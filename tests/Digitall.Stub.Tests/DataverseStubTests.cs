@@ -38,15 +38,6 @@ public class DataverseStubTests
     }
 
     [TestMethod]
-    public void Stubs_Dispatch_Working()
-    {
-        var sut = new DataverseStub();
-        var result = sut.Execute(new WhoAmIRequest());
-
-        result.Should().BeAssignableTo<WhoAmIResponse>();
-    }
-
-    [TestMethod]
     public void EntityTypeIsKnown_ReturnsTrue_WhenEntityTypeIsKnown()
     {
         var sut = new DataverseStub();

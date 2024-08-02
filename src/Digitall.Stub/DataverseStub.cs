@@ -11,6 +11,7 @@ using Digitall.Stub.Errors;
 using Digitall.Stub.OrganizationRequests;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
+using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
 
@@ -35,17 +36,26 @@ public class DataverseStub : IOrganizationService
             .ToList();
     }
 
-    public DataverseStub()
-    {
-        // Todo - remove
-        AddStub(new WhoAmIStub());
-    }
-
     public void AddStub(IOrganizationRequestStub stub)
     {
         OrganizationRequestStubs.Add(stub.ForType, stub);
     }
 
+    public void AddStubs(params IOrganizationRequestStub[] stubs)
+    {
+        foreach (var stub in stubs)
+        {
+            AddStub(stub);
+        }
+    }
+
+    private void AddStubIfNecessary(IOrganizationRequestStub stub)
+    {
+        if (!OrganizationRequestStubs.ContainsKey(stub.ForType))
+        {
+            AddStub(stub);
+        }
+    }
 
     #region IQueryable
 
@@ -280,6 +290,8 @@ public class DataverseStub : IOrganizationService
 
     public OrganizationResponse Execute(OrganizationRequest request)
     {
+        Debug.Assert(request != null, nameof(request) + " != null");
+
         if (OrganizationRequestStubs.TryGetValue(request.GetType(), out var stub))
         {
             return stub.Execute(request, this);
@@ -292,7 +304,11 @@ public class DataverseStub : IOrganizationService
 
     public void Disassociate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities) => throw new NotImplementedException();
 
-    public EntityCollection RetrieveMultiple(QueryBase query) => throw new NotImplementedException();
+    public EntityCollection RetrieveMultiple(QueryBase query)
+    {
+        AddStubIfNecessary(new RetrieveMultipleStub());
+        return ((RetrieveMultipleResponse)Execute(new RetrieveMultipleRequest{Query = query})).EntityCollection;
+    }
 
     #endregion
 }
