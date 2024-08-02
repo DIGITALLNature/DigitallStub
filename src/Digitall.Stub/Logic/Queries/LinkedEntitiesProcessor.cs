@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
 using System.Text.RegularExpressions;
+using Digitall.Stub.Errors;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
@@ -54,8 +55,7 @@ namespace Digitall.Stub.Logic.Queries
             return $"{entityName}{_linkedEntities[entityName]}";
         }
 
-                private IQueryable<Entity> TranslateLinkedEntityToLinq(LinkEntity le, IQueryable<Entity> query,
-            string linkFromAlias = "", string linkFromEntity = "")
+        private IQueryable<Entity> TranslateLinkedEntityToLinq(LinkEntity le, IQueryable<Entity> query, string linkFromAlias = "", string linkFromEntity = "")
         {
             if (!string.IsNullOrEmpty(le.EntityAlias))
             {

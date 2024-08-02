@@ -31,4 +31,9 @@ public enum ErrorCodes : int
     /// </summary>
     InvalidArgument = -2147220989,
 
+    /// <summary>
+    /// Invalid alias for aggregate operation.
+    /// </summary>
+    QueryBuilderInvalid_Alias = -2147217143,
+
 }

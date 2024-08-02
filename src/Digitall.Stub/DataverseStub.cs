@@ -156,7 +156,7 @@ public class DataverseStub : IOrganizationService
             attributeInfo = entityType
                 .GetProperties()
                 .Where(pi => pi.GetCustomAttributes(typeof(AttributeLogicalNameAttribute), true).Length > 0)
-                .SingleOrDefault(pi =>
+                .FirstOrDefault(pi =>
                     (pi.GetCustomAttributes(typeof(AttributeLogicalNameAttribute), true)[0] as
                         AttributeLogicalNameAttribute).LogicalName.Equals(attribute));
         }

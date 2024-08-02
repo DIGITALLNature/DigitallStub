@@ -304,7 +304,7 @@ namespace Digitall.Stub.Logic.Queries
             var entity = Expression.Parameter(typeof(Entity));
             var expTreeBody = ParseToExpression(queryExpression, entity);
             var lambda = Expression.Lambda<Func<Entity, bool>>(expTreeBody, entity);
-    // TODO
+
             return query.Where(lambda);
         }
     }
