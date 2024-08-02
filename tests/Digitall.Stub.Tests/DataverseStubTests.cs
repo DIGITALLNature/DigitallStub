@@ -3,6 +3,7 @@ using System.ServiceModel;
 using Digitall.Stub.Errors;
 using Digitall.Stub.Tests.Fixtures;
 using FluentAssertions;
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
@@ -11,6 +12,12 @@ namespace Digitall.Stub.Tests;
 [TestClass]
 public class DataverseStubTests
 {
+    [ClassInitialize]
+    public static void MyClassInitialize(TestContext testContext)
+    {
+        DotNetEnv.Env.Load();
+    }
+
     [TestMethod]
     public void ModelIsDetected()
     {
@@ -28,6 +35,15 @@ public class DataverseStubTests
         sut.State.Should().NotBeEmpty().And.ContainKeys(Account.EntityLogicalName, Contact.EntityLogicalName);
         sut.State[Account.EntityLogicalName].Should().HaveCount(2);
         sut.State[Contact.EntityLogicalName].Should().HaveCount(3);
+    }
+
+    [TestMethod]
+    public void Stubs_Dispatch_Working()
+    {
+        var sut = new DataverseStub();
+        var result = sut.Execute(new WhoAmIRequest());
+
+        result.Should().BeAssignableTo<WhoAmIResponse>();
     }
 
     [TestMethod]
@@ -113,6 +129,16 @@ public class DataverseStubTests
     }
 
     [TestMethod]
+    public void Create_ThrowsInvalidArgumentFault_WhenEntityIsNull()
+    {
+        var stub = new DataverseStub();
+        var action = () => stub.Create(null);
+
+        action.Should().Throw<FaultException<OrganizationServiceFault>>()
+            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.InvalidArgument);
+    }
+
+    [TestMethod]
     public void Create_ReturnsNonEmptyId_WhenEntityIsAddedSuccessfully()
     {
         var sut = new DataverseStub();
@@ -123,6 +149,8 @@ public class DataverseStubTests
         result.Should().NotBeEmpty();
         sut.State.Should().ContainKey(Account.EntityLogicalName)
             .And.Subject[Account.EntityLogicalName].Should().ContainKey(result);
+
+        sut.State[Account.EntityLogicalName][result].Should().NotBeSameAs(entity);
     }
 
     [TestMethod]
@@ -220,5 +248,93 @@ public class DataverseStubTests
         result.Id.Should().Be(id);
 
         result.Should().NotBeSameAs(entity);
+    }
+
+    [TestMethod]
+    public void Update_ThrowsInvalidArgumentFault_WhenEntityIsNull()
+    {
+        var sut = new DataverseStub();
+        var action = () => sut.Update(null);
+
+        action.Should().Throw<FaultException<OrganizationServiceFault>>()
+            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.InvalidArgument);
+    }
+
+    [TestMethod]
+    public void Update_ThrowsObjectDoesNotExistFault_WhenEntityDoesNotExist()
+    {
+        var sut = new DataverseStub();
+        var entity = new Account(Guid.NewGuid());
+
+        var action = () => sut.Update(entity);
+
+        action.Should().Throw<FaultException<OrganizationServiceFault>>()
+            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.ObjectDoesNotExist);
+    }
+
+    [TestMethod]
+    public void Update_UpdatesEntityInStateDictionary()
+    {
+        var sut = new DataverseStub();
+        var id = Guid.NewGuid();
+        var entity = new Account(id) { Name = nameof(Update_UpdatesEntityInStateDictionary) };
+        sut.Add(entity);
+
+        var updatedEntity = new Account(id) { Name = nameof(Update_UpdatesEntityInStateDictionary), Description = "Changed"};
+        sut.Update(updatedEntity);
+
+        sut.State[Account.EntityLogicalName].Should().ContainKey(id);
+        sut.State[Account.EntityLogicalName][id].ToEntity<Account>().Description.Should().BeEquivalentTo(updatedEntity.Description);
+        sut.State[Account.EntityLogicalName][id].Should().NotBeSameAs(updatedEntity);
+    }
+
+    [TestMethod]
+    public void Delete_WithValidEntityNameAndId_RemovesRecord()
+    {
+        var sut = new DataverseStub();
+        var id = Guid.NewGuid();
+        sut.Add(new Account(id) { Name = nameof(Delete_WithValidEntityNameAndId_RemovesRecord) });
+        sut.Delete(Account.EntityLogicalName, id);
+
+        sut.State[Account.EntityLogicalName].Should().NotContainKey(id);
+    }
+
+    [TestMethod]
+    public void Delete_WithNullEntityName_ThrowsFault()
+    {
+        var sut = new DataverseStub();
+        var id = Guid.NewGuid();
+        sut.Add(new Account(id) { Name = nameof(Delete_WithNullEntityName_ThrowsFault) });
+
+
+        var action = () => sut.Delete(null, id);
+        action.Should().Throw<FaultException<OrganizationServiceFault>>()
+            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.InvalidArgument);
+    }
+
+    [TestMethod]
+    public void Delete_WithUnknownEntityName_ThrowsFault()
+    {
+        var sut = new DataverseStub();
+        var id = Guid.NewGuid();
+        sut.Add(new Account(id) { Name = nameof(Delete_WithUnknownEntityName_ThrowsFault) });
+
+
+        var action = () => sut.Delete("invalid", id);
+        action.Should().Throw<FaultException<OrganizationServiceFault>>()
+            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.QueryBuilderNoEntity);
+    }
+
+    [TestMethod]
+    public void Delete_WithNonExistentId_ThrowsFault()
+    {
+        var sut = new DataverseStub();
+        var id = Guid.NewGuid();
+        sut.Add(new Account(id) { Name = nameof(Delete_WithNonExistentId_ThrowsFault) });
+
+
+        var action = () => sut.Delete(Account.EntityLogicalName, Guid.NewGuid());
+        action.Should().Throw<FaultException<OrganizationServiceFault>>()
+            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.ObjectDoesNotExist);
     }
 }

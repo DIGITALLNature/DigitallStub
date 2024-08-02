@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.ServiceModel;
 using Digitall.Stub.Errors;
+using Digitall.Stub.OrganizationRequests;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -22,6 +24,8 @@ public class DataverseStub : IOrganizationService
 
     internal Dictionary<string, Dictionary<Guid, Entity>> State { get; } = new();
 
+    internal Dictionary<Type,IOrganizationRequestStub> OrganizationRequestStubs { get; } = new();
+
     private static List<Assembly> SearchProxyTypesAssembly()
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -30,6 +34,18 @@ public class DataverseStub : IOrganizationService
             .Where(assembly => assembly.GetCustomAttributes(typeof(ProxyTypesAssemblyAttribute), true).Length != 0)
             .ToList();
     }
+
+    public DataverseStub()
+    {
+        // Todo - remove
+        AddStub(new WhoAmIStub());
+    }
+
+    public void AddStub(IOrganizationRequestStub stub)
+    {
+        OrganizationRequestStubs.Add(stub.ForType, stub);
+    }
+
 
     #region IQueryable
 
@@ -180,24 +196,30 @@ public class DataverseStub : IOrganizationService
     /// </summary>
     /// <param name="entity">The entity to create.</param>
     /// <returns>The Id of the created entity.</returns>
-    /// <exception cref="FaultException{OrganizationServiceFault}">Thrown if the entity already exists in the Dataverse.</exception>
+    /// <exception cref="FaultException">Thrown if the entity already exists in the Dataverse.</exception>
     public Guid Create(Entity entity)
     {
-        if (entity.Id == Guid.Empty)
+        if (entity == null)
         {
-            entity.Id = Guid.NewGuid();
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument,"Required field 'Target' is missing");
+        }
+
+        var clone = entity.CloneEntity();
+        if (clone.Id == Guid.Empty)
+        {
+            clone.Id = Guid.NewGuid();
         }
 
         try
         {
-            Add(entity);
+            Add(clone);
         }
         catch (ArgumentException)
         {
             ErrorFactory.ThrowFault(ErrorCodes.DuplicateRecord, $"Cannot insert duplicate key.");
         }
 
-        return entity.Id;
+        return clone.Id;
     }
 
     public Entity Retrieve(string entityName, Guid id, ColumnSet columnSet)
@@ -218,7 +240,10 @@ public class DataverseStub : IOrganizationService
 
     public void Update(Entity entity)
     {
-        Debug.Assert(entity != null, nameof(entity) + " != null");
+        if (entity == null)
+        {
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument,"Required field 'Target' is missing");
+        }
 
         if (!State.TryGetValue(entity.LogicalName, out var value))
         {
@@ -227,14 +252,19 @@ public class DataverseStub : IOrganizationService
 
         if (value == null || !value.TryGetValue(entity.Id, out var record))
         {
-            // not found
+            ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entity.LogicalName}' With Id = {entity.Id:D} Does Not Exist");
         }
 
-        value[entity.Id] = entity;
+        value[entity.Id] = entity.CloneEntity();
     }
 
     public void Delete(string entityName, Guid id)
     {
+        if (entityName == null)
+        {
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument,"Required member 'LogicalName' missing for field 'Target'");
+        }
+
         if (!State.TryGetValue(entityName, out var value))
         {
             ThrowIfNotKnownEntityType(entityName);
@@ -242,13 +272,21 @@ public class DataverseStub : IOrganizationService
 
         if (value == null || !value.TryGetValue(id, out var record))
         {
-            // not found
+            ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entityName}' With Id = {id:D} Does Not Exist");
         }
 
         value.Remove(id);
     }
 
-    public OrganizationResponse Execute(OrganizationRequest request) => throw new NotImplementedException();
+    public OrganizationResponse Execute(OrganizationRequest request)
+    {
+        if (OrganizationRequestStubs.TryGetValue(request.GetType(), out var stub))
+        {
+            return stub.Execute(request, this);
+        }
+
+        throw new ArgumentOutOfRangeException(nameof(request));
+    }
 
     public void Associate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities) => throw new NotImplementedException();
 

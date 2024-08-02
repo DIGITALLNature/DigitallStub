@@ -25,4 +25,10 @@ public enum ErrorCodes : int
     /// Operation failed due to a SQL integrity violation.
     /// </summary>
     DuplicateRecord = 2147220937,
+
+    /// <summary>
+    /// The specified attribute value is not valid.
+    /// </summary>
+    InvalidArgument = -2147220989,
+
 }
