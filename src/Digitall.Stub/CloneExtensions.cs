@@ -17,8 +17,28 @@ public static class CloneExtensions
 
     public static Entity CloneEntity(this Entity entity)
     {
-        var serialized = JsonSerializer.Serialize(entity, s_serializerOptions);
-        return JsonSerializer.Deserialize<Entity>(serialized, s_serializerOptions);
+        var cloned = new Entity(entity.LogicalName, entity.Id);
+
+        if (entity.FormattedValues != null)
+        {
+            foreach (var formattedValue in entity.FormattedValues)
+            {
+                cloned.FormattedValues.Add(formattedValue);
+            }
+        }
+
+        foreach (var attribute in entity.Attributes)
+        {
+            cloned.Attributes.Add(attribute.Key,Extensions.CloneAttribute(attribute.Value));
+        }
+
+
+        foreach (var keyAttribute in entity.KeyAttributes)
+        {
+            cloned.KeyAttributes.Add(keyAttribute.Key,Extensions.CloneAttribute(keyAttribute.Value));
+        }
+
+        return cloned;
     }
 
     public static QueryExpression CloneQuery(this QueryExpression queryExpression)
@@ -26,6 +46,4 @@ public static class CloneExtensions
         var serialized = JsonSerializer.Serialize(queryExpression, s_serializerOptions);
         return JsonSerializer.Deserialize<QueryExpression>(serialized, s_serializerOptions);
     }
-
-
 }

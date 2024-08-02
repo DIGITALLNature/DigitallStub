@@ -21,5 +21,8 @@ public enum ErrorCodes : int
     /// </summary>
     ObjectDoesNotExist = -2147220969,
 
-
+    /// <summary>
+    /// Operation failed due to a SQL integrity violation.
+    /// </summary>
+    DuplicateRecord = 2147220937,
 }

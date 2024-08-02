@@ -173,13 +173,29 @@ public class DataverseStub : IOrganizationService
 
     #region IOrganizationServer
 
+    /// <summary>
+    ///     Creates a new entity in the Dataverse.
+    ///     If the entity's Id property is Guid.Empty, a new Guid is generated and assigned to the entity's Id property.
+    ///     If the entity already exists in the Dataverse, a FaultException is thrown with an error code of ErrorCodes.DuplicateRecord.
+    /// </summary>
+    /// <param name="entity">The entity to create.</param>
+    /// <returns>The Id of the created entity.</returns>
+    /// <exception cref="FaultException{OrganizationServiceFault}">Thrown if the entity already exists in the Dataverse.</exception>
     public Guid Create(Entity entity)
     {
         if (entity.Id == Guid.Empty)
         {
             entity.Id = Guid.NewGuid();
         }
-        Add(entity);
+
+        try
+        {
+            Add(entity);
+        }
+        catch (ArgumentException)
+        {
+            ErrorFactory.ThrowFault(ErrorCodes.DuplicateRecord, $"Cannot insert duplicate key.");
+        }
 
         return entity.Id;
     }
@@ -197,7 +213,7 @@ public class DataverseStub : IOrganizationService
             ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entityName}' With Id = {id:D} Does Not Exist");
         }
 
-        return record.ProjectAttributes(columnSet, this);
+        return record.ProjectAttributes(columnSet, this).CloneEntity();
     }
 
     public void Update(Entity entity)

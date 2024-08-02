@@ -135,7 +135,7 @@ public static class Extensions
     /// </summary>
     /// <param name="attributeValue">The attribute value to clone.</param>
     /// <returns>The cloned attribute value.</returns>
-    private static object CloneAttribute(object attributeValue)
+    internal static object CloneAttribute(object attributeValue)
     {
         // If the attribute value is null, return null.
         if (attributeValue == null)

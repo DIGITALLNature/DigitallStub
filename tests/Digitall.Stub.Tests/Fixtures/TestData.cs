@@ -18,7 +18,9 @@ public static class TestData
         {
             var CorpA = new Account(Guid.Parse("00000000-0000-0000-0001-000000000001"))
             {
-                Name = "A Corp"
+                Name = "A Corp",
+                Telephone1 = "1",
+                Telephone2 = "2"
             };
             var CorpB = new Account(Guid.Parse("00000000-0000-0000-0001-000000000002"))
             {
