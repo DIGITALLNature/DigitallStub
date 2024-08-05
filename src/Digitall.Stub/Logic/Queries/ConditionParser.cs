@@ -81,7 +81,7 @@ public static class ConditionParser
         return set;
     }
 
-    public static Expression TranslateConditionExpression(QueryExpression qe, DataverseStub context, TypedConditionExpression c, ParameterExpression entity)
+    public static Expression TranslateConditionExpression(QueryExpression queryExpression, DataverseStub context, TypedConditionExpression condition, ParameterExpression entity)
     {
         Expression attributesProperty = Expression.Property(entity, "Attributes");
 
@@ -90,13 +90,13 @@ public static class ConditionParser
 
         //Do not prepend the entity name if the EntityLogicalName is the same as the QueryExpression main logical name
 
-        if (!string.IsNullOrWhiteSpace(c.CondExpression.EntityName) && !c.CondExpression.EntityName.Equals(qe.EntityName))
+        if (!string.IsNullOrWhiteSpace(condition.CondExpression.EntityName) && !condition.CondExpression.EntityName.Equals(queryExpression.EntityName))
         {
-            attributeName = c.CondExpression.EntityName + "." + c.CondExpression.AttributeName;
+            attributeName = condition.CondExpression.EntityName + "." + condition.CondExpression.AttributeName;
         }
         else
         {
-            attributeName = c.CondExpression.AttributeName;
+            attributeName = condition.CondExpression.AttributeName;
         }
 
         Expression containsAttributeExpression = Expression.Call(attributesProperty, typeof(AttributeCollection).GetMethod(nameof(AttributeCollection.ContainsKey) , new[] { typeof(string) }), Expression.Constant(attributeName)
@@ -112,96 +112,87 @@ public static class ConditionParser
 
         Expression operatorExpression = null;
 
-        switch (c.CondExpression.Operator)
+        switch (condition.CondExpression.Operator)
         {
+#region equal and not equal
+
             case ConditionOperator.Equal:
+            case ConditionOperator.On:
             case ConditionOperator.Today:
             case ConditionOperator.Yesterday:
             case ConditionOperator.Tomorrow:
             case ConditionOperator.EqualUserId:
-                operatorExpression = TranslateConditionExpressionEqual(context, c, getNonBasicValueExpr, containsAttributeExpression);
-                break;
-
-            case ConditionOperator.NotEqualUserId:
-                operatorExpression = Expression.Not(TranslateConditionExpressionEqual(context, c, getNonBasicValueExpr, containsAttributeExpression));
-                break;
-
             case ConditionOperator.EqualBusinessId:
-                operatorExpression = TranslateConditionExpressionEqual(context, c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionEqual(context.Clock, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
 
+            case ConditionOperator.NotOn:
+            case ConditionOperator.NotEqual:
+            case ConditionOperator.NotEqualUserId:
             case ConditionOperator.NotEqualBusinessId:
-                operatorExpression = Expression.Not(TranslateConditionExpressionEqual(context, c, getNonBasicValueExpr, containsAttributeExpression));
+                operatorExpression = Expression.Not(TranslateConditionExpressionEqual(context.Clock, condition, getAttributeValueExpr, containsAttributeExpression));
                 break;
+#endregion
 
             case ConditionOperator.BeginsWith:
             case ConditionOperator.Like:
-                operatorExpression = TranslateConditionExpressionLike(c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionLike(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.EndsWith:
-                operatorExpression = TranslateConditionExpressionEndsWith(c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionEndsWith(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.Contains:
-                operatorExpression = TranslateConditionExpressionContains(c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionContains(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
-            case ConditionOperator.NotEqual:
-                operatorExpression = Expression.Not(TranslateConditionExpressionEqual(context, c, getNonBasicValueExpr, containsAttributeExpression));
-                break;
+
 
             case ConditionOperator.DoesNotBeginWith:
             case ConditionOperator.DoesNotEndWith:
             case ConditionOperator.NotLike:
             case ConditionOperator.DoesNotContain:
-                operatorExpression = Expression.Not(TranslateConditionExpressionLike(c, getNonBasicValueExpr, containsAttributeExpression));
+                operatorExpression = Expression.Not(TranslateConditionExpressionLike(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
 
             case ConditionOperator.Null:
-                operatorExpression = TranslateConditionExpressionNull(c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionNull(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.NotNull:
-                operatorExpression = Expression.Not(TranslateConditionExpressionNull(c, getNonBasicValueExpr, containsAttributeExpression));
+                operatorExpression = Expression.Not(TranslateConditionExpressionNull(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
 
             case ConditionOperator.GreaterThan:
-                operatorExpression = TranslateConditionExpressionGreaterThan(c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionGreaterThan(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.GreaterEqual:
-                operatorExpression = TranslateConditionExpressionGreaterThanOrEqual(context, c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionGreaterThanOrEqual(context, condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.LessThan:
-                operatorExpression = TranslateConditionExpressionLessThan(c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionLessThan(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.LessEqual:
-                operatorExpression = TranslateConditionExpressionLessThanOrEqual(context, c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionLessThanOrEqual(context, condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.In:
-                operatorExpression = TranslateConditionExpressionIn(c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionIn(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.NotIn:
-                operatorExpression = Expression.Not(TranslateConditionExpressionIn(c, getNonBasicValueExpr, containsAttributeExpression));
+                operatorExpression = Expression.Not(TranslateConditionExpressionIn(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
 
-            case ConditionOperator.On:
-                operatorExpression = TranslateConditionExpressionEqual(context, c, getNonBasicValueExpr, containsAttributeExpression);
-                break;
-
-            case ConditionOperator.NotOn:
-                operatorExpression = Expression.Not(TranslateConditionExpressionEqual(context, c, getNonBasicValueExpr, containsAttributeExpression));
-                break;
 
             case ConditionOperator.OnOrAfter:
                 operatorExpression = Expression.Or(
-                    TranslateConditionExpressionEqual(context, c, getNonBasicValueExpr, containsAttributeExpression),
-                    TranslateConditionExpressionGreaterThan(c, getNonBasicValueExpr, containsAttributeExpression));
+                    TranslateConditionExpressionEqual(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression),
+                    TranslateConditionExpressionGreaterThan(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
             case ConditionOperator.LastXHours:
             case ConditionOperator.LastXDays:
@@ -209,31 +200,31 @@ public static class ConditionParser
             case ConditionOperator.LastXWeeks:
             case ConditionOperator.LastXMonths:
             case ConditionOperator.LastXYears:
-                operatorExpression = TranslateConditionExpressionLast(c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionLast(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.OnOrBefore:
                 operatorExpression = Expression.Or(
-                    TranslateConditionExpressionEqual(context, c, getNonBasicValueExpr, containsAttributeExpression),
-                    TranslateConditionExpressionLessThan(c, getNonBasicValueExpr, containsAttributeExpression));
+                    TranslateConditionExpressionEqual(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression),
+                    TranslateConditionExpressionLessThan(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
 
             case ConditionOperator.Between:
-                if (c.CondExpression.Values.Count != 2)
+                if (condition.CondExpression.Values.Count != 2)
                 {
                     throw new Exception("Between operator requires exactly 2 values.");
                 }
 
-                operatorExpression = TranslateConditionExpressionBetween(c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionBetween(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.NotBetween:
-                if (c.CondExpression.Values.Count != 2)
+                if (condition.CondExpression.Values.Count != 2)
                 {
                     throw new Exception("Not-Between operator requires exactly 2 values.");
                 }
 
-                operatorExpression = Expression.Not(TranslateConditionExpressionBetween(c, getNonBasicValueExpr, containsAttributeExpression));
+                operatorExpression = Expression.Not(TranslateConditionExpressionBetween(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
             case ConditionOperator.OlderThanXMinutes:
             case ConditionOperator.OlderThanXHours:
@@ -241,7 +232,7 @@ public static class ConditionParser
             case ConditionOperator.OlderThanXWeeks:
             case ConditionOperator.OlderThanXYears:
             case ConditionOperator.OlderThanXMonths:
-                operatorExpression = TranslateConditionExpressionOlderThan(c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionOlderThan(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.NextXHours:
@@ -250,7 +241,7 @@ public static class ConditionParser
             case ConditionOperator.NextXWeeks:
             case ConditionOperator.NextXMonths:
             case ConditionOperator.NextXYears:
-                operatorExpression = TranslateConditionExpressionNext(c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionNext(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
             case ConditionOperator.ThisYear:
             case ConditionOperator.LastYear:
@@ -262,23 +253,23 @@ public static class ConditionParser
             case ConditionOperator.ThisWeek:
             case ConditionOperator.NextWeek:
             case ConditionOperator.InFiscalYear:
-                operatorExpression = TranslateConditionExpressionBetweenDates(c, getNonBasicValueExpr, containsAttributeExpression, context);
+                operatorExpression = TranslateConditionExpressionBetweenDates(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression, context);
                 break;
 
             case ConditionOperator.ContainValues:
-                operatorExpression = TranslateConditionExpressionContainValues(c, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionContainValues(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.DoesNotContainValues:
-                operatorExpression = Expression.Not(TranslateConditionExpressionContainValues(c, getNonBasicValueExpr, containsAttributeExpression));
+                operatorExpression = Expression.Not(TranslateConditionExpressionContainValues(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
 
 
             default:
-                throw new ArgumentOutOfRangeException($"Operator {c.CondExpression.Operator.ToString()} not yet implemented for condition expression");
+                throw new ArgumentOutOfRangeException($"Operator {condition.CondExpression.Operator.ToString()} not yet implemented for condition expression");
         }
 
-        if (c.IsOuter)
+        if (condition.IsOuter)
         {
             //If outer join, filter is optional, only if there was a value
             return Expression.Constant(true);
@@ -371,14 +362,14 @@ public static class ConditionParser
     /// <summary>
     ///     Takes a condition expression which needs translating into a 'between two dates' expression and works out the relevant dates
     /// </summary>
-    private static Expression TranslateConditionExpressionBetweenDates(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr, DataverseStub context)
+    private static Expression TranslateConditionExpressionBetweenDates(IStubClock clock, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr, DataverseStub context)
     {
         var c = tc.CondExpression;
 
         DateTime? fromDate = null;
         DateTime? toDate = null;
 
-        var today = DateTime.Today;
+        var today =clock.Today;
         var thisYear = today.Year;
         var thisMonth = today.Month;
 
@@ -478,7 +469,7 @@ public static class ConditionParser
         return TranslateConditionExpressionLike(typedComputedCondition, getAttributeValueExpr, containsAttributeExpr);
     }
 
-    private static Expression TranslateConditionExpressionEqual(DataverseStub context, TypedConditionExpression c, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static Expression TranslateConditionExpressionEqual(IStubClock clock, TypedConditionExpression c, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var expOrValues = Expression.Or(Expression.Constant(false), Expression.Constant(false));
 
@@ -487,13 +478,13 @@ public static class ConditionParser
         switch (c.CondExpression.Operator)
         {
             case ConditionOperator.Today:
-                unaryOperatorValue = DateTime.Today;
+                unaryOperatorValue = clock.Today;
                 break;
             case ConditionOperator.Yesterday:
-                unaryOperatorValue = DateTime.Today.AddDays(-1);
+                unaryOperatorValue = clock.Today.AddDays(-1);
                 break;
             case ConditionOperator.Tomorrow:
-                unaryOperatorValue = DateTime.Today.AddDays(1);
+                unaryOperatorValue = clock.Today.AddDays(1);
                 break;
             case ConditionOperator.EqualUserId:
             case ConditionOperator.NotEqualUserId:
@@ -586,7 +577,7 @@ public static class ConditionParser
 
     private static Expression TranslateConditionExpressionGreaterThanOrEqual(DataverseStub context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
         Expression.Or(
-            TranslateConditionExpressionEqual(context, tc, getAttributeValueExpr, containsAttributeExpr),
+            TranslateConditionExpressionEqual(context.Clock, tc, getAttributeValueExpr, containsAttributeExpr),
             TranslateConditionExpressionGreaterThan(tc, getAttributeValueExpr, containsAttributeExpr));
 
     private static Expression TranslateConditionExpressionGreaterThanString(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
@@ -662,12 +653,12 @@ public static class ConditionParser
                 expOrValues));
     }
 
-    private static Expression TranslateConditionExpressionLast(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static Expression TranslateConditionExpressionLast(IStubClock clock, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
         var beforeDateTime = default(DateTime);
-        var currentDateTime = DateTime.UtcNow;
+        var currentDateTime = clock.Now;
         switch (c.Operator)
         {
             case ConditionOperator.LastXHours:
@@ -737,7 +728,7 @@ public static class ConditionParser
 
     private static Expression TranslateConditionExpressionLessThanOrEqual(DataverseStub context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
         Expression.Or(
-            TranslateConditionExpressionEqual(context, tc, getAttributeValueExpr, containsAttributeExpr),
+            TranslateConditionExpressionEqual(context.Clock, tc, getAttributeValueExpr, containsAttributeExpr),
             TranslateConditionExpressionLessThan(tc, getAttributeValueExpr, containsAttributeExpr));
 
     private static Expression TranslateConditionExpressionLessThanString(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
@@ -808,12 +799,12 @@ public static class ConditionParser
             expOrValues);
     }
 
-    private static Expression TranslateConditionExpressionNext(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static Expression TranslateConditionExpressionNext(IStubClock clock, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
         var nextDateTime = default(DateTime);
-        var currentDateTime = DateTime.UtcNow;
+        var currentDateTime = clock.Now;
         switch (c.Operator)
         {
             case ConditionOperator.NextXHours:
@@ -859,7 +850,7 @@ public static class ConditionParser
     }
 
 
-    private static Expression TranslateConditionExpressionOlderThan(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static Expression TranslateConditionExpressionOlderThan(IStubClock clock, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -880,22 +871,22 @@ public static class ConditionParser
         switch (c.Operator)
         {
             case ConditionOperator.OlderThanXMonths:
-                toDate = DateTime.UtcNow.AddMonths(-valueToAdd);
+                toDate = clock.Now.AddMonths(-valueToAdd);
                 break;
             case ConditionOperator.OlderThanXMinutes:
-                toDate = DateTime.UtcNow.AddMinutes(-valueToAdd);
+                toDate = clock.Now.AddMinutes(-valueToAdd);
                 break;
             case ConditionOperator.OlderThanXHours:
-                toDate = DateTime.UtcNow.AddHours(-valueToAdd);
+                toDate = clock.Now.AddHours(-valueToAdd);
                 break;
             case ConditionOperator.OlderThanXDays:
-                toDate = DateTime.UtcNow.AddDays(-valueToAdd);
+                toDate = clock.Now.AddDays(-valueToAdd);
                 break;
             case ConditionOperator.OlderThanXWeeks:
-                toDate = DateTime.UtcNow.AddDays(-7 * valueToAdd);
+                toDate = clock.Now.AddDays(-7 * valueToAdd);
                 break;
             case ConditionOperator.OlderThanXYears:
-                toDate = DateTime.UtcNow.AddYears(-valueToAdd);
+                toDate = clock.Now.AddYears(-valueToAdd);
                 break;
         }
 

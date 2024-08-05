@@ -117,7 +117,7 @@ public class RetrieveMultipleStub : OrganizationRequestStub<RetrieveMultipleRequ
                 var first = response.EntityCollection.Entities.First();
                 var last = response.EntityCollection.Entities.Last();
                 response.EntityCollection.PagingCookie = $"<cookie page=\"{pageNumber}\">" +
-                                                         $"<{first.LogicalName}id last=\"{last.Id:B.ToUpper()}\" first=\"{first.Id:B.ToUpper()}\" />" +
+                                                         $"<{first.LogicalName}id last=\"{last.Id.ToString("B").ToUpper()}\" first=\"{first.Id.ToString("B").ToUpper()}\" />" +
                                                          $"</cookie>";
             }
 

@@ -20,11 +20,18 @@ public static class TestData
             {
                 Name = "A Corp",
                 Telephone1 = "1",
-                Telephone2 = "2"
+                Telephone2 = "2",
+                Address1UTCOffset = -120,
+                MarketCap = new Money(123),
+                MarketingOnly = true,
+                AccountId = Guid.Parse("00000000-0000-0000-0001-000000000001")
+
             };
             var CorpB = new Account(Guid.Parse("00000000-0000-0000-0001-000000000002"))
             {
-                Name = "B Corp"
+                Name = "B Corp",
+                ParentAccountId = CorpA.ToNamedEntityReference(),
+                OverriddenCreatedOn = new DateTime(2000,1,2)
             };
 
 

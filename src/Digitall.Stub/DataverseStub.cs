@@ -17,8 +17,14 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Stub;
 
-public class DataverseStub : IOrganizationService
+public class DataverseStub(IStubClock clock) : IOrganizationService
 {
+    public readonly IStubClock Clock = clock;
+
+    public DataverseStub(): this(new RealTimeClock())
+    {
+    }
+
     public List<Assembly> ModelAssemblies { get; set; } = SearchProxyTypesAssembly();
 
     public Dictionary<string, EntityMetadata> EntityMetadata { get; set; } = new();

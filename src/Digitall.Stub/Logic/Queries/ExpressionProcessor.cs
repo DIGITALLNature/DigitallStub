@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using Digitall.Stub.Errors;
@@ -15,15 +16,16 @@ public class ExpressionProcessor(DataverseStub state)
 {
     public IQueryable<Entity> FilterQuery(QueryExpression queryExpression, IQueryable<Entity> query)
     {
+        Debug.Assert(queryExpression != null, nameof(queryExpression) + " != null");
         Validators.ValidateFilterExpressionAliases(queryExpression, queryExpression.Criteria);
         return query.Where(Generate(queryExpression));
     }
 
-    public Expression<Func<Entity, bool>> Generate(QueryExpression qe)
+    public Expression<Func<Entity, bool>> Generate(QueryExpression queryExpression)
     {
         // Compose the expression tree that represents the parameter to the predicate.
         var entity = Expression.Parameter(typeof(Entity));
-        var expTreeBody = ParseToExpression(qe, entity);
+        var expTreeBody = ParseToExpression(queryExpression, entity);
         return Expression.Lambda<Func<Entity, bool>>(expTreeBody, entity);
     }
 
@@ -49,16 +51,16 @@ public class ExpressionProcessor(DataverseStub state)
         }
     }
 
-    private Expression ParseToExpression(QueryExpression qe, ParameterExpression entity)
+    private Expression ParseToExpression(QueryExpression queryExpression, ParameterExpression entity)
     {
         var linkedEntitiesQueryExpressions = new List<Expression>();
-        foreach (var le in qe.LinkEntities)
+        foreach (var le in queryExpression.LinkEntities)
         {
-            var listOfExpressions = TranslateLinkedEntityFilterExpressionToExpression(qe, le, entity);
+            var listOfExpressions = TranslateLinkedEntityFilterExpressionToExpression(queryExpression, le, entity);
             linkedEntitiesQueryExpressions.AddRange(listOfExpressions);
         }
 
-        if (linkedEntitiesQueryExpressions.Count > 0 && qe.Criteria != null)
+        if (linkedEntitiesQueryExpressions.Count > 0 && queryExpression.Criteria != null)
         {
             //Return the and of the two
             Expression andExpression = Expression.Constant(true);
@@ -67,7 +69,7 @@ public class ExpressionProcessor(DataverseStub state)
                 andExpression = Expression.And(e, andExpression);
             }
 
-            var feExpression = TranslateFilterExpressionToExpression(qe, qe.EntityName, qe.Criteria, entity, false);
+            var feExpression = TranslateFilterExpressionToExpression(queryExpression, queryExpression.EntityName, queryExpression.Criteria, entity, false);
             return Expression.And(andExpression, feExpression);
         }
 
@@ -84,10 +86,10 @@ public class ExpressionProcessor(DataverseStub state)
         }
 
         //Criteria only
-        return TranslateFilterExpressionToExpression(qe, qe.EntityName, qe.Criteria, entity, false);
+        return TranslateFilterExpressionToExpression(queryExpression, queryExpression.EntityName, queryExpression.Criteria, entity, false);
     }
 
-    private Expression TranslateFilterExpressionToExpression(QueryExpression qe, string sEntityName, FilterExpression fe, ParameterExpression entity, bool bIsOuter)
+    private Expression TranslateFilterExpressionToExpression(QueryExpression queryExpression, string sEntityName, FilterExpression fe, ParameterExpression entity, bool bIsOuter)
     {
         if (fe == null)
         {
@@ -98,13 +100,13 @@ public class ExpressionProcessor(DataverseStub state)
         BinaryExpression filtersLambda = null;
         if (fe.Conditions != null && fe.Conditions.Count > 0)
         {
-            conditionsLambda = TranslateMultipleConditionExpressions(qe, sEntityName, fe.Conditions.ToList(), fe.FilterOperator, entity, bIsOuter);
+            conditionsLambda = TranslateMultipleConditionExpressions(queryExpression, sEntityName, fe.Conditions.ToList(), fe.FilterOperator, entity, bIsOuter);
         }
 
         //Process nested filters recursively
         if (fe.Filters != null && fe.Filters.Count > 0)
         {
-            filtersLambda = TranslateMultipleFilterExpressions(qe, sEntityName, fe.Filters.ToList(), fe.FilterOperator, entity, bIsOuter);
+            filtersLambda = TranslateMultipleFilterExpressions(queryExpression, sEntityName, fe.Filters.ToList(), fe.FilterOperator, entity, bIsOuter);
         }
 
         if (conditionsLambda != null && filtersLambda != null)
@@ -206,11 +208,11 @@ public class ExpressionProcessor(DataverseStub state)
         return linkedEntitiesQueryExpressions;
     }
 
-    private BinaryExpression TranslateMultipleConditionExpressions(QueryExpression qe, string sEntityName, List<ConditionExpression> conditions, LogicalOperator op,
+    private BinaryExpression TranslateMultipleConditionExpressions(QueryExpression queryExpression, string sEntityName, List<ConditionExpression> conditions, LogicalOperator logicalOperator,
         ParameterExpression entity, bool bIsOuter)
     {
         BinaryExpression binaryExpression = null; //Default initialisation depending on logical operator
-        if (op == LogicalOperator.And)
+        if (logicalOperator == LogicalOperator.And)
         {
             binaryExpression = Expression.And(Expression.Constant(true), Expression.Constant(true));
         }
@@ -235,14 +237,14 @@ public class ExpressionProcessor(DataverseStub state)
             {
                 if (c.EntityName != null)
                 {
-                    cEntityName = qe.GetEntityNameFromAlias(c.EntityName);
+                    cEntityName = queryExpression.GetEntityNameFromAlias(c.EntityName);
                 }
                 else
                 {
                     if (c.AttributeName.IndexOf(".", StringComparison.CurrentCultureIgnoreCase) >= 0)
                     {
                         var alias = c.AttributeName.Split('.')[0];
-                        cEntityName = qe.GetEntityNameFromAlias(alias);
+                        cEntityName = queryExpression.GetEntityNameFromAlias(alias);
                         sAttributeName = c.AttributeName.Split('.')[1];
                     }
                 }
@@ -273,13 +275,13 @@ public class ExpressionProcessor(DataverseStub state)
             EnsureSupportedTypedExpression(typedExpression);
 
             //Build a binary expression
-            if (op == LogicalOperator.And)
+            if (logicalOperator == LogicalOperator.And)
             {
-                binaryExpression = Expression.And(binaryExpression, ConditionParser.TranslateConditionExpression(qe, state, typedExpression, entity));
+                binaryExpression = Expression.And(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, state, typedExpression, entity));
             }
             else
             {
-                binaryExpression = Expression.Or(binaryExpression, ConditionParser.TranslateConditionExpression(qe, state, typedExpression, entity));
+                binaryExpression = Expression.Or(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, state, typedExpression, entity));
             }
         }
 
@@ -287,11 +289,11 @@ public class ExpressionProcessor(DataverseStub state)
     }
 
 
-    private BinaryExpression TranslateMultipleFilterExpressions(QueryExpression qe, string sEntityName, List<FilterExpression> filters, LogicalOperator op,
+    private BinaryExpression TranslateMultipleFilterExpressions(QueryExpression queryExpression, string sEntityName, List<FilterExpression> filters, LogicalOperator logicalOperator,
         ParameterExpression entity, bool bIsOuter)
     {
         BinaryExpression binaryExpression = null;
-        if (op == LogicalOperator.And)
+        if (logicalOperator == LogicalOperator.And)
         {
             binaryExpression = Expression.And(Expression.Constant(true), Expression.Constant(true));
         }
@@ -302,10 +304,10 @@ public class ExpressionProcessor(DataverseStub state)
 
         foreach (var f in filters)
         {
-            var thisFilterLambda = TranslateFilterExpressionToExpression(qe, sEntityName, f, entity, bIsOuter);
+            var thisFilterLambda = TranslateFilterExpressionToExpression(queryExpression, sEntityName, f, entity, bIsOuter);
 
             //Build a binary expression
-            if (op == LogicalOperator.And)
+            if (logicalOperator == LogicalOperator.And)
             {
                 binaryExpression = Expression.And(binaryExpression, thisFilterLambda);
             }
