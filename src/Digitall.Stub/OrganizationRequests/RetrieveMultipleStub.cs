@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
 using Digitall.Stub.Logic.Queries;
 using DotNetEnv;
@@ -100,7 +99,7 @@ public class RetrieveMultipleStub : OrganizationRequestStub<RetrieveMultipleRequ
             var recordsToReturn = startPosition + numberToGet > internalResult.Count ? new List<Entity>() : internalResult.GetRange(startPosition, numberToGet);
 
              recordsToReturn.ForEach(e => PatchDateFormat(e,state));
-             recordsToReturn.ForEach(e => PopulateFormattedValues(e));
+             recordsToReturn.ForEach(e => FillFormattedValues(e));
 
             var response = new RetrieveMultipleResponse
             {
@@ -158,42 +157,40 @@ public class RetrieveMultipleStub : OrganizationRequestStub<RetrieveMultipleRequ
             }
         }
 
-        internal void PopulateFormattedValues(Entity e)
+        private void FillFormattedValues(Entity record)
         {
             // Iterate through attributes and retrieve formatted values based on type
-            foreach (var attKey in e.Attributes.Keys)
+            foreach (var attributeName in record.Attributes.Keys)
             {
-                var value = e[attKey];
-                string formattedValue = "";
-                if (!e.FormattedValues.ContainsKey(attKey) && (value != null))
+                var value = record[attributeName];
+                if (!record.FormattedValues.ContainsKey(attributeName) && value != null)
                 {
-                    bool bShouldAdd;
-                    formattedValue = this.GetFormattedValueForValue(value, out bShouldAdd);
-                    if (bShouldAdd)
+                    if (TryGetFormattedValueForValue(value, out var formattedValue))
                     {
-                        e.FormattedValues.Add(attKey, formattedValue);
+                        record.FormattedValues.Add(attributeName, formattedValue);
                     }
                 }
             }
         }
 
-        protected string GetFormattedValueForValue(object value, out bool bShouldAddFormattedValue)
+        private bool TryGetFormattedValueForValue(object value, out string formattedValue)
         {
-            bShouldAddFormattedValue = false;
-            var sFormattedValue = string.Empty;
+            var result = false;
+            formattedValue = string.Empty;
 
-            if (value is Enum)
+            switch (value)
             {
-                // Retrieve the enum type
-                sFormattedValue = Enum.GetName(value.GetType(), value);
-                bShouldAddFormattedValue = true;
-            }
-            else if (value is AliasedValue)
-            {
-                return this.GetFormattedValueForValue((value as AliasedValue)?.Value, out bShouldAddFormattedValue);
+                case Enum:
+                    // Retrieve the enum type
+                    formattedValue = Enum.GetName(value.GetType(), value);
+                    result = true;
+                    break;
+                case AliasedValue aliasedValue:
+                    result = TryGetFormattedValueForValue(aliasedValue.Value, out formattedValue);
+                    break;
             }
 
-            return sFormattedValue;
+            return result;
         }
 
     }

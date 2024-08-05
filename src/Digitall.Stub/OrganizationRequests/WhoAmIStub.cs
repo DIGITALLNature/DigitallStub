@@ -39,7 +39,7 @@ public class WhoAmIStub: OrganizationRequestStub<WhoAmIRequest,WhoAmIResponse>
 
     private static Guid GetBusinessUnitId(Entity user) {
         var buRef = user.GetAttributeValue<EntityReference>("businessunitid");
-        var buId = buRef != null ? buRef.Id : Guid.Empty;
+        var buId = buRef?.Id ?? Guid.Parse(DotNetEnv.Env.GetString("BusinessUnitId", Guid.Empty.ToString()));
         return buId;
     }
 

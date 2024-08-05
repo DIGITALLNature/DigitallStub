@@ -36,4 +36,9 @@ public enum ErrorCodes : int
     /// </summary>
     QueryBuilderInvalid_Alias = -2147217143,
 
+    /// <summary>
+    /// The operator is not valid or it is not supported.
+    /// </summary>
+    InvalidOperatorCode = -2147187691,
+
 }
