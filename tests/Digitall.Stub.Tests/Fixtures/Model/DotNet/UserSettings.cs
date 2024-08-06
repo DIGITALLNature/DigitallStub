@@ -183,6 +183,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<bool?>("allowemailcredentials");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(AllowEmailCredentials));
+                SetAttributeValue("allowemailcredentials", value);
+                OnPropertyChanged(nameof(AllowEmailCredentials));
+            }
         }
 
 		/// <summary>
@@ -296,6 +303,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<EntityReference>("createdby");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(CreatedBy));
+                SetAttributeValue("createdby", value);
+                OnPropertyChanged(nameof(CreatedBy));
+            }
         }
 
 		/// <summary>
@@ -309,6 +323,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<DateTime?>("createdon");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(CreatedOn));
+                SetAttributeValue("createdon", value);
+                OnPropertyChanged(nameof(CreatedOn));
+            }
         }
 
 		/// <summary>
@@ -321,6 +342,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<EntityReference>("createdonbehalfby");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(CreatedOnBehalfBy));
+                SetAttributeValue("createdonbehalfby", value);
+                OnPropertyChanged(nameof(CreatedOnBehalfBy));
             }
         }
 
@@ -595,6 +623,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<string>("emailpassword");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(EmailPassword));
+                SetAttributeValue("emailpassword", value);
+                OnPropertyChanged(nameof(EmailPassword));
+            }
         }
 
 		/// <summary>
@@ -607,6 +642,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<string>("emailusername");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(EmailUsername));
+                SetAttributeValue("emailusername", value);
+                OnPropertyChanged(nameof(EmailUsername));
             }
         }
 
@@ -1041,6 +1083,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<EntityReference>("modifiedby");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(ModifiedBy));
+                SetAttributeValue("modifiedby", value);
+                OnPropertyChanged(nameof(ModifiedBy));
+            }
         }
 
 		/// <summary>
@@ -1054,6 +1103,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<DateTime?>("modifiedon");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(ModifiedOn));
+                SetAttributeValue("modifiedon", value);
+                OnPropertyChanged(nameof(ModifiedOn));
+            }
         }
 
 		/// <summary>
@@ -1066,6 +1122,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<EntityReference>("modifiedonbehalfby");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(ModifiedOnBehalfBy));
+                SetAttributeValue("modifiedonbehalfby", value);
+                OnPropertyChanged(nameof(ModifiedOnBehalfBy));
             }
         }
 
@@ -2137,6 +2200,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<long?>("versionnumber");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(VersionNumber));
+                SetAttributeValue("versionnumber", value);
+                OnPropertyChanged(nameof(VersionNumber));
             }
         }
 

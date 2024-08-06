@@ -320,6 +320,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<string>("address1_composite");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(Address1Composite));
+                SetAttributeValue("address1_composite", value);
+                OnPropertyChanged(nameof(Address1Composite));
+            }
         }
 
 		/// <summary>
@@ -772,6 +779,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<string>("address2_composite");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(Address2Composite));
+                SetAttributeValue("address2_composite", value);
+                OnPropertyChanged(nameof(Address2Composite));
             }
         }
 
@@ -1258,6 +1272,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<Money>("aging30");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(Aging30));
+                SetAttributeValue("aging30", value);
+                OnPropertyChanged(nameof(Aging30));
+            }
         }
 
 		/// <summary>
@@ -1270,6 +1291,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<Money>("aging30_base");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(Aging30Base));
+                SetAttributeValue("aging30_base", value);
+                OnPropertyChanged(nameof(Aging30Base));
             }
         }
 
@@ -1284,6 +1312,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<Money>("aging60");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(Aging60));
+                SetAttributeValue("aging60", value);
+                OnPropertyChanged(nameof(Aging60));
+            }
         }
 
 		/// <summary>
@@ -1296,6 +1331,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<Money>("aging60_base");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(Aging60Base));
+                SetAttributeValue("aging60_base", value);
+                OnPropertyChanged(nameof(Aging60Base));
             }
         }
 
@@ -1310,6 +1352,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<Money>("aging90");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(Aging90));
+                SetAttributeValue("aging90", value);
+                OnPropertyChanged(nameof(Aging90));
+            }
         }
 
 		/// <summary>
@@ -1322,6 +1371,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<Money>("aging90_base");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(Aging90Base));
+                SetAttributeValue("aging90_base", value);
+                OnPropertyChanged(nameof(Aging90Base));
             }
         }
 
@@ -1356,6 +1412,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<EntityReference>("createdby");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(CreatedBy));
+                SetAttributeValue("createdby", value);
+                OnPropertyChanged(nameof(CreatedBy));
+            }
         }
 
 		/// <summary>
@@ -1368,6 +1431,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<EntityReference>("createdbyexternalparty");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(CreatedByExternalParty));
+                SetAttributeValue("createdbyexternalparty", value);
+                OnPropertyChanged(nameof(CreatedByExternalParty));
             }
         }
 
@@ -1382,6 +1452,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<DateTime?>("createdon");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(CreatedOn));
+                SetAttributeValue("createdon", value);
+                OnPropertyChanged(nameof(CreatedOn));
+            }
         }
 
 		/// <summary>
@@ -1394,6 +1471,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<EntityReference>("createdonbehalfby");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(CreatedOnBehalfBy));
+                SetAttributeValue("createdonbehalfby", value);
+                OnPropertyChanged(nameof(CreatedOnBehalfBy));
             }
         }
 
@@ -1427,6 +1511,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<Money>("creditlimit_base");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(CreditLimitBase));
+                SetAttributeValue("creditlimit_base", value);
+                OnPropertyChanged(nameof(CreditLimitBase));
             }
         }
 
@@ -1739,6 +1830,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<long?>("entityimage_timestamp");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(EntityImageTimestamp));
+                SetAttributeValue("entityimage_timestamp", value);
+                OnPropertyChanged(nameof(EntityImageTimestamp));
+            }
         }
 
 		
@@ -1749,6 +1847,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<string>("entityimage_url");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(EntityImageURL));
+                SetAttributeValue("entityimage_url", value);
+                OnPropertyChanged(nameof(EntityImageURL));
             }
         }
 
@@ -1763,6 +1868,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<Guid?>("entityimageid");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(EntityImageId));
+                SetAttributeValue("entityimageid", value);
+                OnPropertyChanged(nameof(EntityImageId));
+            }
         }
 
 		/// <summary>
@@ -1775,6 +1887,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<decimal?>("exchangerate");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(ExchangeRate));
+                SetAttributeValue("exchangerate", value);
+                OnPropertyChanged(nameof(ExchangeRate));
             }
         }
 
@@ -1949,6 +2068,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<Money>("marketcap_base");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(MarketCapBase));
+                SetAttributeValue("marketcap_base", value);
+                OnPropertyChanged(nameof(MarketCapBase));
+            }
         }
 
 		/// <summary>
@@ -1982,6 +2108,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<EntityReference>("masterid");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(MasterId));
+                SetAttributeValue("masterid", value);
+                OnPropertyChanged(nameof(MasterId));
+            }
         }
 
 		/// <summary>
@@ -1994,6 +2127,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<bool?>("merged");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(Merged));
+                SetAttributeValue("merged", value);
+                OnPropertyChanged(nameof(Merged));
             }
         }
 
@@ -2008,6 +2148,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<EntityReference>("modifiedby");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(ModifiedBy));
+                SetAttributeValue("modifiedby", value);
+                OnPropertyChanged(nameof(ModifiedBy));
+            }
         }
 
 		/// <summary>
@@ -2020,6 +2167,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<EntityReference>("modifiedbyexternalparty");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(ModifiedByExternalParty));
+                SetAttributeValue("modifiedbyexternalparty", value);
+                OnPropertyChanged(nameof(ModifiedByExternalParty));
             }
         }
 
@@ -2034,6 +2188,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<DateTime?>("modifiedon");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(ModifiedOn));
+                SetAttributeValue("modifiedon", value);
+                OnPropertyChanged(nameof(ModifiedOn));
+            }
         }
 
 		/// <summary>
@@ -2046,6 +2207,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<EntityReference>("modifiedonbehalfby");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(ModifiedOnBehalfBy));
+                SetAttributeValue("modifiedonbehalfby", value);
+                OnPropertyChanged(nameof(ModifiedOnBehalfBy));
             }
         }
 
@@ -2077,6 +2245,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<OptionSetValue>("msft_datastate");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(MsftDataState));
+                SetAttributeValue("msft_datastate", value);
+                OnPropertyChanged(nameof(MsftDataState));
             }
         }
 
@@ -2130,6 +2305,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<int?>("onholdtime");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(OnHoldTime));
+                SetAttributeValue("onholdtime", value);
+                OnPropertyChanged(nameof(OnHoldTime));
             }
         }
 
@@ -2204,6 +2386,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<EntityReference>("owningbusinessunit");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(OwningBusinessUnit));
+                SetAttributeValue("owningbusinessunit", value);
+                OnPropertyChanged(nameof(OwningBusinessUnit));
+            }
         }
 
 		/// <summary>
@@ -2217,6 +2406,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<EntityReference>("owningteam");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(OwningTeam));
+                SetAttributeValue("owningteam", value);
+                OnPropertyChanged(nameof(OwningTeam));
+            }
         }
 
 		/// <summary>
@@ -2229,6 +2425,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<EntityReference>("owninguser");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(OwningUser));
+                SetAttributeValue("owninguser", value);
+                OnPropertyChanged(nameof(OwningUser));
             }
         }
 
@@ -2483,6 +2686,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<Money>("revenue_base");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(RevenueBase));
+                SetAttributeValue("revenue_base", value);
+                OnPropertyChanged(nameof(RevenueBase));
+            }
         }
 
 		/// <summary>
@@ -2575,6 +2785,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<EntityReference>("slainvokedid");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(SLAInvokedId));
+                SetAttributeValue("slainvokedid", value);
+                OnPropertyChanged(nameof(SLAInvokedId));
             }
         }
 
@@ -2769,6 +2986,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<string>("timespentbymeonemailandmeetings");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(TimeSpentByMeOnEmailAndMeetings));
+                SetAttributeValue("timespentbymeonemailandmeetings", value);
+                OnPropertyChanged(nameof(TimeSpentByMeOnEmailAndMeetings));
+            }
         }
 
 		/// <summary>
@@ -2861,6 +3085,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<long?>("versionnumber");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(VersionNumber));
+                SetAttributeValue("versionnumber", value);
+                OnPropertyChanged(nameof(VersionNumber));
             }
         }
 

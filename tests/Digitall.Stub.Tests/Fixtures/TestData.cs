@@ -12,6 +12,9 @@ namespace Digitall.Stub.Tests.Fixtures;
 
 public static class TestData
 {
+    public static Guid CallerId => Guid.Parse("00000099-0000-0000-0001-000000000001");
+    public static Guid BusinessUnitId => Guid.Parse("00000099-0000-0000-0002-000000000001");
+
     public static IEnumerable<Entity> Default
     {
         get
@@ -24,8 +27,11 @@ public static class TestData
                 Address1UTCOffset = -120,
                 MarketCap = new Money(123),
                 MarketingOnly = true,
-                AccountId = Guid.Parse("00000000-0000-0000-0001-000000000001")
-
+                AccountId = Guid.Parse("00000000-0000-0000-0001-000000000001"),
+                OverriddenCreatedOn = new DateTime(1999, 12, 31),
+                AccountCategoryCode = new OptionSetValue(Account.Options.AccountCategoryCode.PreferredCustomer),
+                OwnerId = new EntityReference("systemuser", CallerId),
+                OwningBusinessUnit = new EntityReference("businessunit", BusinessUnitId),
             };
             var CorpB = new Account(Guid.Parse("00000000-0000-0000-0001-000000000002"))
             {

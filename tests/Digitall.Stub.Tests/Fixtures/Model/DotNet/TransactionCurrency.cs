@@ -144,6 +144,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<EntityReference>("createdby");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(CreatedBy));
+                SetAttributeValue("createdby", value);
+                OnPropertyChanged(nameof(CreatedBy));
+            }
         }
 
 		/// <summary>
@@ -157,6 +164,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<DateTime?>("createdon");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(CreatedOn));
+                SetAttributeValue("createdon", value);
+                OnPropertyChanged(nameof(CreatedOn));
+            }
         }
 
 		/// <summary>
@@ -169,6 +183,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<EntityReference>("createdonbehalfby");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(CreatedOnBehalfBy));
+                SetAttributeValue("createdonbehalfby", value);
+                OnPropertyChanged(nameof(CreatedOnBehalfBy));
             }
         }
 
@@ -261,6 +282,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<long?>("entityimage_timestamp");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(EntityImageTimestamp));
+                SetAttributeValue("entityimage_timestamp", value);
+                OnPropertyChanged(nameof(EntityImageTimestamp));
+            }
         }
 
 		
@@ -271,6 +299,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<string>("entityimage_url");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(EntityImageURL));
+                SetAttributeValue("entityimage_url", value);
+                OnPropertyChanged(nameof(EntityImageURL));
             }
         }
 
@@ -284,6 +319,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<Guid?>("entityimageid");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(EntityImageId));
+                SetAttributeValue("entityimageid", value);
+                OnPropertyChanged(nameof(EntityImageId));
             }
         }
 
@@ -358,6 +400,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<EntityReference>("modifiedby");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(ModifiedBy));
+                SetAttributeValue("modifiedby", value);
+                OnPropertyChanged(nameof(ModifiedBy));
+            }
         }
 
 		/// <summary>
@@ -370,6 +419,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<DateTime?>("modifiedon");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(ModifiedOn));
+                SetAttributeValue("modifiedon", value);
+                OnPropertyChanged(nameof(ModifiedOn));
             }
         }
 
@@ -384,6 +440,13 @@ namespace Digitall.Stub.Tests.Fixtures
             {
                 return GetAttributeValue<EntityReference>("modifiedonbehalfby");
             }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(ModifiedOnBehalfBy));
+                SetAttributeValue("modifiedonbehalfby", value);
+                OnPropertyChanged(nameof(ModifiedOnBehalfBy));
+            }
         }
 
 		/// <summary>
@@ -396,6 +459,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<EntityReference>("organizationid");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(OrganizationId));
+                SetAttributeValue("organizationid", value);
+                OnPropertyChanged(nameof(OrganizationId));
             }
         }
 
@@ -469,6 +539,13 @@ namespace Digitall.Stub.Tests.Fixtures
 			get
             {
                 return GetAttributeValue<long?>("versionnumber");
+            }
+            [DebuggerNonUserCode]
+			set
+            {
+                OnPropertyChanging(nameof(VersionNumber));
+                SetAttributeValue("versionnumber", value);
+                OnPropertyChanged(nameof(VersionNumber));
             }
         }
 
