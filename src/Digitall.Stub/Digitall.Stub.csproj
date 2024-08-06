@@ -22,5 +22,6 @@
   
     <ItemGroup>
       <None Remove="packages.lock.json" />
+      <None Remove="Digitall.Stub.csproj.DotSettings" />
     </ItemGroup>
 </Project>
