@@ -13,4 +13,9 @@ public static class ErrorFactory
     {
         throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { ErrorCode = (int)errorCode, Message = message }, message);
     }
+
+    public static void ThrowFault(string message)
+    {
+        throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { Message = message }, message);
+    }
 }

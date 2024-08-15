@@ -57,6 +57,17 @@ public class DataverseStub(IStubClock clock) : IOrganizationService
         }
     }
 
+    public void AddDefaultStubs()
+    {
+        Assembly a = typeof(IOrganizationRequestStub).Assembly;
+        var stubs = a.GetTypes().Where(type => type.IsClass && type.Namespace == "Digitall.Stub.OrganizationRequests" && typeof(IOrganizationRequestStub).IsAssignableFrom(type)).ToList();
+
+        foreach (var stub in stubs)
+        {
+            AddStub(Activator.CreateInstance(stub) as IOrganizationRequestStub);
+        }
+    }
+
     private void AddStubIfNecessary(IOrganizationRequestStub stub)
     {
         if (!OrganizationRequestStubs.ContainsKey(stub.ForType))
