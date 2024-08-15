@@ -1,10 +1,12 @@
 using System;
 using System.ServiceModel;
 using Digitall.Stub.Errors;
+using Digitall.Stub.OrganizationRequests;
 using Digitall.Stub.Tests.Fixtures;
 using FluentAssertions;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Stub.Tests;
@@ -327,5 +329,17 @@ public class DataverseStubTests
         var action = () => sut.Delete(Account.EntityLogicalName, Guid.NewGuid());
         action.Should().Throw<FaultException<OrganizationServiceFault>>()
             .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.ObjectDoesNotExist);
+    }
+
+    [TestMethod]
+    public void AddDefaultStubs()
+    {
+        var sut = new DataverseStub();
+        sut.AddDefaultStubs();
+
+        sut.OrganizationRequestStubs.Should().NotBeEmpty()
+            .And.ContainKey(typeof(CreateRequest))
+            .And.ContainKey(typeof(RetrieveMultipleRequest))
+            .And.ContainKey(typeof(DeleteRequest));
     }
 }
