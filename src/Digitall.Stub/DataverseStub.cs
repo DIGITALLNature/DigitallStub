@@ -119,6 +119,16 @@ public class DataverseStub(IStubClock clock) : IOrganizationService
 
     public void AddRange(IEnumerable<Entity> entities) => entities.ToList().ForEach(Add);
 
+    private RelationshipMetadataBase GetRelationship(string relationshipSchemaName)
+    {
+        if (Relationships.ContainsKey(relationshipSchemaName))
+        {
+            return Relationships[relationshipSchemaName];
+        }
+
+        return null;
+    }
+
     // <summary>
     ///     Checks if the specified entity type is known.
     ///     An entity type is considered known if it exists in the metadata or if it is an early bound type.
@@ -312,7 +322,7 @@ public class DataverseStub(IStubClock clock) : IOrganizationService
     {
         var relationshipMetadata = GetRelationship(relationship.SchemaName);
 
-            if (relationship == null)
+            if (relationshipMetadata == null)
             {
                 throw new Exception($"Relationship {relationship.SchemaName} does not exist in the metadata cache");
             }
@@ -322,8 +332,7 @@ public class DataverseStub(IStubClock clock) : IOrganizationService
             {
                 if(relationshipMetadata is ManyToManyRelationshipMetadata manyToManyRelationshipMetadata)
                 {
-                    var isFrom1to2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName
-                                     || relatedEntityReference.LogicalName != manyToManyRelationshipMetadata.Entity1LogicalName;
+                    var isFrom1to2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
                     var fromAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
                     var toAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
                     var fromEntityName = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1LogicalName : manyToManyRelationshipMetadata.Entity2LogicalName;
@@ -375,17 +384,47 @@ public class DataverseStub(IStubClock clock) : IOrganizationService
             }
     }
 
-    private RelationshipMetadataBase GetRelationship(string relationshipSchemaName)
+
+    public void Disassociate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities)
     {
-        if (Relationships.ContainsKey(relationshipSchemaName))
+        var relationshipMetadata = GetRelationship(relationship.SchemaName);
+
+        if (relationshipMetadata == null)
         {
-            return Relationships[relationshipSchemaName];
+            throw new Exception($"Relationship {relationship.SchemaName} does not exist in the metadata cache");
         }
 
-        return null;
-    }
 
-    public void Disassociate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities) => throw new NotImplementedException();
+        foreach (var relatedEntity in relatedEntities)
+        {
+            if(relationshipMetadata is ManyToManyRelationshipMetadata manyToManyRelationshipMetadata)
+            {
+                var isFrom1to2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
+                var fromAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
+                var toAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
+
+                var query = new QueryExpression(manyToManyRelationshipMetadata.IntersectEntityName)
+                {
+                    ColumnSet = new ColumnSet(true),
+                    Criteria = new FilterExpression(LogicalOperator.And)
+                };
+
+                query.Criteria.AddCondition(new ConditionExpression(fromAttribute, ConditionOperator.Equal, entityId));
+                query.Criteria.AddCondition(new ConditionExpression(toAttribute, ConditionOperator.Equal, relatedEntity.Id));
+
+                var results = RetrieveMultiple(query);
+
+                if (results.Entities.Count == 1)
+                {
+                    Delete(manyToManyRelationshipMetadata.IntersectEntityName, results.Entities.First().Id);
+                }
+            }
+            else
+            {
+                throw new ArgumentException("RelationShip Metadata is not ManyToManyRelationshipMetadata");
+            }
+        }
+    }
 
     public EntityCollection RetrieveMultiple(QueryBase query)
     {
