@@ -29,6 +29,8 @@ public class DataverseStub(IStubClock clock) : IOrganizationService
 
     public Dictionary<string, EntityMetadata> EntityMetadata { get; set; } = new();
 
+    public Dictionary<string, RelationshipMetadataBase> Relationships { get; set; } = new();
+
     internal Dictionary<string, Dictionary<Guid, Entity>> State { get; } = new();
 
     internal Dictionary<Type,IOrganizationRequestStub> OrganizationRequestStubs { get; } = new();
@@ -306,7 +308,82 @@ public class DataverseStub(IStubClock clock) : IOrganizationService
         throw new ArgumentOutOfRangeException(nameof(request));
     }
 
-    public void Associate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities) => throw new NotImplementedException();
+    public void Associate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities)
+    {
+        var relationshipMetadata = GetRelationship(relationship.SchemaName);
+
+            if (relationship == null)
+            {
+                throw new Exception($"Relationship {relationship.SchemaName} does not exist in the metadata cache");
+            }
+
+
+            foreach (var relatedEntityReference in relatedEntities)
+            {
+                if(relationshipMetadata is ManyToManyRelationshipMetadata manyToManyRelationshipMetadata)
+                {
+                    var isFrom1to2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName
+                                     || relatedEntityReference.LogicalName != manyToManyRelationshipMetadata.Entity1LogicalName;
+                    var fromAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
+                    var toAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
+                    var fromEntityName = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1LogicalName : manyToManyRelationshipMetadata.Entity2LogicalName;
+                    var toEntityName = isFrom1to2 ? manyToManyRelationshipMetadata.Entity2LogicalName : manyToManyRelationshipMetadata.Entity1LogicalName;
+
+                    //Check records exist
+                    var targetExists = CreateQuery(fromEntityName)
+                        .FirstOrDefault(e => e.Id == entityId) != null;
+
+                    if (!targetExists)
+                    {
+                        throw new Exception($"{fromEntityName} with Id {entityId.ToString()} doesn't exist");
+                    }
+
+                    var relatedExists = CreateQuery(toEntityName)
+                        .FirstOrDefault(e => e.Id == relatedEntityReference.Id) != null;
+
+                    if (!relatedExists)
+                    {
+                        throw new Exception($"{toEntityName} with Id {relatedEntityReference.Id.ToString()} doesn't exist");
+                    }
+
+                    var association = new Entity(manyToManyRelationshipMetadata.IntersectEntityName)
+                    {
+                        Attributes = new AttributeCollection
+                        {
+                            { fromAttribute, entityId },
+                            { toAttribute, relatedEntityReference.Id }
+                        }
+                    };
+
+                    Create(association);
+                }
+                else if (relationshipMetadata is OneToManyRelationshipMetadata oneToManyRelationshipMetadata)
+                {
+                    //Get entity to update
+                    var entityToUpdate = new Entity(relatedEntityReference.LogicalName)
+                    {
+                        Id = relatedEntityReference.Id,
+                        [oneToManyRelationshipMetadata.ReferencingAttribute] = new EntityReference(entityName, entityId)
+                    };
+
+                    Update(entityToUpdate);
+                }
+                else
+                {
+                    throw new ArgumentException("RelationShip Metadata is not typed correctly");
+                }
+            }
+    }
+
+    private RelationshipMetadataBase GetRelationship(string relationshipSchemaName)
+    {
+        if (Relationships.ContainsKey(relationshipSchemaName))
+        {
+            return Relationships[relationshipSchemaName];
+        }
+
+        return null;
+    }
 
     public void Disassociate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities) => throw new NotImplementedException();
 
