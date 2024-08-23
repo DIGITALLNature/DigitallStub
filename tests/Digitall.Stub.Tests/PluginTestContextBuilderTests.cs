@@ -1,12 +1,13 @@
 using System;
-using Digitall.Stub.Plugin;
+using System.Collections.Generic;
 using Digitall.Stub.Tests.Fixtures;
+using Digitall.Stub.Tests.Fixtures.SamplePlugin;
 using FluentAssertions;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using NSubstitute;
 
-namespace Digitall.Stub.Tests.Plugin;
+namespace Digitall.Stub.Tests;
 
 [TestClass]
 public class PluginTestContextBuilderTests
@@ -141,5 +142,40 @@ public class PluginTestContextBuilderTests
         var tracingServiceFromContext = pluginTestContext.ServiceProvider.GetService(typeof(ITracingService));
         tracingServiceFromContext.Should().NotBeNull();
         tracingServiceFromContext.Should().Be(tracingService);
+    }
+
+    [TestMethod]
+    [DataRow(typeof(IPluginExecutionContext))]
+    [DataRow(typeof(IPluginExecutionContext2))]
+    [DataRow(typeof(IPluginExecutionContext3))]
+    [DataRow(typeof(IPluginExecutionContext4))]
+    [DataRow(typeof(IPluginExecutionContext5))]
+    [DataRow(typeof(IPluginExecutionContext6))]
+    [DataRow(typeof(IPluginExecutionContext7))]
+    public void PluginTestContext_FromMinimalBuilder_Should_HaveAllCurrentIPluginExecutionContextFlavors(Type iPluginExecutionContextType)
+    {
+        var pluginTestContext = PluginTestContextBuilder<IPlugin>.Minimal.Build();
+
+        pluginTestContext.ServiceProvider.Should().NotBeNull();
+
+        var pluginContextPlain = pluginTestContext.ServiceProvider.GetService(iPluginExecutionContextType) as IPluginExecutionContext;
+        pluginContextPlain.Should().NotBeNull();
+
+        var pluginContext = pluginTestContext.ServiceProvider.GetService(iPluginExecutionContextType);
+        pluginContext.Should().NotBeNull().And.BeAssignableTo(iPluginExecutionContextType);
+    }
+
+    [TestMethod]
+    public void TestPlugin_Durchstich()
+    {
+        var tracingService = Substitute.For<ITracingService>();
+        var pluginTestContext = PluginTestContextBuilder<TestPlugin>.Minimal
+            .WithTracingService(tracingService)
+            .Build();
+
+        pluginTestContext.Should().NotBeNull();
+        pluginTestContext.ExecutePlugin();
+
+        tracingService.Received().Trace("TestPlugin: Execute");
     }
 }
