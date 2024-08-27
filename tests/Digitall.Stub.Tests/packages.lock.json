@@ -88,6 +88,11 @@
         "resolved": "0.10.4",
         "contentHash": "z8ASd9bjXkVjcnIrwUKrxb/bPi/gvG5NX3nv7MHK/5QrlYwbK7N5ZTDNaYXQ5qunaUCMGN0UHdgkNARIEBTEyA=="
       },
+      "dgt.apower": {
+        "type": "Transitive",
+        "resolved": "1.1.0-beta.1",
+        "contentHash": "000WhleZBpKwjsVOJBuHdx4YPZPmDPWthGYsCazgXPDThJMHgFB+/495F/CjI/k5RBACbVNFSJ9sy4CRmZyz4w=="
+      },
       "DotNetEnv": {
         "type": "Transitive",
         "resolved": "3.1.0",
@@ -613,7 +618,8 @@
         "dependencies": {
           "DeepCloner": "[0.10.4, )",
           "DotNetEnv": "[3.1.0, )",
-          "NSubstitute": "[5.1.0, )"
+          "NSubstitute": "[5.1.0, )",
+          "dgt.apower": "[1.1.0-beta.1, )"
         }
       }
     }

@@ -1,42 +1,16 @@
 // Copyright (c) DIGITALL Nature. All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
-using System.Collections.Generic;
-using Microsoft.Xrm.Sdk;
+using Digitall.APower;
 
 namespace Digitall.Stub;
 
 public static class PluginTestContextExtensions
 {
-    public static PluginTestContextBuilder<TPlugin> WithTarget<TPlugin>(this PluginTestContextBuilder<TPlugin> builder, Entity entity) where TPlugin : IPlugin
+    public static ExecutionResult Execute<TPlugin>(this PluginTestContextBuilder<TPlugin>.PluginTestContext context) where TPlugin : Executor
     {
-        return builder with { Target = entity };
-    }
-
-    public static PluginTestContextBuilder<TPlugin> WithTargetReference<TPlugin>(this PluginTestContextBuilder<TPlugin> builder, EntityReference entityReference) where TPlugin : IPlugin
-    {
-        return builder with { Target = entityReference };
-    }
-
-    public static PluginTestContextBuilder<TPlugin> WithTracingService<TPlugin>(this PluginTestContextBuilder<TPlugin> builder, ITracingService tracingService) where TPlugin : IPlugin
-    {
-        return builder with { TracingService = tracingService };
-    }
-
-    public static PluginTestContextBuilder<TPlugin> WithMessageName<TPlugin>(this PluginTestContextBuilder<TPlugin> builder, string messageName) where TPlugin : IPlugin
-    {
-        return builder with { MessageName = messageName };
-    }
-
-    public static PluginTestContextBuilder<TPlugin> AddData<TPlugin>(this PluginTestContextBuilder<TPlugin> builder, Entity entity) where TPlugin : IPlugin
-    {
-        builder.OrganizationService?.Add(entity);
-        return builder;
-    }
-
-    public static PluginTestContextBuilder<TPlugin> AddData<TPlugin>(this PluginTestContextBuilder<TPlugin> builder, IEnumerable<Entity> entities) where TPlugin : IPlugin
-    {
-        builder.OrganizationService?.AddRange(entities);
-        return builder;
+        var plugin = System.Activator.CreateInstance<TPlugin>();
+        plugin.Execute(context.ServiceProvider);
+        return plugin.Result;
     }
 }
