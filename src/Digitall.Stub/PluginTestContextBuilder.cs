@@ -17,7 +17,7 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
 
     internal PluginTestContextBuilder() { }
 
-    public PluginTestContext<TPlugin> Build()
+    public PluginTestContext Build()
     {
         ParameterCollection inputParameters = [];
 
@@ -36,6 +36,7 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
         }
 
         pluginExecutionContext.InputParameters.Returns(inputParameters);
+        pluginExecutionContext.OutputParameters.Returns([]);
 
         var organizationServiceFactory = Substitute.For<IOrganizationServiceFactory>();
         organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(OrganizationService);
@@ -51,7 +52,7 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
         serviceProvider.GetService(typeof(IOrganizationServiceFactory)).Returns(organizationServiceFactory);
         serviceProvider.GetService(typeof(ITracingService)).Returns(TracingService ?? Substitute.For<ITracingService>());
 
-        return new PluginTestContext<TPlugin>(serviceProvider);
+        return new PluginTestContext(serviceProvider);
     }
 
     public static PluginTestContextBuilder<TPlugin> Minimal => new();
@@ -64,6 +65,7 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
             tracingService.When(x => x.Trace(Arg.Any<string>())).Do(x => Debug.WriteLine(x.Arg<string>()));
 
             var organizationService = new DataverseStub();
+            organizationService.AddDefaultStubs();
 
             return Minimal with
             {
@@ -73,7 +75,7 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
         }
     }
 
-    public class PluginTestContext<TPlugin>(IServiceProvider serviceProvider) where TPlugin : IPlugin
+    public class PluginTestContext(IServiceProvider serviceProvider)
     {
         public readonly IServiceProvider ServiceProvider = serviceProvider;
 
