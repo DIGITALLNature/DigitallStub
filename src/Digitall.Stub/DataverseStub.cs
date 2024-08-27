@@ -108,7 +108,7 @@ public class DataverseStub(IStubClock clock) : IOrganizationService
 
         foreach (var e in entityState.Values)
         {
-            entityStateCopy.Add(e.CloneEntity().ToEntity<T>());
+            entityStateCopy.Add(typeof(T) == typeof(Entity) ? (T)e.CloneEntity() : e.CloneEntity().ToEntity<T>());
         }
 
         return entityStateCopy.AsQueryable();
