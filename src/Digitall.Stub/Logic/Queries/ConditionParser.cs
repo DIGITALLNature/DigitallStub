@@ -149,10 +149,15 @@ public static class ConditionParser
                 break;
 
             case ConditionOperator.DoesNotBeginWith:
-            case ConditionOperator.DoesNotEndWith:
             case ConditionOperator.NotLike:
-            case ConditionOperator.DoesNotContain:
                 operatorExpression = Expression.Not(TranslateConditionExpressionLike(condition, getNonBasicValueExpr, containsAttributeExpression));
+                break;
+
+            case ConditionOperator.DoesNotEndWith:
+                operatorExpression = Expression.Not(TranslateConditionExpressionEndsWith(condition, getNonBasicValueExpr, containsAttributeExpression));
+                break;
+            case ConditionOperator.DoesNotContain:
+                operatorExpression = Expression.Not(TranslateConditionExpressionContains(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
 #endregion
 
