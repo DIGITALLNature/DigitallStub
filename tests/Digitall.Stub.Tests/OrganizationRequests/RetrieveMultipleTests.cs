@@ -31,8 +31,10 @@ public class RetrieveMultipleTests
         result.Should().NotBeNull();
     }
 
+    #region QueryExpression
+
     [TestMethod]
-    public void Top()
+    public void QueryExpression_Top()
     {
         var sut = new DataverseStub();
 
@@ -47,7 +49,7 @@ public class RetrieveMultipleTests
     }
 
     [TestMethod]
-    public void Paging()
+    public void QueryExpression_Paging()
     {
         var sut = new DataverseStub();
 
@@ -77,7 +79,7 @@ public class RetrieveMultipleTests
     }
 
     [TestMethod]
-    public void EmptyPageOnPaging()
+    public void QueryExpression_EmptyPageOnPaging()
     {
         var sut = new DataverseStub();
 
@@ -108,7 +110,7 @@ public class RetrieveMultipleTests
     }
 
     [TestMethod]
-    public void Destinct()
+    public void QueryExpression_Destinct()
     {
         var sut = new DataverseStub();
         sut.AddRange(TestData.Default);
@@ -147,7 +149,7 @@ public class RetrieveMultipleTests
     }
 
     [TestMethod]
-    public void Empty()
+    public void QueryExpression_Empty()
     {
         var sut = new DataverseStub();
 
@@ -163,7 +165,7 @@ public class RetrieveMultipleTests
 
 
     [TestMethod]
-    public void TotalRecords()
+    public void QueryExpression_TotalRecords()
     {
         var sut = new DataverseStub();
 
@@ -176,4 +178,127 @@ public class RetrieveMultipleTests
         result.Should().NotBeNull();
         result.Entities.Should().HaveCount(5);
     }
+
+    [TestMethod]
+    public void QueryExpression_Order()
+    {
+        throw new NotImplementedException();
+    }
+
+    #endregion
+
+    #region QueryByAttribute
+   [TestMethod]
+    public void QueryByAttribute_Top()
+    {
+        var sut = new DataverseStub();
+
+        var manyRecords = new List<Account>();
+        Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
+
+        sut.AddRange(manyRecords);
+
+        var result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { TopCount = 5, ColumnSet = new ColumnSet(true) });
+        result.Should().NotBeNull();
+        result.Entities.Should().HaveCount(5);
+    }
+
+    [TestMethod]
+    public void QueryByAttribute_Paging()
+    {
+        var sut = new DataverseStub();
+
+        var manyRecords = new List<Account>();
+        Enumerable.Range(0, 19).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
+
+        sut.AddRange(manyRecords);
+
+        var result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true) });
+        result.Should().NotBeNull();
+        result.Entities.Should().HaveCount(10);
+        result.PagingCookie.Should().NotBeNull();
+        result.MoreRecords.Should().BeTrue();
+
+        result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),PageInfo = new PagingInfo
+        {
+            PagingCookie = result.PagingCookie,
+            PageNumber = 2
+        }
+
+        });
+
+        result.Should().NotBeNull();
+        result.Entities.Should().HaveCount(9);
+        result.PagingCookie.Should().BeNull();
+        result.MoreRecords.Should().BeFalse();
+    }
+
+    [TestMethod]
+    public void QueryByAttribute_EmptyPageOnPaging()
+    {
+        var sut = new DataverseStub();
+
+        var manyRecords = new List<Account>();
+        Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
+
+        sut.AddRange(manyRecords);
+
+        var result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true) });
+        result.Should().NotBeNull();
+        result.Entities.Should().HaveCount(10);
+        result.PagingCookie.Should().NotBeNull();
+        result.MoreRecords.Should().BeTrue();
+
+        result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),PageInfo = new PagingInfo
+            {
+                PagingCookie = result.PagingCookie,
+                PageNumber = 21 // out of range
+            }
+
+        });
+
+        result.Should().NotBeNull();
+        result.Entities.Should().BeEmpty();
+        result.PagingCookie.Should().BeNull();
+        result.MoreRecords.Should().BeFalse();
+
+    }
+
+    [TestMethod]
+    public void QueryByAttribute_Empty()
+    {
+        var sut = new DataverseStub();
+
+        var manyRecords = new List<Account>();
+        Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
+
+        sut.AddRange(manyRecords);
+
+        var result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { TopCount = 5, ColumnSet = new ColumnSet(true) });
+        result.Should().NotBeNull();
+        result.Entities.Should().HaveCount(5);
+    }
+
+
+    [TestMethod]
+    public void QueryByAttribute_TotalRecords()
+    {
+        var sut = new DataverseStub();
+
+        var manyRecords = new List<Account>();
+        Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
+
+        sut.AddRange(manyRecords);
+
+        var result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { TopCount = 5, ColumnSet = new ColumnSet(true) });
+        result.Should().NotBeNull();
+        result.Entities.Should().HaveCount(5);
+    }
+
+    [TestMethod]
+    public void QueryByAttribute_Order()
+    {
+        throw new NotImplementedException();
+    }
+    #endregion
 }

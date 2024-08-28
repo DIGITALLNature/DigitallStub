@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Xml.Linq;
 using Digitall.Stub.Logic.Queries;
 using DotNetEnv;
 using Microsoft.Xrm.Sdk;
@@ -39,6 +40,47 @@ public class RetrieveMultipleStub : OrganizationRequestStub<RetrieveMultipleRequ
                 // Execute the query and store the results in a list
                 var linqQuery = queryProcessor.ExecuteQueryExpression(queryExpression);
                 internalResult = linqQuery.ToList();
+            }
+            else if (organizationRequest.Query is QueryByAttribute query)
+            {
+// We instantiate a QueryExpression to be executed as we have the implementation done already
+                queryExpression = new QueryExpression(query.EntityName);
+                entityName = query.EntityName;
+
+                queryExpression.ColumnSet = query.ColumnSet;
+                queryExpression.Criteria = new FilterExpression();
+                for (var i = 0; i < query.Attributes.Count; i++)
+                {
+                    queryExpression.Criteria.AddCondition(new ConditionExpression(query.Attributes[i], ConditionOperator.Equal, query.Values[i]));
+                }
+
+                foreach (var order in query.Orders)
+                {
+                    queryExpression.AddOrder(order.AttributeName, order.OrderType);
+                }
+
+                queryExpression.PageInfo = query.PageInfo;
+                queryExpression.TopCount = query.TopCount;
+
+                // QueryExpression now done... execute it!
+                var linqQuery = queryProcessor.ExecuteQueryExpression(queryExpression);
+                internalResult = linqQuery.ToList();
+            }
+            else if (organizationRequest.Query is FetchExpression fetchXml)
+            {
+                var xmlDoc = ParseXml(fetchXml.Query);
+                queryExpression = queryProcessor.ConvertXmlDocumentToQueryExpression(xmlDoc);
+                entityName = queryExpression.EntityName;
+
+                // QueryExpression now done... execute it!
+                var linqQuery = queryProcessor.ExecuteQueryExpression(queryExpression);
+                internalResult = linqQuery.ToList();
+
+                if (xmlDoc.IsAggregateFetchXml())
+                {
+                    // TODO
+                    throw new NotImplementedException("Aggregate FetchXml not implemented yet");
+                }
             }
             else
             {
@@ -122,6 +164,26 @@ public class RetrieveMultipleStub : OrganizationRequestStub<RetrieveMultipleRequ
             }
 
             return response;
+        }
+
+        /// <summary>
+        /// Parses a string containing FetchXML and returns an XDocument object.
+        /// </summary>
+        /// <param name="fetchXml">The FetchXML string to parse.</param>
+        /// <returns>An XDocument object representing the parsed FetchXML.</returns>
+        /// <exception cref="Exception">Thrown when the input string is not a valid XML document.</exception>
+        private XDocument ParseXml(string fetchXml)
+        {
+            try
+            {
+                // Parse the input string into an XDocument object
+                return XDocument.Parse(fetchXml);
+            }
+            catch (Exception ex)
+            {
+                // If parsing fails, throw an exception with a helpful error message
+                throw new Exception($"FetchXml must be a valid XML document: {ex}");
+            }
         }
 
         /// <summary>
