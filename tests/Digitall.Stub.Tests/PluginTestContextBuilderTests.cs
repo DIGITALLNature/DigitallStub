@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Digitall.APower;
 using Digitall.Stub.Tests.Fixtures;
 using Digitall.Stub.Tests.Fixtures.SamplePlugin;
 using FluentAssertions;
@@ -177,5 +178,31 @@ public class PluginTestContextBuilderTests
         pluginTestContext.ExecutePlugin();
 
         tracingService.Received().Trace("TestPlugin: Execute");
+    }
+
+    [TestMethod]
+    public void TestExecutorPlugin_Durchstich()
+    {
+        var tracingService = Substitute.For<ITracingService>();
+        var pluginTestContext = PluginTestContextBuilder<TestExecutorPlugin>.Minimal
+            .WithTracingService(tracingService)
+            .Build();
+
+        pluginTestContext.Should().NotBeNull();
+        pluginTestContext.ExecuteExecutorPlugin().Should().Be(ExecutionResult.Ok);
+
+        tracingService.Received().Trace("TestPlugin: Execute");
+    }
+
+    [TestMethod]
+    public void TestExecutorPlugin_WithOutExecutor_ThrowsInvalidCastException()
+    {
+        var pluginTestContext = PluginTestContextBuilder<TestPlugin>.Minimal
+            .Build();
+
+        pluginTestContext.Should().NotBeNull();
+
+        var action = () => pluginTestContext.ExecuteExecutorPlugin();
+        action.Should().Throw<InvalidCastException>();
     }
 }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using Digitall.APower;
 using Microsoft.Xrm.Sdk;
 using NSubstitute;
 
@@ -83,6 +84,18 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
         {
             var plugin = Activator.CreateInstance<TPlugin>();
             plugin.Execute(ServiceProvider);
+        }
+
+        public ExecutionResult ExecuteExecutorPlugin()
+        {
+            if (!typeof(Executor).IsAssignableFrom(typeof(TPlugin)))
+            {
+                throw new InvalidCastException("The plugin must inherit from the Executor base class.");
+            }
+
+            var plugin = Activator.CreateInstance<TPlugin>() as Executor;
+            plugin!.Execute(ServiceProvider);
+            return plugin.Result;
         }
     }
 }

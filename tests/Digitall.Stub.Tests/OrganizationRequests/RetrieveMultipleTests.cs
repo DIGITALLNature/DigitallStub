@@ -158,7 +158,7 @@ public class RetrieveMultipleTests
 
         var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { TopCount = 5, ColumnSet = new ColumnSet(true) });
         result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(10);
+        result.Entities.Should().HaveCount(5);
     }
 
 
@@ -174,6 +174,6 @@ public class RetrieveMultipleTests
 
         var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { TopCount = 5, ColumnSet = new ColumnSet(true) });
         result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(10);
+        result.Entities.Should().HaveCount(5);
     }
 }
