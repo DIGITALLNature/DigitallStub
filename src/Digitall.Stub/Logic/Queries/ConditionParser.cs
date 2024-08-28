@@ -99,7 +99,8 @@ public static class ConditionParser
             attributeName = condition.CondExpression.AttributeName;
         }
 
-        Expression containsAttributeExpression = Expression.Call(attributesProperty, typeof(AttributeCollection).GetMethod(nameof(AttributeCollection.ContainsKey) , new[] { typeof(string) }), Expression.Constant(attributeName)
+        Expression containsAttributeExpression = Expression.Call(attributesProperty, typeof(AttributeCollection).GetMethod(nameof(AttributeCollection.ContainsKey) ,
+                new[] { typeof(string) }), Expression.Constant(attributeName)
         );
 
         Expression getAttributeValueExpr = Expression.Property(
@@ -161,6 +162,7 @@ public static class ConditionParser
                 break;
 #endregion
 
+#region null and not null
             case ConditionOperator.Null:
                 operatorExpression = TranslateConditionExpressionNull(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
@@ -168,7 +170,9 @@ public static class ConditionParser
             case ConditionOperator.NotNull:
                 operatorExpression = Expression.Not(TranslateConditionExpressionNull(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
+#endregion
 
+#region Greater & Less
             case ConditionOperator.GreaterThan:
                 operatorExpression = TranslateConditionExpressionGreaterThan(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
@@ -184,7 +188,9 @@ public static class ConditionParser
             case ConditionOperator.LessEqual:
                 operatorExpression = TranslateConditionExpressionLessThanOrEqual(context, condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
+#endregion
 
+#region Array Operations
             case ConditionOperator.In:
                 operatorExpression = TranslateConditionExpressionIn(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
@@ -193,7 +199,17 @@ public static class ConditionParser
                 operatorExpression = Expression.Not(TranslateConditionExpressionIn(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
 
+            case ConditionOperator.ContainValues:
+                operatorExpression = TranslateConditionExpressionContainValues(condition, getNonBasicValueExpr, containsAttributeExpression);
+                break;
 
+            case ConditionOperator.DoesNotContainValues:
+                operatorExpression = Expression.Not(TranslateConditionExpressionContainValues(condition, getNonBasicValueExpr, containsAttributeExpression));
+                break;
+
+#endregion
+
+#region Time Operations
             case ConditionOperator.OnOrAfter:
                 operatorExpression = Expression.Or(
                     TranslateConditionExpressionEqual(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression),
@@ -260,17 +276,9 @@ public static class ConditionParser
             case ConditionOperator.InFiscalYear:
                 operatorExpression = TranslateConditionExpressionBetweenDates(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression, context);
                 break;
+#endregion
 
-            case ConditionOperator.ContainValues:
-                operatorExpression = TranslateConditionExpressionContainValues(condition, getNonBasicValueExpr, containsAttributeExpression);
-                break;
-
-            case ConditionOperator.DoesNotContainValues:
-                operatorExpression = Expression.Not(TranslateConditionExpressionContainValues(condition, getNonBasicValueExpr, containsAttributeExpression));
-                break;
-
-
-            default:
+default:
                 throw new ArgumentOutOfRangeException($"Operator {condition.CondExpression.Operator.ToString()} not yet implemented for condition expression");
         }
 

@@ -707,4 +707,118 @@ public class QueryTests
         queryResult.Should().HaveCount(0);
     }
     #endregion
+
+    #region null and not null
+    [TestMethod]
+    public void GenerateQuery_Null()
+    {
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition(Account.LogicalNames.AccountCategoryCode, ConditionOperator.Null);
+
+        var stub = new DataverseStub();
+        stub.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(stub);
+
+        var result = sut.Generate(query);
+        result.Should().NotBeNull();
+
+        var queryResult = stub.CreateQuery<Account>().Where(result);
+        queryResult.Should().NotBeNull();
+        queryResult.Should().HaveCount(1);
+    }
+
+    [TestMethod]
+    public void GenerateQuery_NotNull()
+    {
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition(Account.LogicalNames.AccountCategoryCode, ConditionOperator.NotNull);
+
+        var stub = new DataverseStub();
+        stub.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(stub);
+
+        var result = sut.Generate(query);
+        result.Should().NotBeNull();
+
+        var queryResult = stub.CreateQuery<Account>().Where(result);
+        queryResult.Should().NotBeNull();
+        queryResult.Should().HaveCount(1);
+    }
+
+    #endregion
+
+    #region greater than and less than
+
+    [TestMethod]
+    public void GenerateQuery_GreaterThan()
+    {
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.GreaterThan, new Money(122));
+
+        var stub = new DataverseStub();
+        stub.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(stub);
+
+        var result = sut.Generate(query);
+        result.Should().NotBeNull();
+
+        var queryResult = stub.CreateQuery<Account>().Where(result);
+        queryResult.Should().NotBeNull();
+        queryResult.Should().HaveCount(1);
+    }
+
+    [TestMethod]
+    public void GenerateQuery_GreaterEqual()
+    {
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.GreaterEqual, new Money(123));
+
+        var stub = new DataverseStub();
+        stub.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(stub);
+
+        var result = sut.Generate(query);
+        result.Should().NotBeNull();
+
+        var queryResult = stub.CreateQuery<Account>().Where(result);
+        queryResult.Should().NotBeNull();
+        queryResult.Should().HaveCount(1);
+    }
+
+    public void GenerateQuery_LessThan()
+    {
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.LessThan, new Money(124));
+
+        var stub = new DataverseStub();
+        stub.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(stub);
+
+        var result = sut.Generate(query);
+        result.Should().NotBeNull();
+
+        var queryResult = stub.CreateQuery<Account>().Where(result);
+        queryResult.Should().NotBeNull();
+        queryResult.Should().HaveCount(1);
+    }
+
+    [TestMethod]
+    public void GenerateQuery_LessEqual()
+    {
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.LessEqual, new Money(123));
+
+        var stub = new DataverseStub();
+        stub.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(stub);
+
+        var result = sut.Generate(query);
+        result.Should().NotBeNull();
+
+        var queryResult = stub.CreateQuery<Account>().Where(result);
+        queryResult.Should().NotBeNull();
+        queryResult.Should().HaveCount(1);
+    }
+
+    #endregion
 }
