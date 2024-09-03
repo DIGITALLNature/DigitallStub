@@ -182,7 +182,22 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryExpression_Order()
     {
-        throw new NotImplementedException();
+        var sut = new DataverseStub();
+
+        var manyRecords = new List<Account>();
+        Enumerable.Range(0, 50).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}", ExchangeRate = x}));
+
+        sut.AddRange(manyRecords);
+
+        var resultDescending = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),
+            Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Descending) } });
+        resultDescending.Should().NotBeNull();
+        resultDescending.Entities.Select(a => a.ToEntity<Account>()).Should().BeInDescendingOrder(x => x.ExchangeRate);
+
+        var resultAscending = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),
+            Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Ascending) } });
+        resultAscending.Should().NotBeNull();
+        resultAscending.Entities.Select(a => a.ToEntity<Account>()).Should().BeInAscendingOrder(x => x.ExchangeRate);
     }
 
     #endregion
@@ -298,7 +313,22 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryByAttribute_Order()
     {
-        throw new NotImplementedException();
+        var sut = new DataverseStub();
+
+        var manyRecords = new List<Account>();
+        Enumerable.Range(0, 50).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}", ExchangeRate = x}));
+
+        sut.AddRange(manyRecords);
+
+        var resultDescending = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),
+            Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Descending) } });
+        resultDescending.Should().NotBeNull();
+        resultDescending.Entities.Select(a => a.ToEntity<Account>()).Should().BeInDescendingOrder(x => x.ExchangeRate);
+
+        var resultAscending = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),
+            Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Ascending) } });
+        resultAscending.Should().NotBeNull();
+        resultAscending.Entities.Select(a => a.ToEntity<Account>()).Should().BeInAscendingOrder(x => x.ExchangeRate);
     }
     #endregion
 }
