@@ -78,8 +78,7 @@ public class RetrieveMultipleStub : OrganizationRequestStub<RetrieveMultipleRequ
 
                 if (xmlDoc.IsAggregateFetchXml())
                 {
-                    // TODO
-                    throw new NotImplementedException("Aggregate FetchXml not implemented yet");
+                    internalResult = queryProcessor.ProcessAggregateFetchXml(xmlDoc, internalResult);
                 }
             }
             else

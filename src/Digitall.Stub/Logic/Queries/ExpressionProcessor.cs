@@ -250,22 +250,20 @@ public class ExpressionProcessor(DataverseStub state)
                 }
 
 
-                if (state.EntityTypeIsKnow(cEntityName, out var earlyBoundType))
-                {
-                    if (!state.IsKnownAttributeForType(cEntityName, sAttributeName, out var _))
-                    {
-                        // Special case when filtering on the name of a Lookup
-                        if (sAttributeName.EndsWith("name", StringComparison.Ordinal))
-                        {
-                            var realAttributeName = c.AttributeName.Substring(0, c.AttributeName.Length - 4);
 
-                            if (state.IsKnownAttributeForType(cEntityName, realAttributeName, out var attributeInfo))
+                if (!state.IsKnownAttributeForType(cEntityName, sAttributeName, out _))
+                {
+                    // Special case when filtering on the name of a Lookup
+                    if (sAttributeName.EndsWith("name", StringComparison.Ordinal))
+                    {
+                        var realAttributeName = c.AttributeName.Substring(0, c.AttributeName.Length - 4);
+
+                        if (state.IsKnownAttributeForType(cEntityName, realAttributeName, out var attributeInfo))
+                        {
+                            if (attributeInfo.PropertyType == typeof(EntityReference))
                             {
-                                if (attributeInfo.PropertyType == typeof(EntityReference))
-                                {
-                                    // Need to make Lookups work against the real attribute, not the "name" suffixed attribute that doesn't exist
-                                    c.AttributeName = realAttributeName;
-                                }
+                                // Need to make Lookups work against the real attribute, not the "name" suffixed attribute that doesn't exist
+                                c.AttributeName = realAttributeName;
                             }
                         }
                     }
