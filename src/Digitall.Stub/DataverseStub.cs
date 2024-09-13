@@ -327,7 +327,7 @@ public class DataverseStub(IStubClock clock) : IOrganizationService
             return stub.Execute(request, this);
         }
 
-        throw new ArgumentOutOfRangeException(nameof(request));
+        throw new ArgumentOutOfRangeException(nameof(request), $"No stub found for request of type {request.GetType().Name}");
     }
 
     public void Associate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities)

@@ -15,6 +15,8 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
     public object Target;
     public ITracingService TracingService;
     public DataverseStub OrganizationService;
+    public EntityImageCollection PreEntityImages;
+    public EntityImageCollection PostEntityImages;
 
     internal PluginTestContextBuilder() { }
 
@@ -34,6 +36,18 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
 
             pluginExecutionContext.PrimaryEntityName.Returns(targetEntity?.LogicalName ?? targetReference?.LogicalName ?? throw new NotSupportedException("target entity name is missing or type is not supported"));
             pluginExecutionContext.PrimaryEntityId.Returns(targetEntity?.Id ?? targetReference?.Id ?? throw new NotSupportedException("target entity id is missing or type is not supported"));
+        }
+
+        if (PreEntityImages != null)
+        {
+            pluginExecutionContext.PreEntityImages.Returns(PreEntityImages);
+            pluginExecutionContext.PreEntityImagesCollection.Returns([PreEntityImages]);
+        }
+
+        if (PostEntityImages != null)
+        {
+            pluginExecutionContext.PostEntityImages.Returns(PostEntityImages);
+            pluginExecutionContext.PostEntityImagesCollection.Returns([PostEntityImages]);
         }
 
         pluginExecutionContext.InputParameters.Returns(inputParameters);
@@ -83,6 +97,12 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
         public void ExecutePlugin()
         {
             var plugin = Activator.CreateInstance<TPlugin>();
+            plugin.Execute(ServiceProvider);
+        }
+
+        public void ExecutePlugin(out TPlugin plugin)
+        {
+            plugin = Activator.CreateInstance<TPlugin>();
             plugin.Execute(ServiceProvider);
         }
 
