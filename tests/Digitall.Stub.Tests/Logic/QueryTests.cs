@@ -785,6 +785,7 @@ public class QueryTests
         queryResult.Should().HaveCount(1);
     }
 
+    [TestMethod]
     public void GenerateQuery_LessThan()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -820,5 +821,94 @@ public class QueryTests
         queryResult.Should().HaveCount(1);
     }
 
+    #endregion
+
+    #region Array Operations
+
+    /**
+     *             case ConditionOperator.In:
+                operatorExpression = TranslateConditionExpressionIn(condition, getNonBasicValueExpr, containsAttributeExpression);
+                break;
+
+            case ConditionOperator.NotIn:
+                operatorExpression = Expression.Not(TranslateConditionExpressionIn(condition, getNonBasicValueExpr, containsAttributeExpression));
+                break;
+
+            case ConditionOperator.ContainValues:
+                operatorExpression = TranslateConditionExpressionContainValues(condition, getNonBasicValueExpr, containsAttributeExpression);
+                break;
+
+            case ConditionOperator.DoesNotContainValues:
+     */
+
+    #endregion
+
+    #region Time Operations
+    /**
+     * case ConditionOperator.OnOrAfter:
+                operatorExpression = Expression.Or(
+                    TranslateConditionExpressionEqual(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression),
+                    TranslateConditionExpressionGreaterThan(condition, getNonBasicValueExpr, containsAttributeExpression));
+                break;
+            case ConditionOperator.LastXHours:
+            case ConditionOperator.LastXDays:
+            case ConditionOperator.Last7Days:
+            case ConditionOperator.LastXWeeks:
+            case ConditionOperator.LastXMonths:
+            case ConditionOperator.LastXYears:
+                operatorExpression = TranslateConditionExpressionLast(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression);
+                break;
+
+            case ConditionOperator.OnOrBefore:
+                operatorExpression = Expression.Or(
+                    TranslateConditionExpressionEqual(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression),
+                    TranslateConditionExpressionLessThan(condition, getNonBasicValueExpr, containsAttributeExpression));
+                break;
+
+            case ConditionOperator.Between:
+                if (condition.CondExpression.Values.Count != 2)
+                {
+                    throw new Exception("Between operator requires exactly 2 values.");
+                }
+
+                operatorExpression = TranslateConditionExpressionBetween(condition, getNonBasicValueExpr, containsAttributeExpression);
+                break;
+
+            case ConditionOperator.NotBetween:
+                if (condition.CondExpression.Values.Count != 2)
+                {
+                    throw new Exception("Not-Between operator requires exactly 2 values.");
+                }
+
+                operatorExpression = Expression.Not(TranslateConditionExpressionBetween(condition, getNonBasicValueExpr, containsAttributeExpression));
+                break;
+            case ConditionOperator.OlderThanXMinutes:
+            case ConditionOperator.OlderThanXHours:
+            case ConditionOperator.OlderThanXDays:
+            case ConditionOperator.OlderThanXWeeks:
+            case ConditionOperator.OlderThanXYears:
+            case ConditionOperator.OlderThanXMonths:
+                operatorExpression = TranslateConditionExpressionOlderThan(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression);
+                break;
+
+            case ConditionOperator.NextXHours:
+            case ConditionOperator.NextXDays:
+            case ConditionOperator.Next7Days:
+            case ConditionOperator.NextXWeeks:
+            case ConditionOperator.NextXMonths:
+            case ConditionOperator.NextXYears:
+                operatorExpression = TranslateConditionExpressionNext(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression);
+                break;
+            case ConditionOperator.ThisYear:
+            case ConditionOperator.LastYear:
+            case ConditionOperator.NextYear:
+            case ConditionOperator.ThisMonth:
+            case ConditionOperator.LastMonth:
+            case ConditionOperator.NextMonth:
+            case ConditionOperator.LastWeek:
+            case ConditionOperator.ThisWeek:
+            case ConditionOperator.NextWeek:
+            case ConditionOperator.InFiscalYear:
+     */
     #endregion
 }

@@ -28,50 +28,48 @@ public static class ConditionParser
                           $"Consider changing the implementation of the ResolveName method on your DataContractResolver to return a non-null value for name " +
                           $"'{input?.GetType()}' and namespace 'http://schemas.microsoft.com/xrm/2011/Contracts'.'.  Please see InnerException for more details.";
 
-        if (input is int)
+        if (input is int intValue)
         {
-            set.Add((int)input);
+            set.Add(intValue);
         }
-        else if (input is string)
+        else if (input is string stringValue)
         {
-            set.Add(int.Parse(input as string));
+            set.Add(int.Parse(stringValue));
         }
-        else if (input is int[])
+        else if (input is int[] intArray)
         {
-            set.UnionWith(input as int[]);
+            set.UnionWith(intArray);
         }
-        else if (input is string[])
+        else if (input is string[] strings)
         {
-            set.UnionWith((input as string[]).Select(s => int.Parse(s)));
+            set.UnionWith(strings.Select(s => int.Parse(s)));
         }
-        else if (input is DataCollection<object>)
+        else if (input is DataCollection<object> collection)
         {
-            var collection = input as DataCollection<object>;
-
             if (collection.All(o => o is int))
             {
                 set.UnionWith(collection.Cast<int>());
             }
             else if (collection.All(o => o is string))
             {
-                set.UnionWith(collection.Select(o => int.Parse(o as string)));
+                set.UnionWith(collection.Select(o => int.Parse((o as string)!)));
             }
-            else if (collection.Count == 1 && collection[0] is int[])
+            else if (collection.Count == 1 && collection[0] is int[] iArray)
             {
-                set.UnionWith(collection[0] as int[]);
+                set.UnionWith(iArray);
             }
-            else if (collection.Count == 1 && collection[0] is string[])
+            else if (collection.Count == 1 && collection[0] is string[] sArray)
             {
-                set.UnionWith((collection[0] as string[]).Select(s => int.Parse(s)));
+                set.UnionWith(sArray.Select(s => int.Parse(s)));
             }
             else
             {
                 throw new FaultException(new FaultReason(faultReason));
             }
         }
-        else if (isOptionSetValueCollectionAccepted && input is OptionSetValueCollection)
+        else if (isOptionSetValueCollectionAccepted && input is OptionSetValueCollection optionSetValueCollection)
         {
-            set.UnionWith((input as OptionSetValueCollection).Select(osv => osv.Value));
+            set.UnionWith(optionSetValueCollection.Select(osv => osv.Value));
         }
         else
         {
@@ -164,11 +162,11 @@ public static class ConditionParser
 
 #region null and not null
             case ConditionOperator.Null:
-                operatorExpression = TranslateConditionExpressionNull(condition, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionNull(getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.NotNull:
-                operatorExpression = Expression.Not(TranslateConditionExpressionNull(condition, getNonBasicValueExpr, containsAttributeExpression));
+                operatorExpression = Expression.Not(TranslateConditionExpressionNull(getNonBasicValueExpr, containsAttributeExpression));
                 break;
 #endregion
 
@@ -274,7 +272,7 @@ public static class ConditionParser
             case ConditionOperator.ThisWeek:
             case ConditionOperator.NextWeek:
             case ConditionOperator.InFiscalYear:
-                operatorExpression = TranslateConditionExpressionBetweenDates(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression, context);
+                operatorExpression = TranslateConditionExpressionBetweenDates(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 #endregion
 
@@ -375,7 +373,7 @@ default:
     /// <summary>
     ///     Takes a condition expression which needs translating into a 'between two dates' expression and works out the relevant dates
     /// </summary>
-    private static Expression TranslateConditionExpressionBetweenDates(IStubClock clock, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr, DataverseStub context)
+    private static Expression TranslateConditionExpressionBetweenDates(IStubClock clock, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -390,31 +388,31 @@ default:
         switch (c.Operator)
         {
             case ConditionOperator.ThisYear: // From first day of this year to last day of this year
-                fromDate = new DateTime(thisYear, 1, 1);
-                toDate = new DateTime(thisYear, 12, 31);
+                fromDate = new DateTime(thisYear, 1, 1,0,0,0, DateTimeKind.Local);
+                toDate = new DateTime(thisYear, 12, 31,0,0,0, DateTimeKind.Local);
                 break;
             case ConditionOperator.LastYear: // From first day of last year to last day of last year
-                fromDate = new DateTime(thisYear - 1, 1, 1);
-                toDate = new DateTime(thisYear - 1, 12, 31);
+                fromDate = new DateTime(thisYear - 1, 1, 1,0,0,0, DateTimeKind.Local);
+                toDate = new DateTime(thisYear - 1, 12, 31,0,0,0, DateTimeKind.Local);
                 break;
             case ConditionOperator.NextYear: // From first day of next year to last day of next year
-                fromDate = new DateTime(thisYear + 1, 1, 1);
-                toDate = new DateTime(thisYear + 1, 12, 31);
+                fromDate = new DateTime(thisYear + 1, 1, 1,0,0,0, DateTimeKind.Local);
+                toDate = new DateTime(thisYear + 1, 12, 31,0,0,0, DateTimeKind.Local);
                 break;
             case ConditionOperator.ThisMonth: // From first day of this month to last day of this month
-                fromDate = new DateTime(thisYear, thisMonth, 1);
+                fromDate = new DateTime(thisYear, thisMonth, 1,0,0,0, DateTimeKind.Local);
                 // Last day of this month: Add one month to the first of this month, and then remove one day
-                toDate = new DateTime(thisYear, thisMonth, 1).AddMonths(1).AddDays(-1);
+                toDate = new DateTime(thisYear, thisMonth, 1,0,0,0, DateTimeKind.Local).AddMonths(1).AddDays(-1);
                 break;
             case ConditionOperator.LastMonth: // From first day of last month to last day of last month
-                fromDate = new DateTime(thisYear, thisMonth, 1).AddMonths(-1);
+                fromDate = new DateTime(thisYear, thisMonth, 1,0,0,0, DateTimeKind.Local).AddMonths(-1);
                 // Last day of last month: One day before the first of this month
-                toDate = new DateTime(thisYear, thisMonth, 1).AddDays(-1);
+                toDate = new DateTime(thisYear, thisMonth, 1,0,0,0, DateTimeKind.Local).AddDays(-1);
                 break;
             case ConditionOperator.NextMonth: // From first day of next month to last day of next month
-                fromDate = new DateTime(thisYear, thisMonth, 1).AddMonths(1);
+                fromDate = new DateTime(thisYear, thisMonth, 1,0,0,0, DateTimeKind.Local).AddMonths(1);
                 // LAst day of Next Month: Add two months to the first of this month, and then go back one day
-                toDate = new DateTime(thisYear, thisMonth, 1).AddMonths(2).AddDays(-1);
+                toDate = new DateTime(thisYear, thisMonth, 1,0,0,0, DateTimeKind.Local).AddMonths(2).AddDays(-1);
                 break;
             case ConditionOperator.ThisWeek:
                 fromDate = today.ToFirstDayOfDeltaWeek();
@@ -642,9 +640,9 @@ default:
         {
             foreach (var value in c.Values)
             {
-                if (value is Array)
+                if (value is Array array)
                 {
-                    foreach (var a in (Array)value)
+                    foreach (var a in array)
                     {
                         expOrValues = Expression.Or(expOrValues, Expression.Equal(
                             GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, a),
@@ -848,10 +846,8 @@ default:
         return TranslateConditionExpressionBetween(tc, getAttributeValueExpr, containsAttributeExpr);
     }
 
-    private static Expression TranslateConditionExpressionNull(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static Expression TranslateConditionExpressionNull(Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
-        var c = tc.CondExpression;
-
         return Expression.Or(Expression.AndAlso(
                 containsAttributeExpr,
                 Expression.Equal(
@@ -931,14 +927,14 @@ default:
 
         //Basic types conversions
         //Special case => datetime is sent as a string
-        if (value is string)
+        if (value is string stringValue)
         {
             int iValue;
 
             DateTime dtDateTimeConversion;
             Guid id;
             if (attributeType.IsDateTime() //Only convert to DateTime if the attribute's type was DateTime
-                && DateTime.TryParse(value.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out dtDateTimeConversion))
+                && DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out dtDateTimeConversion))
             {
                 return Expression.Constant(dtDateTimeConversion, typeof(DateTime));
             }
@@ -956,21 +952,21 @@ default:
             return GetCaseInsensitiveExpression(Expression.Constant(value, typeof(string)));
         }
 
-        if (value is EntityReference)
+        if (value is EntityReference reference)
         {
-            var cast = (value as EntityReference).Id;
+            var cast = reference.Id;
             return Expression.Constant(cast);
         }
 
-        if (value is OptionSetValue)
+        if (value is OptionSetValue optionSetValue)
         {
-            var cast = (value as OptionSetValue).Value;
+            var cast = optionSetValue.Value;
             return Expression.Constant(cast);
         }
 
-        if (value is Money)
+        if (value is Money money)
         {
-            var cast = (value as Money).Value;
+            var cast = money.Value;
             return Expression.Constant(cast);
         }
 
@@ -1000,10 +996,10 @@ default:
     {
         //Basic types conversions
         //Special case => datetime is sent as a string
-        if (value is string)
+        if (value is string stringValue)
         {
             DateTime dtDateTimeConversion;
-            if (DateTime.TryParse(value.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out dtDateTimeConversion))
+            if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out dtDateTimeConversion))
             {
                 return Expression.Constant(dtDateTimeConversion, typeof(DateTime));
             }
@@ -1011,21 +1007,21 @@ default:
             return GetCaseInsensitiveExpression(Expression.Constant(value, typeof(string)));
         }
 
-        if (value is EntityReference)
+        if (value is EntityReference reference)
         {
-            var cast = (value as EntityReference).Id;
+            var cast = reference.Id;
             return Expression.Constant(cast);
         }
 
-        if (value is OptionSetValue)
+        if (value is OptionSetValue optionSetValue)
         {
-            var cast = (value as OptionSetValue).Value;
+            var cast = optionSetValue.Value;
             return Expression.Constant(cast);
         }
 
-        if (value is Money)
+        if (value is Money money)
         {
-            var cast = (value as Money).Value;
+            var cast = money.Value;
             return Expression.Constant(cast);
         }
 
