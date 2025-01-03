@@ -122,14 +122,14 @@ public static class ConditionParser
             case ConditionOperator.Tomorrow:
             case ConditionOperator.EqualUserId:
             case ConditionOperator.EqualBusinessId:
-                operatorExpression = TranslateConditionExpressionEqual(context.Clock, condition, getAttributeValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionEqual(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.NotOn:
             case ConditionOperator.NotEqual:
             case ConditionOperator.NotEqualUserId:
             case ConditionOperator.NotEqualBusinessId:
-                operatorExpression = Expression.Not(TranslateConditionExpressionEqual(context.Clock, condition, getAttributeValueExpr, containsAttributeExpression));
+                operatorExpression = Expression.Not(TranslateConditionExpressionEqual(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression));
                 break;
 #endregion
 
@@ -210,7 +210,7 @@ public static class ConditionParser
 #region Time Operations
             case ConditionOperator.OnOrAfter:
                 operatorExpression = Expression.Or(
-                    TranslateConditionExpressionEqual(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression),
+                    TranslateConditionExpressionEqual(context.TimeProvider, condition, getNonBasicValueExpr, containsAttributeExpression),
                     TranslateConditionExpressionGreaterThan(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
             case ConditionOperator.LastXHours:
@@ -219,12 +219,12 @@ public static class ConditionParser
             case ConditionOperator.LastXWeeks:
             case ConditionOperator.LastXMonths:
             case ConditionOperator.LastXYears:
-                operatorExpression = TranslateConditionExpressionLast(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionLast(context.TimeProvider, condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.OnOrBefore:
                 operatorExpression = Expression.Or(
-                    TranslateConditionExpressionEqual(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression),
+                    TranslateConditionExpressionEqual(context.TimeProvider, condition, getNonBasicValueExpr, containsAttributeExpression),
                     TranslateConditionExpressionLessThan(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
 
@@ -251,7 +251,7 @@ public static class ConditionParser
             case ConditionOperator.OlderThanXWeeks:
             case ConditionOperator.OlderThanXYears:
             case ConditionOperator.OlderThanXMonths:
-                operatorExpression = TranslateConditionExpressionOlderThan(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionOlderThan(context.TimeProvider,condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.NextXHours:
@@ -260,7 +260,7 @@ public static class ConditionParser
             case ConditionOperator.NextXWeeks:
             case ConditionOperator.NextXMonths:
             case ConditionOperator.NextXYears:
-                operatorExpression = TranslateConditionExpressionNext(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionNext(context.TimeProvider,condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
             case ConditionOperator.ThisYear:
             case ConditionOperator.LastYear:
@@ -272,7 +272,7 @@ public static class ConditionParser
             case ConditionOperator.ThisWeek:
             case ConditionOperator.NextWeek:
             case ConditionOperator.InFiscalYear:
-                operatorExpression = TranslateConditionExpressionBetweenDates(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionBetweenDates(context.TimeProvider,condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 #endregion
 
@@ -373,14 +373,14 @@ default:
     /// <summary>
     ///     Takes a condition expression which needs translating into a 'between two dates' expression and works out the relevant dates
     /// </summary>
-    private static Expression TranslateConditionExpressionBetweenDates(IStubClock clock, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static Expression TranslateConditionExpressionBetweenDates(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
         DateTime? fromDate = null;
         DateTime? toDate = null;
 
-        var today =clock.Today;
+        var today =timeProvider.GetLocalNow().Date;
         var thisYear = today.Year;
         var thisMonth = today.Month;
 
@@ -480,22 +480,23 @@ default:
         return TranslateConditionExpressionLike(typedComputedCondition, getAttributeValueExpr, containsAttributeExpr);
     }
 
-    private static Expression TranslateConditionExpressionEqual(IStubClock clock, TypedConditionExpression c, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static Expression TranslateConditionExpressionEqual(TimeProvider timeProvider, TypedConditionExpression c, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var expOrValues = Expression.Or(Expression.Constant(false), Expression.Constant(false));
 
         object unaryOperatorValue = null;
 
+        var today = timeProvider.GetLocalNow().Date;
         switch (c.CondExpression.Operator)
         {
             case ConditionOperator.Today:
-                unaryOperatorValue = clock.Today;
+                unaryOperatorValue = today;
                 break;
             case ConditionOperator.Yesterday:
-                unaryOperatorValue = clock.Today.AddDays(-1);
+                unaryOperatorValue = today.AddDays(-1);
                 break;
             case ConditionOperator.Tomorrow:
-                unaryOperatorValue = clock.Today.AddDays(1);
+                unaryOperatorValue = today.AddDays(1);
                 break;
             case ConditionOperator.EqualUserId:
             case ConditionOperator.NotEqualUserId:
@@ -588,7 +589,7 @@ default:
 
     private static Expression TranslateConditionExpressionGreaterThanOrEqual(DataverseStub context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
         Expression.Or(
-            TranslateConditionExpressionEqual(context.Clock, tc, getAttributeValueExpr, containsAttributeExpr),
+            TranslateConditionExpressionEqual(context.TimeProvider, tc, getAttributeValueExpr, containsAttributeExpr),
             TranslateConditionExpressionGreaterThan(tc, getAttributeValueExpr, containsAttributeExpr));
 
     private static Expression TranslateConditionExpressionGreaterThanString(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
@@ -664,12 +665,12 @@ default:
                 expOrValues));
     }
 
-    private static Expression TranslateConditionExpressionLast(IStubClock clock, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static Expression TranslateConditionExpressionLast(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
         var beforeDateTime = default(DateTime);
-        var currentDateTime = clock.Now;
+        var currentDateTime = timeProvider.GetLocalNow().DateTime;
         switch (c.Operator)
         {
             case ConditionOperator.LastXHours:
@@ -739,7 +740,7 @@ default:
 
     private static Expression TranslateConditionExpressionLessThanOrEqual(DataverseStub context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
         Expression.Or(
-            TranslateConditionExpressionEqual(context.Clock, tc, getAttributeValueExpr, containsAttributeExpr),
+            TranslateConditionExpressionEqual(context.TimeProvider, tc, getAttributeValueExpr, containsAttributeExpr),
             TranslateConditionExpressionLessThan(tc, getAttributeValueExpr, containsAttributeExpr));
 
     private static Expression TranslateConditionExpressionLessThanString(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
@@ -810,12 +811,12 @@ default:
             expOrValues);
     }
 
-    private static Expression TranslateConditionExpressionNext(IStubClock clock, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static Expression TranslateConditionExpressionNext(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
         var nextDateTime = default(DateTime);
-        var currentDateTime = clock.Now;
+        var currentDateTime = timeProvider.GetLocalNow().DateTime;
         switch (c.Operator)
         {
             case ConditionOperator.NextXHours:
@@ -859,7 +860,7 @@ default:
     }
 
 
-    private static Expression TranslateConditionExpressionOlderThan(IStubClock clock, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static Expression TranslateConditionExpressionOlderThan(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -876,26 +877,26 @@ default:
         }
 
         var toDate = default(DateTime);
-
+        var now = timeProvider.GetLocalNow().DateTime;
         switch (c.Operator)
         {
             case ConditionOperator.OlderThanXMonths:
-                toDate = clock.Now.AddMonths(-valueToAdd);
+                toDate = now.AddMonths(-valueToAdd);
                 break;
             case ConditionOperator.OlderThanXMinutes:
-                toDate = clock.Now.AddMinutes(-valueToAdd);
+                toDate = now.AddMinutes(-valueToAdd);
                 break;
             case ConditionOperator.OlderThanXHours:
-                toDate = clock.Now.AddHours(-valueToAdd);
+                toDate = now.AddHours(-valueToAdd);
                 break;
             case ConditionOperator.OlderThanXDays:
-                toDate = clock.Now.AddDays(-valueToAdd);
+                toDate = now.AddDays(-valueToAdd);
                 break;
             case ConditionOperator.OlderThanXWeeks:
-                toDate = clock.Now.AddDays(-7 * valueToAdd);
+                toDate = now.AddDays(-7 * valueToAdd);
                 break;
             case ConditionOperator.OlderThanXYears:
-                toDate = clock.Now.AddYears(-valueToAdd);
+                toDate = now.AddYears(-valueToAdd);
                 break;
         }
 

@@ -7,6 +7,7 @@ using Digitall.Stub.Logic.Queries;
 using Digitall.Stub.Tests.Fixtures;
 using DotNetEnv;
 using FluentAssertions;
+using Microsoft.Extensions.Time.Testing;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
@@ -193,7 +194,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.Today);
 
-        var stub = new DataverseStub(new MockClock(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc)));
+        var stub = new DataverseStub(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc)));
         stub.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(stub);
 
@@ -211,7 +212,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.Yesterday);
 
-        var stub = new DataverseStub(new MockClock(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(1)));
+        var stub = new DataverseStub(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(1)));
         stub.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(stub);
 
@@ -229,7 +230,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.Tomorrow);
 
-        var stub = new DataverseStub(new MockClock(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
+        var stub = new DataverseStub(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         stub.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(stub);
 
@@ -249,7 +250,7 @@ public class QueryTests
 
         Environment.SetEnvironmentVariable("BusinessUnitId", TestData.BusinessUnitId.ToString("N"));
 
-        var stub = new DataverseStub(new MockClock(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
+        var stub = new DataverseStub(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         stub.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(stub);
 
@@ -268,7 +269,7 @@ public class QueryTests
 
         Environment.SetEnvironmentVariable("CallerId", TestData.CallerId.ToString("N"));
 
-        var stub = new DataverseStub(new MockClock(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
+        var stub = new DataverseStub(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         stub.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(stub);
 
@@ -473,7 +474,7 @@ public class QueryTests
 
         Environment.SetEnvironmentVariable("CallerId", TestData.CallerId.ToString("N"));
 
-        var stub = new DataverseStub(new MockClock(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
+        var stub = new DataverseStub(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         stub.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(stub);
 
@@ -847,7 +848,7 @@ public class QueryTests
     /**
      * case ConditionOperator.OnOrAfter:
                 operatorExpression = Expression.Or(
-                    TranslateConditionExpressionEqual(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression),
+                    TranslateConditionExpressionEqual(context.TimeProvider, condition, getNonBasicValueExpr, containsAttributeExpression),
                     TranslateConditionExpressionGreaterThan(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
             case ConditionOperator.LastXHours:
@@ -856,12 +857,12 @@ public class QueryTests
             case ConditionOperator.LastXWeeks:
             case ConditionOperator.LastXMonths:
             case ConditionOperator.LastXYears:
-                operatorExpression = TranslateConditionExpressionLast(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionLast(context.TimeProvider, condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.OnOrBefore:
                 operatorExpression = Expression.Or(
-                    TranslateConditionExpressionEqual(context.Clock, condition, getNonBasicValueExpr, containsAttributeExpression),
+                    TranslateConditionExpressionEqual(context.TimeProvider, condition, getNonBasicValueExpr, containsAttributeExpression),
                     TranslateConditionExpressionLessThan(condition, getNonBasicValueExpr, containsAttributeExpression));
                 break;
 
@@ -888,7 +889,7 @@ public class QueryTests
             case ConditionOperator.OlderThanXWeeks:
             case ConditionOperator.OlderThanXYears:
             case ConditionOperator.OlderThanXMonths:
-                operatorExpression = TranslateConditionExpressionOlderThan(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionOlderThan(context.TimeProvider,condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.NextXHours:
@@ -897,7 +898,7 @@ public class QueryTests
             case ConditionOperator.NextXWeeks:
             case ConditionOperator.NextXMonths:
             case ConditionOperator.NextXYears:
-                operatorExpression = TranslateConditionExpressionNext(context.Clock,condition, getNonBasicValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionNext(context.TimeProvider,condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
             case ConditionOperator.ThisYear:
             case ConditionOperator.LastYear:

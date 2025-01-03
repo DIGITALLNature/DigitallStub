@@ -17,11 +17,11 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Stub;
 
-public class DataverseStub(IStubClock clock) : IOrganizationService
+public class DataverseStub(TimeProvider timeProvider) : IOrganizationService
 {
-    public readonly IStubClock Clock = clock;
+    public readonly TimeProvider TimeProvider = timeProvider;
 
-    public DataverseStub(): this(new RealTimeClock())
+    public DataverseStub(): this(TimeProvider.System)
     {
     }
 
