@@ -251,10 +251,12 @@ public class ExpressionProcessor(DataverseStub state)
 
 
 
-                if (!state.IsKnownAttributeForType(cEntityName, sAttributeName, out _))
+                if (state.IsKnownAttributeForType(cEntityName, sAttributeName, out var propertyInfo))
                 {
+                    typedExpression.AttributeType = propertyInfo.PropertyType;
+
                     // Special case when filtering on the name of a Lookup
-                    if (sAttributeName.EndsWith("name", StringComparison.Ordinal))
+                    if (typedExpression.AttributeType == typeof(EntityReference) &&  sAttributeName.EndsWith("name", StringComparison.Ordinal))
                     {
                         var realAttributeName = c.AttributeName.Substring(0, c.AttributeName.Length - 4);
 

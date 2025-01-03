@@ -2,6 +2,7 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Digitall.Stub.Logic.Queries;
 using Digitall.Stub.Tests.Fixtures;
@@ -754,7 +755,7 @@ public class QueryTests
     public void GenerateQuery_GreaterThan()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
-        query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.GreaterThan, new Money(122));
+        query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.GreaterThan, new Money(320));
 
         var stub = new DataverseStub();
         stub.AddRange(TestData.Default);
@@ -772,7 +773,7 @@ public class QueryTests
     public void GenerateQuery_GreaterEqual()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
-        query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.GreaterEqual, new Money(123));
+        query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.GreaterEqual, new Money(321));
 
         var stub = new DataverseStub();
         stub.AddRange(TestData.Default);
@@ -826,21 +827,61 @@ public class QueryTests
 
     #region Array Operations
 
-    /**
-     *             case ConditionOperator.In:
-                operatorExpression = TranslateConditionExpressionIn(condition, getNonBasicValueExpr, containsAttributeExpression);
-                break;
+    [TestMethod]
+    public void GenerateQuery_In()
+    {
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.In, new Money(123),new Money(321), new Money(111));
 
-            case ConditionOperator.NotIn:
-                operatorExpression = Expression.Not(TranslateConditionExpressionIn(condition, getNonBasicValueExpr, containsAttributeExpression));
-                break;
+        var stub = new DataverseStub();
+        stub.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(stub);
 
-            case ConditionOperator.ContainValues:
-                operatorExpression = TranslateConditionExpressionContainValues(condition, getNonBasicValueExpr, containsAttributeExpression);
-                break;
+        var result = sut.Generate(query);
+        result.Should().NotBeNull();
 
-            case ConditionOperator.DoesNotContainValues:
-     */
+        var queryResult = stub.CreateQuery<Account>().Where(result);
+        queryResult.Should().NotBeNull();
+        queryResult.Should().HaveCount(2);
+    }
+
+    [TestMethod]
+    public void GenerateQuery_ContainValues()
+    {
+
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition("new_accountcategorycodemultiple", ConditionOperator.ContainValues, 3);
+
+        var stub = new DataverseStub();
+        stub.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(stub);
+
+        var result = sut.Generate(query);
+        result.Should().NotBeNull();
+
+        var queryResult = stub.CreateQuery<Account>().Where(result);
+        queryResult.Should().NotBeNull();
+        queryResult.Should().HaveCount(2);
+    }
+
+    [TestMethod]
+    public void GenerateQuery_DoesNotContainValues()
+    {
+
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition("new_accountcategorycodemultiple", ConditionOperator.DoesNotContainValues, 1 , 2);
+
+        var stub = new DataverseStub();
+        stub.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(stub);
+
+        var result = sut.Generate(query);
+        result.Should().NotBeNull();
+
+        var queryResult = stub.CreateQuery<Account>().Where(result);
+        queryResult.Should().NotBeNull();
+        queryResult.Should().HaveCount(1);
+    }
 
     #endregion
 

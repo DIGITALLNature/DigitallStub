@@ -30,6 +30,12 @@ public static class TestData
                 AccountId = Guid.Parse("00000000-0000-0000-0001-000000000001"),
                 OverriddenCreatedOn = new DateTime(1999, 12, 31),
                 AccountCategoryCode = new OptionSetValue(Account.Options.AccountCategoryCode.PreferredCustomer),
+                AccountCategoryCodeMultiple = new OptionSetValueCollection
+                {
+                    new OptionSetValue(1),
+                    new OptionSetValue(2),
+                    new OptionSetValue(3)
+                },
                 OwnerId = new EntityReference("systemuser", CallerId),
                 OwningBusinessUnit = new EntityReference("businessunit", BusinessUnitId),
             };
@@ -37,7 +43,14 @@ public static class TestData
             {
                 Name = "B Corp",
                 ParentAccountId = CorpA.ToNamedEntityReference(),
-                OverriddenCreatedOn = new DateTime(2000,1,2)
+                OverriddenCreatedOn = new DateTime(2000,1,2),
+                MarketCap = new Money(321),
+                AccountCategoryCodeMultiple = new OptionSetValueCollection
+                {
+                    new OptionSetValue(3),
+                    new OptionSetValue(4),
+                    new OptionSetValue(5)
+                },
             };
 
 
