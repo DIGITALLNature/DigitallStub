@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using Digitall.APower;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.PluginTelemetry;
 using NSubstitute;
 
 namespace Digitall.Stub;
@@ -14,11 +15,14 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
     public string MessageName;
     public object Target;
     public ITracingService TracingService;
+    public ILogger Logger;
     public DataverseStub OrganizationService;
-    public EntityImageCollection PreEntityImages;
-    public EntityImageCollection PostEntityImages;
+    public EntityImageCollection PreEntityImages = [];
+    public EntityImageCollection PostEntityImages = [];
 
-    internal PluginTestContextBuilder() { }
+    internal PluginTestContextBuilder()
+    {
+    }
 
     public PluginTestContext Build()
     {
@@ -34,21 +38,16 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
             var targetEntity = Target as Entity;
             var targetReference = Target as EntityReference;
 
-            pluginExecutionContext.PrimaryEntityName.Returns(targetEntity?.LogicalName ?? targetReference?.LogicalName ?? throw new NotSupportedException("target entity name is missing or type is not supported"));
+            pluginExecutionContext.PrimaryEntityName.Returns(targetEntity?.LogicalName ??
+                                                             targetReference?.LogicalName ?? throw new NotSupportedException("target entity name is missing or type is not supported"));
             pluginExecutionContext.PrimaryEntityId.Returns(targetEntity?.Id ?? targetReference?.Id ?? throw new NotSupportedException("target entity id is missing or type is not supported"));
         }
 
-        if (PreEntityImages != null)
-        {
-            pluginExecutionContext.PreEntityImages.Returns(PreEntityImages);
-            pluginExecutionContext.PreEntityImagesCollection.Returns([PreEntityImages]);
-        }
+        pluginExecutionContext.PreEntityImages.Returns(PreEntityImages);
+        pluginExecutionContext.PreEntityImagesCollection.Returns([PreEntityImages]);
 
-        if (PostEntityImages != null)
-        {
-            pluginExecutionContext.PostEntityImages.Returns(PostEntityImages);
-            pluginExecutionContext.PostEntityImagesCollection.Returns([PostEntityImages]);
-        }
+        pluginExecutionContext.PostEntityImages.Returns(PostEntityImages);
+        pluginExecutionContext.PostEntityImagesCollection.Returns([PostEntityImages]);
 
         pluginExecutionContext.InputParameters.Returns(inputParameters);
         pluginExecutionContext.OutputParameters.Returns([]);
@@ -66,6 +65,7 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
         serviceProvider.GetService(typeof(IPluginExecutionContext7)).Returns(pluginExecutionContext);
         serviceProvider.GetService(typeof(IOrganizationServiceFactory)).Returns(organizationServiceFactory);
         serviceProvider.GetService(typeof(ITracingService)).Returns(TracingService ?? Substitute.For<ITracingService>());
+        serviceProvider.GetService(typeof(ILogger)).Returns(Logger ?? Substitute.For<ILogger>());
 
         return new PluginTestContext(serviceProvider);
     }
@@ -79,14 +79,14 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
             var tracingService = Substitute.For<ITracingService>();
             tracingService.When(x => x.Trace(Arg.Any<string>())).Do(x => Debug.WriteLine(x.Arg<string>()));
 
+            var logger = Substitute.For<ILogger>();
+            logger.When(x => x.Log(Arg.Any<LogLevel>(), Arg.Any<string>())).Do(x => Debug.WriteLine(x.Arg<string>()));
+            logger.When(x => x.Log(Arg.Any<LogLevel>(), Arg.Any<Exception>(), Arg.Any<string>())).Do(x => Debug.WriteLine(x.Arg<string>()));
+
             var organizationService = new DataverseStub();
             organizationService.AddDefaultStubs();
 
-            return Minimal with
-            {
-                TracingService = tracingService,
-                OrganizationService = organizationService,
-            };
+            return Minimal with { TracingService = tracingService, OrganizationService = organizationService, Logger = logger };
         }
     }
 
