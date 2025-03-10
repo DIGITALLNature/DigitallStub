@@ -72,4 +72,26 @@ public static class PluginTestContextBuilderExtensions
         builder.OrganizationService?.AddStub(organizationRequestStub);
         return builder;
     }
+
+    public static PluginTestContextBuilder<TPlugin> WithInputParameter<TPlugin>(this PluginTestContextBuilder<TPlugin> builder, string name, object value) where TPlugin : IPlugin
+    {
+        builder.InputParameters.Add(name, value);
+        return builder;
+    }
+
+    public static PluginTestContextBuilder<TPlugin> WithInputParameters<TPlugin>(this PluginTestContextBuilder<TPlugin> builder, ParameterCollection inputParameters) where TPlugin : IPlugin
+    {
+        return builder with { InputParameters = inputParameters };
+    }
+
+    public static PluginTestContextBuilder<TPlugin> WithOutputParameter<TPlugin>(this PluginTestContextBuilder<TPlugin> builder, string name, object value) where TPlugin : IPlugin
+    {
+        builder.OutputParameters.Add(name, value);
+        return builder;
+    }
+
+    public static PluginTestContextBuilder<TPlugin> WithOutputParameters<TPlugin>(this PluginTestContextBuilder<TPlugin> builder, ParameterCollection outputParameters) where TPlugin : IPlugin
+    {
+        return builder with { OutputParameters = outputParameters };
+    }
 }

@@ -19,6 +19,8 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
     public DataverseStub OrganizationService;
     public EntityImageCollection PreEntityImages = [];
     public EntityImageCollection PostEntityImages = [];
+    public ParameterCollection InputParameters = [];
+    public ParameterCollection OutputParameters = [];
 
     internal PluginTestContextBuilder()
     {
@@ -26,14 +28,12 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
 
     public PluginTestContext Build()
     {
-        ParameterCollection inputParameters = [];
-
         var pluginExecutionContext = Substitute.For<IPluginExecutionContext7>();
         pluginExecutionContext.MessageName.Returns(MessageName);
 
         if (Target != null)
         {
-            inputParameters.Add("Target", Target);
+            InputParameters.Add("Target", Target);
 
             var targetEntity = Target as Entity;
             var targetReference = Target as EntityReference;
@@ -49,8 +49,8 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
         pluginExecutionContext.PostEntityImages.Returns(PostEntityImages);
         pluginExecutionContext.PostEntityImagesCollection.Returns([PostEntityImages]);
 
-        pluginExecutionContext.InputParameters.Returns(inputParameters);
-        pluginExecutionContext.OutputParameters.Returns([]);
+        pluginExecutionContext.InputParameters.Returns(InputParameters);
+        pluginExecutionContext.OutputParameters.Returns(OutputParameters);
 
         var organizationServiceFactory = Substitute.For<IOrganizationServiceFactory>();
         organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(OrganizationService);
