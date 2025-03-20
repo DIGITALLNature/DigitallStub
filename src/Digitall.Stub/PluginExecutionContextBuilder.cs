@@ -215,7 +215,7 @@ public class DataverseStubBuilder : PluginExecutionContextBuilder
     public new DataverseStub OrganizationService { get; set; }
 }
 
-public static class AnotherBuilderExtensions
+public static class DataverseStubBuilderExtensions
 {
     public static DataverseStubBuilder WithData(this DataverseStubBuilder builder, params Entity[] records)
     {
@@ -282,8 +282,23 @@ public class TestClass
 {
     public void TestMethod()
     {
-        var serviceProvider = new PluginExecutionContextBuilder().WithTarget(new Entity("account")).Build();
+        // Arrange
+        var serviceProvider = new PluginExecutionContextBuilder()
+            .WithTarget(new Entity("account"))
+            .Build();
 
-        var serviceProviderWithStub = new PluginExecutionContextBuilder().UseDataverseStub().WithTarget(new Entity("account")).WithData(new Entity("account"), new Entity("contact")).Build();
+        var serviceProviderWithStub = new PluginExecutionContextBuilder()
+            .UseDataverseStub()
+            .WithTarget(new Entity("account"))
+            .WithData(new Entity("account"), new Entity("contact"))
+            .Build();
+
+        IPlugin plugin = null;
+
+        // Act
+        plugin.Execute(serviceProviderWithStub);
+
+        // Assert
+        // use our extension methods to get target etc.
     }
 }
