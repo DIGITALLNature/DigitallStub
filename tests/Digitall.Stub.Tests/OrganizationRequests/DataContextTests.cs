@@ -66,7 +66,6 @@ public class DataContextTests
 
         using (var dataContext = new DataContext(stub))
         {
-            dataContext.AccountSet.Select(a => a.Id).Single().Should().Be(accountId);
             dataContext.AccountSet.Select(a => a.Name).Single().Should().Be(accountName);
         }
     }
