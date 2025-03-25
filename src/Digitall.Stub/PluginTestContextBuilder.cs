@@ -15,8 +15,8 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
     public object Target;
     public ITracingService TracingService;
     public DataverseStub OrganizationService;
-    public EntityImageCollection PreEntityImages;
-    public EntityImageCollection PostEntityImages;
+    public EntityImageCollection PreEntityImages = [];
+    public EntityImageCollection PostEntityImages = [];
 
     internal PluginTestContextBuilder() { }
 
