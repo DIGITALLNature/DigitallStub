@@ -104,8 +104,9 @@ public static class Extensions
         }
 
         //Return selected list of attributes in a projected entity
-        var projected = new Entity(e.LogicalName) { Id = e.Id };
-
+        var projected = Activator.CreateInstance(e.GetType()) as Entity;
+        projected.LogicalName = e.LogicalName;
+        projected.Id = e.Id;
 
         foreach (var attKey in qe.ColumnSet.Columns)
         {
