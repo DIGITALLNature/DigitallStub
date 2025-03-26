@@ -26,7 +26,7 @@ public class PluginExecutionContextBuilder
     public ITracingService TracingService { get; set; } = Substitute.For<ITracingService>();
     public ILogger Logger { get; set; } = Substitute.For<ILogger>();
 
-    public IServiceProvider Build()
+    public IServiceProvider BuildServiceProvider()
     {
         var pluginExecutionContext = Substitute.For<IPluginExecutionContext7>();
 
@@ -178,15 +178,6 @@ public static class PluginExecutionContextBuilderExtensions
         builder.CorrelationId = correlationId;
         return builder;
     }
-
-    public static DataverseStubBuilder UseDataverseStub(this PluginExecutionContextBuilder builder)
-    {
-        var stub = new DataverseStub();
-        stub.AddDefaultStubs();
-
-        builder.OrganizationService = stub;
-        return builder as DataverseStubBuilder;
-    }
 }
 
 public record Target
@@ -285,13 +276,12 @@ public class TestClass
         // Arrange
         var serviceProvider = new PluginExecutionContextBuilder()
             .WithTarget(new Entity("account"))
-            .Build();
+            .BuildServiceProvider();
 
-        var serviceProviderWithStub = new PluginExecutionContextBuilder()
-            .UseDataverseStub()
+        var serviceProviderWithStub = new DataverseStubBuilder()
             .WithTarget(new Entity("account"))
             .WithData(new Entity("account"), new Entity("contact"))
-            .Build();
+            .BuildServiceProvider();
 
         IPlugin plugin = null;
 
