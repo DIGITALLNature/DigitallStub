@@ -19,7 +19,7 @@ public class PluginExecutionContextBuilder
     public ParameterCollection OutputParameters { get; set; }
     public EntityImageCollection PreEntityImages { get; set; } = [];
     public EntityImageCollection PostEntityImages { get; set; } = [];
-    public ParameterCollection SharedVariables { get; set; }
+    public ParameterCollection SharedVariables { get; set; } = [];
     public Guid InitiatingUserId { get; set; } = Guid.NewGuid();
     public Guid CorrelationId { get; set; } = Guid.NewGuid();
     public IOrganizationService OrganizationService { get; set; }
@@ -59,7 +59,7 @@ public class PluginExecutionContextBuilder
 
         // organization service
         var organizationServiceFactory = Substitute.For<IOrganizationServiceFactory>();
-        organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(OrganizationService); // TODO how to add data?
+        organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(OrganizationService);
 
         // service provider
         var serviceProvider = Substitute.For<IServiceProvider>();
@@ -238,7 +238,7 @@ public class PluginExecutionContextBuilder<TPlugin, TRequest> : PluginExecutionC
 
         // TODO filter
 
-        return new RegistrationInfo { MessageName = "TODO", Mode = PluginExecutionMode.Async, Stage = PluginExecutionStage.Post };
+        return new RegistrationInfo { MessageName = messageName, Mode = PluginExecutionMode.Async, Stage = PluginExecutionStage.Post };
     }
 
     private record RegistrationInfo
@@ -283,7 +283,7 @@ public class TestClass
             .WithData(new Entity("account"), new Entity("contact"))
             .BuildServiceProvider();
 
-        IPlugin plugin = null;
+        var plugin = new MyPlugin();
 
         // Act
         plugin.Execute(serviceProviderWithStub);
@@ -291,4 +291,9 @@ public class TestClass
         // Assert
         // use our extension methods to get target etc.
     }
+}
+
+public class MyPlugin : IPlugin
+{
+    public void Execute(IServiceProvider serviceProvider) => throw new NotImplementedException();
 }
