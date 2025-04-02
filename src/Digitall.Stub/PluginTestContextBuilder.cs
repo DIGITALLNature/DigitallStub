@@ -23,6 +23,7 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
     public PluginTestContext Build()
     {
         ParameterCollection inputParameters = [];
+        ParameterCollection sharedVariables = [];
 
         var pluginExecutionContext = Substitute.For<IPluginExecutionContext7>();
         pluginExecutionContext.MessageName.Returns(MessageName);
@@ -52,6 +53,8 @@ public record PluginTestContextBuilder<TPlugin> where TPlugin : IPlugin
 
         pluginExecutionContext.InputParameters.Returns(inputParameters);
         pluginExecutionContext.OutputParameters.Returns([]);
+
+        pluginExecutionContext.SharedVariables.Returns(sharedVariables);
 
         var organizationServiceFactory = Substitute.For<IOrganizationServiceFactory>();
         organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(OrganizationService);
