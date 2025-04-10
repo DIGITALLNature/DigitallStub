@@ -126,6 +126,21 @@ public class DataverseStub(TimeProvider timeProvider) : IOrganizationService
             State.Add(entity.LogicalName, value);
         }
 
+        foreach (var entityRef in entity.Attributes.Values.OfType<EntityReference>().Where(er => er.KeyAttributes?.Count > 0))
+        {
+            if (State.TryGetValue(entityRef.LogicalName, out var refState))
+            {
+                var match = refState.Values
+                    .SingleOrDefault(e => entityRef.KeyAttributes.All(k => e.Contains(k.Key) && e[k.Key].Equals(k.Value)));
+
+                if (match is not null)
+                {
+                    entityRef.KeyAttributes = [];
+                    entityRef.Id = match.Id;
+                }
+            }
+        }
+
         value.Add(entity.Id, entity);
     }
 
