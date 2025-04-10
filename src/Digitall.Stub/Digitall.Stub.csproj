@@ -1,4 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+      <TargetFrameworks>net462;net8.0</TargetFrameworks>
+      <TargetFramework />
+    </PropertyGroup>
     <ItemGroup>
     <PackageReference Include="DeepCloner" Version="0.10.4" />
     <PackageReference Include="DotNetEnv" Version="3.1.1" />
