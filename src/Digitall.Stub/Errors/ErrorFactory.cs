@@ -11,11 +11,19 @@ public static class ErrorFactory
 
     public static void ThrowFault(ErrorCodes errorCode, string message)
     {
+#if NETFRAMEWORK
         throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { ErrorCode = (int)errorCode, Message = message }, message);
+#else
+        throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { ErrorCode = (int)errorCode, Message = message }, new FaultReason(message));
+#endif
     }
 
     public static void ThrowFault(string message)
     {
+#if NETFRAMEWORK
         throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { Message = message }, message);
+#else
+        throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { Message = message }, new FaultReason(message));
+#endif
     }
 }
