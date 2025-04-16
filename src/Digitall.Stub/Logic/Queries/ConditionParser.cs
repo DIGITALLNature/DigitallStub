@@ -64,11 +64,7 @@ public static class ConditionParser
             }
             else
             {
-                #if NETFRAMEWORK
                 throw new FaultException(new FaultReason(faultReason));
-                #else
-                throw new FaultException(faultReason);
-                #endif
             }
         }
         else if (isOptionSetValueCollectionAccepted && input is OptionSetValueCollection optionSetValueCollection)
@@ -77,11 +73,7 @@ public static class ConditionParser
         }
         else
         {
-            #if NETFRAMEWORK
             throw new FaultException(new FaultReason(faultReason));
-            #else
-            throw new FaultException(faultReason);
-            #endif
         }
 
         return set;
@@ -564,11 +556,7 @@ default:
 
         if (c.Values.Count(v => v != null) != 1)
         {
-            #if NETFRAMEWORK
             throw new FaultException(new FaultReason($"The ConditonOperator.{c.Operator} requires 1 value/s, not {c.Values.Count(v => v != null)}. Parameter Name: {c.AttributeName}"));
-            #else
-            throw new FaultException($"The ConditonOperator.{c.Operator} requires 1 value/s, not {c.Values.Count(v => v != null)}. Parameter Name: {c.AttributeName}");
-            #endif
         }
 
         if (tc.AttributeType == typeof(string))
@@ -719,11 +707,7 @@ default:
 
         if (c.Values.Count(v => v != null) != 1)
         {
-            #if NETFRAMEWORK
             throw new FaultException(new FaultReason($"The ConditonOperator.{c.Operator} requires 1 value/s, not {c.Values.Count(v => v != null)}. Parameter Name: {c.AttributeName}"));
-            #else
-            throw new FaultException($"The ConditonOperator.{c.Operator} requires 1 value/s, not {c.Values.Count(v => v != null)}. Parameter Name: {c.AttributeName}");
-            #endif
         }
 
         if (tc.AttributeType == typeof(string))

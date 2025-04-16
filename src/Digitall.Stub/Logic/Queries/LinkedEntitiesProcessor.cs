@@ -63,11 +63,7 @@ namespace Digitall.Stub.Logic.Queries
                 {
                     var errorMsg =
                         $"Invalid character specified for alias: {le.EntityAlias}. Only characters within the ranges [A-Z], [a-z] or [0-9] or _ are allowed.  The first character may only be in the ranges [A-Z], [a-z] or _.";
-                    #if NETFRAMEWORK
                     throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { ErrorCode = (int)ErrorCodes.QueryBuilderInvalid_Alias, Message = errorMsg }, errorMsg);
-                    #else
-                    throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { ErrorCode = (int)ErrorCodes.QueryBuilderInvalid_Alias, Message = errorMsg }, new FaultReason(errorMsg));
-                    #endif
                 }
             }
 
@@ -78,11 +74,7 @@ namespace Digitall.Stub.Logic.Queries
             if (!_state.IsKnownAttributeForType(le.LinkToEntityName, le.LinkToAttributeName, out _))
             {
                 var errorMsg = $"The attribute {le.LinkToAttributeName} does not exist on this entity.";
-                #if NETFRAMEWORK
                 throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { ErrorCode = (int)ErrorCodes.QueryBuilderNoAttribute, Message = errorMsg }, errorMsg);
-                #else
-                throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { ErrorCode = (int)ErrorCodes.QueryBuilderNoAttribute, Message = errorMsg }, new FaultReason(errorMsg));
-                #endif
             }
 
             IQueryable<Entity> inner = null;

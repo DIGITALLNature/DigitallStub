@@ -75,13 +75,8 @@ namespace Digitall.Stub.Logic.Queries
             // If there are multiple matches, throw an exception
             if (matches > 1)
             {
-#if NETFRAMEWORK
                 throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault(),
                     $"Table {conditionExpression.EntityName} is not unique amongst all top-level table and join aliases");
-#else
-                throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault(),
-                    new FaultReason($"Table {conditionExpression.EntityName} is not unique amongst all top-level table and join aliases"));
-#endif
             }
 
             // If there are no matches, check if there is a matching entity in the query expression's link entities
@@ -95,11 +90,7 @@ namespace Digitall.Stub.Logic.Queries
                 // If there are multiple matches, throw an exception
                 if (matches > 1)
                 {
-                    #if NETFRAMEWORK
                     throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault(), $"There's more than one LinkEntity expressions with name={conditionExpression.EntityName}");
-                    #else
-                    throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault(), new FaultReason($"There's more than one LinkEntity expressions with name={conditionExpression.EntityName}"));
-                    #endif
                 }
 
                 // If there are no matches, check if the condition's entity name matches the query expression's entity name
@@ -110,11 +101,7 @@ namespace Digitall.Stub.Logic.Queries
                         return;
                     }
 
-                    #if NETFRAMEWORK
                     throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault(), $"LinkEntity with name or alias {conditionExpression.EntityName} is not found");
-                    #else
-                    throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault(), new FaultReason($"LinkEntity with name or alias {conditionExpression.EntityName} is not found"));
-                    #endif
                 }
 
                 // If there is a match, append "1" to the condition's entity name
