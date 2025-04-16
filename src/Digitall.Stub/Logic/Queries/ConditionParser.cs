@@ -10,7 +10,6 @@ using System.Linq.Expressions;
 using System.ServiceModel;
 using Digitall.Stub.Errors;
 using Digitall.Stub.Extensions;
-using DotNetEnv;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
@@ -65,7 +64,7 @@ public static class ConditionParser
             }
             else
             {
-                throw new FaultException(new FaultReason(faultReason));
+                ThrowFaultException(faultReason);
             }
         }
         else if (isOptionSetValueCollectionAccepted && input is OptionSetValueCollection optionSetValueCollection)
@@ -74,10 +73,19 @@ public static class ConditionParser
         }
         else
         {
-            throw new FaultException(new FaultReason(faultReason));
+            ThrowFaultException(faultReason);
         }
 
         return set;
+    }
+
+    private static FaultException ThrowFaultException(string faultReason)
+    {
+#if NETFRAMEWORK
+        throw new FaultException(new FaultReason(faultReason));
+#else
+        throw new FaultException(faultReason);
+#endif
     }
 
     public static Expression TranslateConditionExpression(QueryExpression queryExpression, DataverseStub context, TypedConditionExpression condition, ParameterExpression entity)
@@ -430,7 +438,7 @@ default:
             case ConditionOperator.InFiscalYear:
                 var fiscalYear = (int)c.Values[0];
                 c.Values.Clear();
-                var fiscalYearDate = DateTime.Parse(Env.GetString("FiscalYearStart", $"{fiscalYear}-01-01"));
+                var fiscalYearDate = DateTime.Parse(Environment.GetEnvironmentVariable("FiscalYearStart") ?? $"{fiscalYear}-01-01");
                 fromDate = fiscalYearDate;
                 toDate = fiscalYearDate.AddYears(1).AddDays(-1);
                 break;
@@ -501,12 +509,12 @@ default:
                 break;
             case ConditionOperator.EqualUserId:
             case ConditionOperator.NotEqualUserId:
-                unaryOperatorValue = Guid.Parse(Env.GetString("CallerId", Guid.Empty.ToString()));
+                unaryOperatorValue = Guid.Parse(Environment.GetEnvironmentVariable("UserId") ?? Guid.Empty.ToString());
                 break;
 
             case ConditionOperator.EqualBusinessId:
             case ConditionOperator.NotEqualBusinessId:
-                unaryOperatorValue = Guid.Parse(Env.GetString("BusinessUnitId", Guid.Empty.ToString()));
+                unaryOperatorValue = Guid.Parse(Environment.GetEnvironmentVariable("BusinessUnitId") ?? Guid.Empty.ToString());
                 break;
         }
 
@@ -557,7 +565,7 @@ default:
 
         if (c.Values.Count(v => v != null) != 1)
         {
-            throw new FaultException(new FaultReason($"The ConditonOperator.{c.Operator} requires 1 value/s, not {c.Values.Count(v => v != null)}. Parameter Name: {c.AttributeName}"));
+            ThrowFaultException($"The ConditonOperator.{c.Operator} requires 1 value/s, not {c.Values.Count(v => v != null)}. Parameter Name: {c.AttributeName}");
         }
 
         if (tc.AttributeType == typeof(string))
@@ -708,7 +716,7 @@ default:
 
         if (c.Values.Count(v => v != null) != 1)
         {
-            throw new FaultException(new FaultReason($"The ConditonOperator.{c.Operator} requires 1 value/s, not {c.Values.Count(v => v != null)}. Parameter Name: {c.AttributeName}"));
+            ThrowFaultException($"The ConditonOperator.{c.Operator} requires 1 value/s, not {c.Values.Count(v => v != null)}. Parameter Name: {c.AttributeName}");
         }
 
         if (tc.AttributeType == typeof(string))

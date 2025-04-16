@@ -93,17 +93,24 @@ public static class PluginExecutionContextBuilderExtensions
         return builder;
     }
 
-    public static PluginExecutionContextBuilder WithInitiatingUserId<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, Guid userId)
+    public static TPluginExecutionContextBuilder WithInitiatingUserId<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, Guid userId)
         where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
     {
         builder.InitiatingUserId = userId;
         return builder;
     }
 
-    public static PluginExecutionContextBuilder WithCorrelationId<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, Guid correlationId)
+    public static TPluginExecutionContextBuilder WithCorrelationId<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, Guid correlationId)
         where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
     {
         builder.CorrelationId = correlationId;
+        return builder;
+    }
+
+    public static TPluginExecutionContextBuilder WithMessageName<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, string messageName)
+        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
+    {
+        builder.MessageName = messageName;
         return builder;
     }
 }

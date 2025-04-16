@@ -11,6 +11,6 @@ public class TestPlugin : IPlugin
     public void Execute(IServiceProvider serviceProvider)
     {
         var tracingService = serviceProvider.GetService(typeof(ITracingService)) as ITracingService;
-        tracingService.Trace("TestPlugin: Execute");
+        tracingService?.Trace("TestPlugin: Execute");
     }
 }

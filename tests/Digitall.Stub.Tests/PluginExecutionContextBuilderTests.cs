@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using Digitall.APower;
 using Digitall.Stub.Extensions;
 using Digitall.Stub.Tests.Fixtures;
 using Digitall.Stub.Tests.Fixtures.SamplePlugin;
@@ -12,24 +10,24 @@ using NSubstitute;
 namespace Digitall.Stub.Tests;
 
 [TestClass]
-public class PluginTestContextBuilderTests
+public class PluginExecutionContextBuilderTests
 {
     [TestMethod]
     public void PluginTestContext_FromMinimalBuilder_Should_HaveEssentials()
     {
-        var pluginTestContext = PluginTestContextBuilder<IPlugin>.Minimal.Build();
+        var serviceProvider = new PluginExecutionContextBuilder().BuildServiceProvider();
 
-        pluginTestContext.ServiceProvider.Should().NotBeNull();
+        serviceProvider.Should().NotBeNull();
 
-        var pluginContext = pluginTestContext.ServiceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
+        var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         pluginContext.Should().NotBeNull();
         pluginContext.InputParameters.Should().NotBeNull();
         pluginContext.InputParameters.Should().BeEmpty();
 
-        var tracingService = pluginTestContext.ServiceProvider.GetService(typeof(ITracingService)) as ITracingService;
+        var tracingService = serviceProvider.GetService(typeof(ITracingService)) as ITracingService;
         tracingService.Should().NotBeNull();
 
-        var organizationServiceFactory = pluginTestContext.ServiceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
+        var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
         organizationServiceFactory.Should().NotBeNull();
 
         var organizationService = organizationServiceFactory.CreateOrganizationService(null);
@@ -39,20 +37,20 @@ public class PluginTestContextBuilderTests
     [TestMethod]
     public void PluginTestContext_FromDefaultBuilder_Should_HaveCommonServices()
     {
-        var pluginTestContext = PluginTestContextBuilder<IPlugin>.Default.Build();
+        var serviceProvider = new DataverseStubBuilder().BuildServiceProvider();
 
-        pluginTestContext.ServiceProvider.Should().NotBeNull();
+        serviceProvider.Should().NotBeNull();
 
-        var pluginContext = pluginTestContext.ServiceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
+        var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
 
         pluginContext.Should().NotBeNull();
         pluginContext.InputParameters.Should().NotBeNull();
         pluginContext.InputParameters.Should().BeEmpty();
 
-        var tracingService = pluginTestContext.ServiceProvider.GetService(typeof(ITracingService)) as ITracingService;
+        var tracingService = serviceProvider.GetService(typeof(ITracingService)) as ITracingService;
         tracingService.Should().NotBeNull();
 
-        var organizationServiceFactory = pluginTestContext.ServiceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
+        var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
         organizationServiceFactory.Should().NotBeNull();
 
         var organizationService = organizationServiceFactory.CreateOrganizationService(null);
@@ -64,11 +62,11 @@ public class PluginTestContextBuilderTests
     {
         var entity = new Entity("unittest", Guid.NewGuid());
 
-        var pluginTestContext = PluginTestContextBuilder<IPlugin>.Default
+        var serviceProvider = new DataverseStubBuilder()
             .AddData(entity)
-            .Build();
+            .BuildServiceProvider();
 
-        var organizationServiceFactory = pluginTestContext.ServiceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
+        var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
         organizationServiceFactory.Should().NotBeNull();
 
         var organizationService = organizationServiceFactory.CreateOrganizationService(null);
@@ -83,11 +81,11 @@ public class PluginTestContextBuilderTests
     public void SettingEntityTarget_Should_SetInputParameter_And_PluginPrimaryEntity()
     {
         var target = new Entity("unittest", Guid.NewGuid());
-        var pluginTestContext = PluginTestContextBuilder<IPlugin>.Minimal
+        var serviceProvider = new PluginExecutionContextBuilder()
             .WithTarget(target)
-            .Build();
+            .BuildServiceProvider();
 
-        var pluginContext = pluginTestContext.ServiceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
+        var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         pluginContext.Should().NotBeNull();
 
         pluginContext.InputParameters.Should().NotBeNull();
@@ -102,11 +100,11 @@ public class PluginTestContextBuilderTests
     public void SettingTargetReference_Should_SetInputParameter_And_PluginPrimaryEntity()
     {
         var target = new EntityReference("unittest", Guid.NewGuid());
-        var pluginTestContext = PluginTestContextBuilder<IPlugin>.Minimal
-            .WithTargetReference(target)
-            .Build();
+        var serviceProvider = new PluginExecutionContextBuilder()
+            .WithTarget(target)
+            .BuildServiceProvider();
 
-        var pluginContext = pluginTestContext.ServiceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
+        var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         pluginContext.Should().NotBeNull();
 
         pluginContext.InputParameters.Should().NotBeNull();
@@ -124,11 +122,11 @@ public class PluginTestContextBuilderTests
     [DataRow("custom")]
     public void SettingRequestType_Should_SetPluginMessageName(string messageName)
     {
-        var pluginTestContext = PluginTestContextBuilder<IPlugin>.Minimal
+        var serviceProvider = new PluginExecutionContextBuilder()
             .WithMessageName(messageName)
-            .Build();
+            .BuildServiceProvider();
 
-        var pluginContext = pluginTestContext.ServiceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
+        var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         pluginContext.Should().NotBeNull();
         pluginContext.MessageName.Should().Be(messageName);
     }
@@ -137,11 +135,10 @@ public class PluginTestContextBuilderTests
     public void SettingTracingService_Should_OverwriteDefault()
     {
         var tracingService = Substitute.For<ITracingService>();
-        var pluginTestContext = PluginTestContextBuilder<IPlugin>.Minimal
-            .WithTracingService(tracingService)
-            .Build();
+        var serviceProvider = new PluginExecutionContextBuilder(tracingService)
+            .BuildServiceProvider();
 
-        var tracingServiceFromContext = pluginTestContext.ServiceProvider.GetService(typeof(ITracingService));
+        var tracingServiceFromContext = serviceProvider.GetService(typeof(ITracingService));
         tracingServiceFromContext.Should().NotBeNull();
         tracingServiceFromContext.Should().Be(tracingService);
     }
@@ -156,14 +153,14 @@ public class PluginTestContextBuilderTests
     [DataRow(typeof(IPluginExecutionContext7))]
     public void PluginTestContext_FromMinimalBuilder_Should_HaveAllCurrentIPluginExecutionContextFlavors(Type iPluginExecutionContextType)
     {
-        var pluginTestContext = PluginTestContextBuilder<IPlugin>.Minimal.Build();
+        var serviceProvider = new PluginExecutionContextBuilder().BuildServiceProvider();
 
-        pluginTestContext.ServiceProvider.Should().NotBeNull();
+        serviceProvider.Should().NotBeNull();
 
-        var pluginContextPlain = pluginTestContext.ServiceProvider.GetService(iPluginExecutionContextType) as IPluginExecutionContext;
+        var pluginContextPlain = serviceProvider.GetService(iPluginExecutionContextType) as IPluginExecutionContext;
         pluginContextPlain.Should().NotBeNull();
 
-        var pluginContext = pluginTestContext.ServiceProvider.GetService(iPluginExecutionContextType);
+        var pluginContext = serviceProvider.GetService(iPluginExecutionContextType);
         pluginContext.Should().NotBeNull().And.BeAssignableTo(iPluginExecutionContextType);
     }
 
@@ -171,39 +168,12 @@ public class PluginTestContextBuilderTests
     public void TestPlugin_Durchstich()
     {
         var tracingService = Substitute.For<ITracingService>();
-        var pluginTestContext = PluginTestContextBuilder<TestPlugin>.Minimal
-            .WithTracingService(tracingService)
-            .Build();
+        var serviceProvider = new PluginExecutionContextBuilder(tracingService)
+            .BuildServiceProvider();
 
-        pluginTestContext.Should().NotBeNull();
-        pluginTestContext.ExecutePlugin();
-
-        tracingService.Received().Trace("TestPlugin: Execute");
-    }
-
-    [TestMethod]
-    public void TestExecutorPlugin_Durchstich()
-    {
-        var tracingService = Substitute.For<ITracingService>();
-        var pluginTestContext = PluginTestContextBuilder<TestExecutorPlugin>.Minimal
-            .WithTracingService(tracingService)
-            .Build();
-
-        pluginTestContext.Should().NotBeNull();
-        pluginTestContext.ExecuteExecutorPlugin().Should().Be(ExecutionResult.Ok);
+        var plugin = new TestPlugin();
+        plugin.Execute(serviceProvider);
 
         tracingService.Received().Trace("TestPlugin: Execute");
-    }
-
-    [TestMethod]
-    public void TestExecutorPlugin_WithOutExecutor_ThrowsInvalidCastException()
-    {
-        var pluginTestContext = PluginTestContextBuilder<TestPlugin>.Minimal
-            .Build();
-
-        pluginTestContext.Should().NotBeNull();
-
-        var action = () => pluginTestContext.ExecuteExecutorPlugin();
-        action.Should().Throw<InvalidCastException>();
     }
 }

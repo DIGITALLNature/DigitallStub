@@ -12,7 +12,7 @@ namespace Digitall.Stub.Tests.Fixtures;
 
 public static class TestData
 {
-    public static Guid CallerId => Guid.Parse("00000099-0000-0000-0001-000000000001");
+    public static Guid UserId => Guid.Parse("00000099-0000-0000-0001-000000000001");
     public static Guid BusinessUnitId => Guid.Parse("00000099-0000-0000-0002-000000000001");
 
     public static IEnumerable<Entity> Default
@@ -36,7 +36,7 @@ public static class TestData
                     new OptionSetValue(2),
                     new OptionSetValue(3)
                 },
-                OwnerId = new EntityReference("systemuser", CallerId),
+                OwnerId = new EntityReference("systemuser", UserId),
                 OwningBusinessUnit = new EntityReference("businessunit", BusinessUnitId),
             };
             var CorpB = new Account(Guid.Parse("00000000-0000-0000-0001-000000000002"))

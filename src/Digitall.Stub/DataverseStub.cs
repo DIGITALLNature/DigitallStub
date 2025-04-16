@@ -50,6 +50,14 @@ public class DataverseStub(TimeProvider timeProvider) : IOrganizationService
         OrganizationRequestStubs.Add(stub.ForType, stub);
     }
 
+    public void AddStubs(IEnumerable<IOrganizationRequestStub> stubs)
+    {
+        foreach (var stub in stubs)
+        {
+            AddStub(stub);
+        }
+    }
+
     public void AddStubs(params IOrganizationRequestStub[] stubs)
     {
         foreach (var stub in stubs)

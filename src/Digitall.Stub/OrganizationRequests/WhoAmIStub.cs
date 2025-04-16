@@ -12,15 +12,15 @@ public class WhoAmIStub: OrganizationRequestStub<WhoAmIRequest,WhoAmIResponse>
 {
     public override WhoAmIResponse Execute(WhoAmIRequest organizationRequest, DataverseStub state)
     {
-        var callerId = Guid.Parse(DotNetEnv.Env.GetString("CallerId", Guid.Empty.ToString()));
+        var userId = Guid.Parse(Environment.GetEnvironmentVariable("UserId") ?? Guid.Empty.ToString());
 
         var results = new ParameterCollection {
-            { "UserId", callerId }
+            { "UserId", userId }
         };
 
         var user = state
             .CreateQuery("systemuser")
-            .SingleOrDefault(u => u.Id == callerId);
+            .SingleOrDefault(u => u.Id == userId);
 
         if(user != null) {
             var buId = GetBusinessUnitId(user);
@@ -39,7 +39,7 @@ public class WhoAmIStub: OrganizationRequestStub<WhoAmIRequest,WhoAmIResponse>
 
     private static Guid GetBusinessUnitId(Entity user) {
         var buRef = user.GetAttributeValue<EntityReference>("businessunitid");
-        var buId = buRef?.Id ?? Guid.Parse(DotNetEnv.Env.GetString("BusinessUnitId", Guid.Empty.ToString()));
+        var buId = buRef?.Id ?? Guid.Parse(Environment.GetEnvironmentVariable("BusinessUnitId") ?? Guid.Empty.ToString());
         return buId;
     }
 

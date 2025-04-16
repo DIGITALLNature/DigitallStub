@@ -24,6 +24,16 @@ public class PluginExecutionContextBuilder
         OrganizationService = organizationService;
     }
 
+    public PluginExecutionContextBuilder(ITracingService tracingService)
+    {
+        TracingService = tracingService;
+    }
+
+    public PluginExecutionContextBuilder(ILogger logger)
+    {
+        Logger = logger;
+    }
+
     public PluginExecutionContextBuilder(ITracingService tracingService, ILogger logger)
     {
         TracingService = tracingService;
@@ -46,8 +56,23 @@ public class PluginExecutionContextBuilder
     public EntityImageCollection PreEntityImages { get; set; } = [];
     public EntityImageCollection PostEntityImages { get; set; } = [];
     public ParameterCollection SharedVariables { get; set; } = [];
-    public Guid InitiatingUserId { get; set; } = Guid.NewGuid();
+    public Guid InitiatingUserId { get; set; }
+
+    public Guid UserId
+    {
+        get
+        {
+            Guid.TryParse(Environment.GetEnvironmentVariable("UserId"), out var userId);
+            return userId;
+        }
+        set
+        {
+            Environment.SetEnvironmentVariable("UserId", value.ToString());
+        }
+    }
+
     public Guid CorrelationId { get; set; } = Guid.NewGuid();
+
     public IOrganizationService? OrganizationService { get; set; }
     public ITracingService TracingService { get; set; } = Substitute.For<ITracingService>();
     public ILogger Logger { get; set; } = Substitute.For<ILogger>();
@@ -60,6 +85,7 @@ public class PluginExecutionContextBuilder
         pluginExecutionContext.Mode.Returns(Mode);
         pluginExecutionContext.Stage.Returns(Stage);
         pluginExecutionContext.InitiatingUserId.Returns(InitiatingUserId);
+        pluginExecutionContext.UserId.Returns(UserId);
         pluginExecutionContext.CorrelationId.Returns(CorrelationId);
 
         // parameters
@@ -162,17 +188,12 @@ public class TestClass
     public void TestMethod()
     {
         // Arrange
-        var serviceProvider = new PluginExecutionContextBuilder()
-            .WithTarget(new Entity("account"))
+        var serviceProvider = new PluginExecutionContextBuilder().WithTarget(new Entity("account")).BuildServiceProvider();
+
+        var serviceProviderWithStub = new DataverseStubBuilder().WithTarget(new Entity("account")).AddData(new Entity("account"), new Entity("contact")).AddOrganizationRequests()
             .BuildServiceProvider();
 
-        var serviceProviderWithStub = new DataverseStubBuilder()
-            .WithTarget(new Entity("account"))
-            .WithData(new Entity("account"), new Entity("contact"))
-            .BuildServiceProvider();
-
-        var serviceProviderWithCustomServices = new PluginExecutionContextBuilder(new MyFakeTracingService(), new MyFakeLogger())
-            .BuildServiceProvider();
+        var serviceProviderWithCustomServices = new PluginExecutionContextBuilder(new MyFakeTracingService(), new MyFakeLogger()).BuildServiceProvider();
 
         var plugin = new MyPlugin();
 

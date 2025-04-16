@@ -268,7 +268,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OwnerId, ConditionOperator.EqualUserId);
 
-        Environment.SetEnvironmentVariable("CallerId", TestData.CallerId.ToString("N"));
+        Environment.SetEnvironmentVariable("UserId", TestData.UserId.ToString("N"));
 
         var stub = new DataverseStub(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         stub.AddRange(TestData.Default);
@@ -473,7 +473,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OwnerId, ConditionOperator.NotEqualUserId);
 
-        Environment.SetEnvironmentVariable("CallerId", TestData.CallerId.ToString("N"));
+        Environment.SetEnvironmentVariable("UserId", TestData.UserId.ToString("N"));
 
         var stub = new DataverseStub(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         stub.AddRange(TestData.Default);

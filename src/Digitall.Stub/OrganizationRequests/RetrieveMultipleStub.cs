@@ -8,7 +8,6 @@ using System.Linq;
 using System.Xml.Linq;
 using Digitall.Stub.Extensions;
 using Digitall.Stub.Logic.Queries;
-using DotNetEnv;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -108,8 +107,8 @@ public class RetrieveMultipleStub : OrganizationRequestStub<RetrieveMultipleRequ
             }
 
             // Handle paging
-            var maxRetireveCount = Env.GetInt("MaxRetrieveCount", 5000);
-            var pageSize = maxRetireveCount;
+            var maxRetrieveCount = int.Parse(Environment.GetEnvironmentVariable("MaxRetrieveCount") ?? "5000");
+            var pageSize = maxRetrieveCount;
             pageInfo = queryExpression.PageInfo;
             int pageNumber = 1;
 
@@ -117,7 +116,7 @@ public class RetrieveMultipleStub : OrganizationRequestStub<RetrieveMultipleRequ
             if (pageInfo != null && pageInfo.PageNumber > 0)
             {
                 pageNumber = pageInfo.PageNumber;
-                pageSize = pageInfo.Count == 0 ? maxRetireveCount : pageInfo.Count;
+                pageSize = pageInfo.Count == 0 ? maxRetrieveCount : pageInfo.Count;
             }
 
             // Figure out where in the list we need to start and how many items we need to grab
