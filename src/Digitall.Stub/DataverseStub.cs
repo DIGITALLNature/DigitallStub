@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.ServiceModel;
 using Digitall.Stub.Errors;
+using Digitall.Stub.Extensions;
 using Digitall.Stub.OrganizationRequests;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
