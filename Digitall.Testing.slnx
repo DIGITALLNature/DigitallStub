@@ -1,0 +1,8 @@
+﻿<Solution>
+  <Folder Name="/src/">
+    <Project Path="src\Digitall.Testing\Digitall.Testing.csproj" Type="Classic C#" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests\Digitall.Testing.Tests\Digitall.Testing.Tests.csproj" Type="Classic C#" />
+  </Folder>
+</Solution>
