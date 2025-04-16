@@ -70,7 +70,7 @@ namespace Digitall.Stub.Logic.Queries
                 }
             }
 
-            query.Distinct = xmlDocument.IsDistincFetchXml();
+            query.Distinct = xmlDocument.IsDistinctFetchXml();
 
             query.Criteria =   _fetchProcessor.ExtractCriteria(xmlDocument);
 
@@ -78,7 +78,7 @@ namespace Digitall.Stub.Logic.Queries
 
             query.PageInfo.Count = xmlDocument.ToCount() ?? 0;
             query.PageInfo.PageNumber = xmlDocument.ToPageNumber() ?? 1;
-            query.PageInfo.ReturnTotalRecordCount = xmlDocument.ToReturnTotalRecordCount();
+            query.PageInfo.ReturnTotalRecordCount = xmlDocument.ToReturnTotalRecordCount() == true;
 
             var linkedEntities = _fetchProcessor.ExtractLinkEntities(xmlDocument);
             foreach (var le in linkedEntities)

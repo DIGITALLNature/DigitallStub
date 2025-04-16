@@ -70,11 +70,11 @@ public class DataverseStub(TimeProvider timeProvider) : IOrganizationService
     {
         Assembly a = typeof(IOrganizationRequestStub).Assembly;
         var stubs = a.GetTypes()
-            .Where(type => type.IsClass && !type.IsAbstract && type.Namespace == "Digitall.Stub.OrganizationRequests" && typeof(IOrganizationRequestStub).IsAssignableFrom(type)).ToList();
+            .Where(type => type.IsClass && type is { IsAbstract: false, Namespace: "Digitall.Stub.OrganizationRequests" } && typeof(IOrganizationRequestStub).IsAssignableFrom(type)).ToList();
 
         foreach (var stub in stubs)
         {
-            AddStubIfNecessary(Activator.CreateInstance(stub) as IOrganizationRequestStub);
+            AddStubIfNecessary((Activator.CreateInstance(stub) as IOrganizationRequestStub)!);
         }
     }
 

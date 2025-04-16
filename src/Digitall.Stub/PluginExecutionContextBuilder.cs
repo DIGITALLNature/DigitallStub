@@ -287,7 +287,7 @@ public class MyFakeLogger : ILogger
 
     public void AddCustomProperty(string propertyName, string propertyValue) => throw new NotImplementedException();
 
-    public void Execute(string activityName, Action action, IEnumerable<KeyValuePair<string, string>> additionalCustomProperties = null) => throw new NotImplementedException();
+    public void Execute(string activityName, Action action, IEnumerable<KeyValuePair<string, string>>? additionalCustomProperties = null) => throw new NotImplementedException();
 
-    public Task ExecuteAsync(string activityName, Func<Task> action, IEnumerable<KeyValuePair<string, string>> additionalCustomProperties = null) => throw new NotImplementedException();
+    public Task ExecuteAsync(string activityName, Func<Task> action, IEnumerable<KeyValuePair<string, string>>? additionalCustomProperties = null) => throw new NotImplementedException();
 }

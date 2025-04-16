@@ -13,8 +13,6 @@ public abstract class OrganizationRequestStub<TIn, TOut> : IOrganizationRequestS
 
     public OrganizationResponse Execute(OrganizationRequest organizationRequest, DataverseStub state)
     {
-        Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
-
         if(organizationRequest is not TIn @in)
         {
             throw new InvalidCastException($"Cannot cast {organizationRequest.GetType()} to {typeof(TIn)}");

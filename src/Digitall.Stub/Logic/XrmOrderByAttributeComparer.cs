@@ -9,94 +9,95 @@ namespace Digitall.Stub.Logic;
 
 public class XrmOrderByAttributeComparer : IComparer<object>
 {
-    public int Compare(Object objectA, Object objectB)
+    public int Compare(object? objectA, object? objectB)
     {
-        if (objectA == null && objectB == null) return 0;  //Equal
-
-        if (objectA == null)
-            return -1;
-        if (objectB == null)
-            return 1;
-
-        Type attributeType = objectA.GetType();
-
-        if (attributeType == typeof(OptionSetValue))
+        while (true)
         {
-            // we'll want the text value
-            OptionSetValue attributeValueA = (OptionSetValue)(objectA);
-            OptionSetValue attributeValueB = (OptionSetValue)(objectB);
-            return attributeValueA.Value.CompareTo(attributeValueB.Value);
+            if (objectA == null && objectB == null) return 0; //Equal
+
+            if (objectA == null) return -1;
+            if (objectB == null) return 1;
+
+            Type attributeType = objectA.GetType();
+
+            if (attributeType == typeof(OptionSetValue))
+            {
+                // we'll want the text value
+                OptionSetValue attributeValueA = (OptionSetValue)(objectA);
+                OptionSetValue attributeValueB = (OptionSetValue)(objectB);
+                return attributeValueA.Value.CompareTo(attributeValueB.Value);
+            }
+
+            if (attributeType == typeof(EntityReference))
+            {
+                // Name might well be Null in an entity reference?
+                EntityReference entityRefA = (EntityReference)objectA;
+                EntityReference entityRefB = (EntityReference)objectB;
+
+                if (entityRefA.Name == null && entityRefB.Name == null) return 0; //Equal
+
+                if (entityRefA.Name == null) return -1;
+                if (entityRefB.Name == null) return 1;
+
+                return string.Compare(entityRefA.Name, entityRefB.Name, StringComparison.Ordinal);
+            }
+
+            if (attributeType == typeof(Money))
+            {
+                var valueA = ((Money)objectA).Value;
+                var valueB = ((Money)objectB).Value;
+                var x = valueA.CompareTo(valueB);
+                return x;
+            }
+
+            if (attributeType == typeof(string))
+            {
+                return string.CompareOrdinal(objectA.ToString(), objectB.ToString());
+            }
+
+            if (attributeType == typeof(int))
+            {
+                return ((int)objectA).CompareTo(((int)objectB));
+            }
+
+            if (attributeType == typeof(DateTime))
+            {
+                return ((DateTime)objectA).CompareTo((DateTime)objectB);
+            }
+
+            if (attributeType == typeof(Guid))
+            {
+                return ((Guid)objectA).CompareTo((Guid)objectB);
+            }
+
+            if (attributeType == typeof(decimal))
+            {
+                return ((decimal)objectA).CompareTo((decimal)objectB);
+            }
+
+            if (attributeType == typeof(double))
+            {
+                return ((double)objectA).CompareTo((double)objectB);
+            }
+
+            if (attributeType == typeof(float))
+            {
+                return ((float)objectA).CompareTo((float)objectB);
+            }
+
+            if (attributeType == typeof(bool))
+            {
+                return ((bool)objectA).CompareTo((bool)objectB);
+            }
+
+            if (attributeType == typeof(AliasedValue))
+            {
+                objectA = (objectA as AliasedValue)?.Value;
+                objectB = (objectB as AliasedValue)?.Value;
+                continue;
+            }
+
+            return 0;
         }
-
-        if (attributeType == typeof(EntityReference))
-        {
-            // Name might well be Null in an entity reference?
-            EntityReference entityRefA = (EntityReference)objectA;
-            EntityReference entityRefB = (EntityReference)objectB;
-
-            if (entityRefA.Name == null && entityRefB.Name == null) return 0;  //Equal
-
-            if (entityRefA.Name == null)
-                return -1;
-            if (entityRefB.Name == null)
-                return 1;
-
-            return entityRefA.Name.CompareTo(entityRefB.Name);
-        }
-
-        if (attributeType == typeof(Money))
-        {
-            var valueA = ((Money)objectA).Value;
-            var valueB = ((Money)objectB).Value;
-            var x = valueA.CompareTo(valueB);
-            return x;
-        }
-
-        if (attributeType == typeof(string))
-        {
-            return String.Compare(objectA.ToString(), objectB.ToString());
-        }
-
-        if (attributeType == typeof(int))
-        {
-            return ((int)objectA).CompareTo(((int)objectB));
-        }
-
-        if (attributeType == typeof(DateTime))
-        {
-            return ((DateTime)objectA).CompareTo((DateTime)objectB);
-        }
-
-        if (attributeType == typeof(Guid))
-        {
-            return ((Guid)objectA).CompareTo((Guid)objectB);
-        }
-
-        if (attributeType == typeof(decimal))
-        {
-            return ((decimal)objectA).CompareTo((decimal)objectB);
-        }
-
-        if (attributeType == typeof(double))
-        {
-            return ((double)objectA).CompareTo((double)objectB);
-        }
-
-        if (attributeType == typeof(float))
-        {
-            return ((float)objectA).CompareTo((float)objectB);
-        }
-
-        if (attributeType == typeof(bool))
-        {
-            return ((bool)objectA).CompareTo((bool)objectB);
-        }
-
-        if (attributeType == typeof(AliasedValue))
-        {
-            return Compare((objectA as AliasedValue)?.Value, (objectB as AliasedValue)?.Value);
-        }
-
-        return 0;
     }
 }

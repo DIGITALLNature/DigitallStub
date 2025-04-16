@@ -11,9 +11,6 @@ public class CreateStub : OrganizationRequestStub<CreateRequest, CreateResponse>
 {
     public override CreateResponse Execute(CreateRequest organizationRequest, DataverseStub state)
     {
-        Debug.Assert(state != null, nameof(state) + " != null");
-        Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
-
         var guid = state.Create(organizationRequest.Target);
 
         return new CreateResponse

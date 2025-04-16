@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using Digitall.Stub.Errors;
@@ -16,7 +15,6 @@ public class ExpressionProcessor(DataverseStub state)
 {
     public IQueryable<Entity> FilterQuery(QueryExpression queryExpression, IQueryable<Entity> query)
     {
-        Debug.Assert(queryExpression != null, nameof(queryExpression) + " != null");
         Validators.ValidateFilterExpressionAliases(queryExpression, queryExpression.Criteria);
         return query.Where(Generate(queryExpression));
     }
@@ -89,22 +87,22 @@ public class ExpressionProcessor(DataverseStub state)
         return TranslateFilterExpressionToExpression(queryExpression, queryExpression.EntityName, queryExpression.Criteria, entity, false);
     }
 
-    private Expression TranslateFilterExpressionToExpression(QueryExpression queryExpression, string sEntityName, FilterExpression fe, ParameterExpression entity, bool bIsOuter)
+    private Expression TranslateFilterExpressionToExpression(QueryExpression queryExpression, string sEntityName, FilterExpression? fe, ParameterExpression entity, bool bIsOuter)
     {
         if (fe == null)
         {
             return Expression.Constant(true);
         }
 
-        BinaryExpression conditionsLambda = null;
-        BinaryExpression filtersLambda = null;
-        if (fe.Conditions != null && fe.Conditions.Count > 0)
+        BinaryExpression? conditionsLambda = null;
+        BinaryExpression? filtersLambda = null;
+        if (fe.Conditions is { Count: > 0 })
         {
             conditionsLambda = TranslateMultipleConditionExpressions(queryExpression, sEntityName, fe.Conditions.ToList(), fe.FilterOperator, entity, bIsOuter);
         }
 
         //Process nested filters recursively
-        if (fe.Filters != null && fe.Filters.Count > 0)
+        if (fe.Filters is { Count: > 0 })
         {
             filtersLambda = TranslateMultipleFilterExpressions(queryExpression, sEntityName, fe.Filters.ToList(), fe.FilterOperator, entity, bIsOuter);
         }
@@ -211,15 +209,8 @@ public class ExpressionProcessor(DataverseStub state)
     private BinaryExpression TranslateMultipleConditionExpressions(QueryExpression queryExpression, string sEntityName, List<ConditionExpression> conditions, LogicalOperator logicalOperator,
         ParameterExpression entity, bool bIsOuter)
     {
-        BinaryExpression binaryExpression = null; //Default initialisation depending on logical operator
-        if (logicalOperator == LogicalOperator.And)
-        {
-            binaryExpression = Expression.And(Expression.Constant(true), Expression.Constant(true));
-        }
-        else
-        {
-            binaryExpression = Expression.Or(Expression.Constant(false), Expression.Constant(false));
-        }
+        var binaryExpression = //Default initialisation depending on logical operator
+            logicalOperator == LogicalOperator.And ? Expression.And(Expression.Constant(true), Expression.Constant(true)) : Expression.Or(Expression.Constant(false), Expression.Constant(false));
 
         foreach (var c in conditions)
         {
@@ -275,14 +266,7 @@ public class ExpressionProcessor(DataverseStub state)
             EnsureSupportedTypedExpression(typedExpression);
 
             //Build a binary expression
-            if (logicalOperator == LogicalOperator.And)
-            {
-                binaryExpression = Expression.And(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, state, typedExpression, entity));
-            }
-            else
-            {
-                binaryExpression = Expression.Or(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, state, typedExpression, entity));
-            }
+            binaryExpression = logicalOperator == LogicalOperator.And ? Expression.And(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, state, typedExpression, entity)) : Expression.Or(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, state, typedExpression, entity));
         }
 
         return binaryExpression;
@@ -292,29 +276,14 @@ public class ExpressionProcessor(DataverseStub state)
     private BinaryExpression TranslateMultipleFilterExpressions(QueryExpression queryExpression, string sEntityName, List<FilterExpression> filters, LogicalOperator logicalOperator,
         ParameterExpression entity, bool bIsOuter)
     {
-        BinaryExpression binaryExpression = null;
-        if (logicalOperator == LogicalOperator.And)
-        {
-            binaryExpression = Expression.And(Expression.Constant(true), Expression.Constant(true));
-        }
-        else
-        {
-            binaryExpression = Expression.Or(Expression.Constant(false), Expression.Constant(false));
-        }
+        var binaryExpression = logicalOperator == LogicalOperator.And ? Expression.And(Expression.Constant(true), Expression.Constant(true)) : Expression.Or(Expression.Constant(false), Expression.Constant(false));
 
         foreach (var f in filters)
         {
             var thisFilterLambda = TranslateFilterExpressionToExpression(queryExpression, sEntityName, f, entity, bIsOuter);
 
             //Build a binary expression
-            if (logicalOperator == LogicalOperator.And)
-            {
-                binaryExpression = Expression.And(binaryExpression, thisFilterLambda);
-            }
-            else
-            {
-                binaryExpression = Expression.Or(binaryExpression, thisFilterLambda);
-            }
+            binaryExpression = logicalOperator == LogicalOperator.And ? Expression.And(binaryExpression, thisFilterLambda) : Expression.Or(binaryExpression, thisFilterLambda);
         }
 
         return binaryExpression;

@@ -10,9 +10,6 @@ public class AssociateStub : OrganizationRequestStub<AssociateRequest, Associate
 {
     public override AssociateResponse Execute(AssociateRequest organizationRequest, DataverseStub state)
     {
-        Debug.Assert(state != null, nameof(state) + " != null");
-        Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
-
         state.Associate(organizationRequest.Target.LogicalName, organizationRequest.Target.Id, organizationRequest.Relationship, organizationRequest.RelatedEntities);
 
         return new AssociateResponse();

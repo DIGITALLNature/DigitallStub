@@ -12,9 +12,9 @@ namespace Digitall.Stub.Extensions;
 
 public static class XDocumentExtensions
 {
-    public static XAttribute GetAttribute(this XElement elem, string sAttributeName) => elem.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals(sAttributeName));
+    public static XAttribute? GetAttribute(this XElement elem, string sAttributeName) => elem.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals(sAttributeName));
 
-    public static bool IsAggregateFetchXml(this XDocument xDocument) => xDocument.Root.IsAttributeTrue("aggregate");
+    public static bool IsAggregateFetchXml(this XDocument xDocument) => xDocument.Root?.IsAttributeTrue("aggregate") == true;
 
     public static bool IsAttributeTrue(this XElement xElement, string attributeName)
     {
@@ -23,31 +23,31 @@ public static class XDocumentExtensions
         return "true".Equals(val, StringComparison.InvariantCultureIgnoreCase) || "1".Equals(val, StringComparison.InvariantCultureIgnoreCase);
     }
 
-    public static bool IsDistincFetchXml(this XDocument xDocument) => xDocument.Root.IsAttributeTrue("distinct");
+    public static bool IsDistinctFetchXml(this XDocument xDocument) => xDocument.Root?.IsAttributeTrue("distinct") == true;
 
-    public static ColumnSet ToColumnSet(this XDocument xDocument)
+    public static ColumnSet? ToColumnSet(this XDocument xDocument)
     {
         Debug.Assert(xDocument != null, nameof(xDocument) + " != null");
-        return xDocument.Elements() //fetch
-            .Elements().FirstOrDefault().ToColumnSet();
+        return xDocument?.Elements() //fetch
+            .Elements().FirstOrDefault()?.ToColumnSet();
     }
 
     public static ColumnSet ToColumnSet(this XElement el)
     {
-        var allAttributes = el.Elements().Where(e => e.Name.LocalName.Equals("all-attributes")).FirstOrDefault();
+        var allAttributes = el.Elements().FirstOrDefault(e => e.Name.LocalName.Equals("all-attributes"));
 
         if (allAttributes != null)
         {
             return new ColumnSet(true);
         }
 
-        var attributes = el.Elements().Where(e => e.Name.LocalName.Equals("attribute")).Select(e => e.GetAttribute("name").Value).ToArray();
+        var attributes = el.Elements().Where(e => e.Name.LocalName.Equals("attribute")).Select(e => e.GetAttribute("name")?.Value).ToArray();
 
 
         return new ColumnSet(attributes);
     }
 
-    public static int? ToCount(this XElement el)
+    private static int? ToCount(this XElement el)
     {
         var countAttr = el.GetAttribute("count");
         if (countAttr == null)
@@ -55,8 +55,7 @@ public static class XDocumentExtensions
             return null;
         }
 
-        int iCount;
-        if (!int.TryParse(countAttr.Value, out iCount))
+        if (!int.TryParse(countAttr.Value, out var iCount))
         {
             throw new Exception("Count attribute in fetch node must be an integer");
         }
@@ -67,7 +66,7 @@ public static class XDocumentExtensions
     public static int? ToCount(this XDocument xlDoc) =>
         //Check if all-attributes exist
         xlDoc.Elements() //fetch
-            .FirstOrDefault().ToCount();
+            .FirstOrDefault()?.ToCount();
 
     public static List<OrderExpression> ToOrderExpressionList(this XDocument xlDoc)
     {
@@ -75,12 +74,12 @@ public static class XDocumentExtensions
             .Elements() //entity
             .Elements() //child nodes of entity
             .Where(el => el.Name.LocalName.Equals("order")).Select(el =>
-                new OrderExpression { AttributeName = el.GetAttribute("attribute").Value, OrderType = el.IsAttributeTrue("descending") ? OrderType.Descending : OrderType.Ascending }).ToList();
+                new OrderExpression { AttributeName = el.GetAttribute("attribute")?.Value, OrderType = el.IsAttributeTrue("descending") ? OrderType.Descending : OrderType.Ascending }).ToList();
 
         return orderByElements;
     }
 
-    public static int? ToPageNumber(this XElement el)
+    private static int? ToPageNumber(this XElement el)
     {
         var pageAttr = el.GetAttribute("page");
         if (pageAttr == null)
@@ -88,8 +87,7 @@ public static class XDocumentExtensions
             return null;
         }
 
-        int iPage;
-        if (!int.TryParse(pageAttr.Value, out iPage))
+        if (!int.TryParse(pageAttr.Value, out var iPage))
         {
             throw new Exception("Count attribute in fetch node must be an integer");
         }
@@ -101,10 +99,10 @@ public static class XDocumentExtensions
     public static int? ToPageNumber(this XDocument xlDoc) =>
         //Check if all-attributes exist
         xlDoc.Elements() //fetch
-            .FirstOrDefault().ToPageNumber();
+            .FirstOrDefault()?.ToPageNumber();
 
 
-    public static bool ToReturnTotalRecordCount(this XElement el)
+    private static bool ToReturnTotalRecordCount(this XElement el)
     {
         var returnTotalRecordCountAttr = el.GetAttribute("returntotalrecordcount");
         if (returnTotalRecordCountAttr == null)
@@ -112,8 +110,7 @@ public static class XDocumentExtensions
             return false;
         }
 
-        bool bReturnCount;
-        if (!bool.TryParse(returnTotalRecordCountAttr.Value, out bReturnCount))
+        if (!bool.TryParse(returnTotalRecordCountAttr.Value, out var bReturnCount))
         {
             throw new Exception("returntotalrecordcount attribute in fetch node must be an boolean");
         }
@@ -121,11 +118,11 @@ public static class XDocumentExtensions
         return bReturnCount;
     }
 
-    public static bool ToReturnTotalRecordCount(this XDocument xlDoc) =>
+    public static bool? ToReturnTotalRecordCount(this XDocument xlDoc) =>
         xlDoc.Elements() //fetch
-            .FirstOrDefault().ToReturnTotalRecordCount();
+            .FirstOrDefault()?.ToReturnTotalRecordCount();
 
-    public static int? ToTopCount(this XElement el)
+    private static int? ToTopCount(this XElement el)
     {
         var countAttr = el.GetAttribute("top");
         if (countAttr == null)
@@ -133,8 +130,7 @@ public static class XDocumentExtensions
             return null;
         }
 
-        int iCount;
-        if (!int.TryParse(countAttr.Value, out iCount))
+        if (!int.TryParse(countAttr.Value, out var iCount))
         {
             throw new Exception("Top attribute in fetch node must be an integer");
         }
@@ -146,7 +142,7 @@ public static class XDocumentExtensions
     public static int? ToTopCount(this XDocument xlDoc) =>
         //Check if all-attributes exist
         xlDoc.Elements() //fetch
-            .FirstOrDefault().ToTopCount();
+            .FirstOrDefault()?.ToTopCount();
 
     public static bool IsFetchXmlNodeValid(this XElement elem)
     {
@@ -172,20 +168,18 @@ public static class XDocumentExtensions
                 return elem.GetAttribute("name") != null && elem.GetAttribute("from") != null && elem.GetAttribute("to") != null;
 
             case "order":
-                if (elem.Document.IsAggregateFetchXml())
+                if (elem.Document?.IsAggregateFetchXml() == true)
                 {
                     return elem.GetAttribute("alias") != null && elem.GetAttribute("attribute") == null;
                 }
-                else
-                {
-                    return elem.GetAttribute("attribute") != null;
-                }
+
+                return elem.GetAttribute("attribute") != null;
 
             case "condition":
                 return elem.GetAttribute("attribute") != null && elem.GetAttribute("operator") != null;
 
             default:
-                throw new Exception(string.Format("Node {0} is not a valid FetchXml node or it doesn't have the required attributes", elem.Name.LocalName));
+                throw new Exception($"Node {elem.Name.LocalName} is not a valid FetchXml node or it doesn't have the required attributes");
         }
     }
 }

@@ -10,9 +10,6 @@ public class DeleteStub : OrganizationRequestStub<DeleteRequest, DeleteResponse>
 {
     public override DeleteResponse Execute(DeleteRequest organizationRequest, DataverseStub state)
     {
-        Debug.Assert(state != null, nameof(state) + " != null");
-        Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
-
         state.Delete(organizationRequest.Target.LogicalName, organizationRequest.Target.Id);
 
         return new DeleteResponse();
