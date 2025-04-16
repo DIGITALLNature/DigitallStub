@@ -3,7 +3,7 @@
 
 using System;
 using System.Linq;
-using Digitall.Stub.Tests.Fixtures;
+using Digitall.Testing.Tests.Fixtures;
 using FluentAssertions;
 
 namespace Digitall.Testing.Tests.OrganizationRequests;
@@ -40,8 +40,8 @@ public class DataContextTests
     [TestMethod]
     public void ProjectionOfEarlyBound_Should_MaintainType()
     {
-        var stub = new DataverseStub();
-        stub.AddDefaultStubs();
+        var dataverse = new FakedDataverse();
+        dataverse.AddDefaultRequests();
 
         var accountId = Guid.NewGuid();
         var accountName = "Test Account";
@@ -49,14 +49,14 @@ public class DataContextTests
         {
             Name = accountName,
         };
-        stub.Add(account);
+        dataverse.Add(account);
 
-        using (var dataContext = new DataContext(stub))
+        using (var dataContext = new DataContext(dataverse))
         {
             dataContext.AccountSet.Select(a => a.Id).Single().Should().Be(accountId);
         }
 
-        using (var dataContext = new DataContext(stub))
+        using (var dataContext = new DataContext(dataverse))
         {
             dataContext.AccountSet.Select(a => a.Name).Single().Should().Be(accountName);
         }
@@ -64,7 +64,7 @@ public class DataContextTests
         account.Id.Should().Be(accountId);
         account.Name.Should().Be(accountName);
 
-        using (var dataContext = new DataContext(stub))
+        using (var dataContext = new DataContext(dataverse))
         {
             dataContext.AccountSet.Select(a => a.Name).Single().Should().Be(accountName);
         }
