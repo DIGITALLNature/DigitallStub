@@ -1,7 +1,6 @@
 // Copyright (c) DIGITALL Nature. All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
-using System.Diagnostics;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 
@@ -11,9 +10,6 @@ public class ExecuteTransactionFake : OrganizationRequestFake<ExecuteTransaction
 {
     public override ExecuteTransactionResponse Execute(ExecuteTransactionRequest organizationRequest, FakedDataverse state)
     {
-        Debug.Assert(state != null, nameof(state) + " != null");
-        Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
-
         var response = new ExecuteTransactionResponse { ["Responses"] = new OrganizationResponseCollection() };
 
         foreach (var r in organizationRequest.Requests)

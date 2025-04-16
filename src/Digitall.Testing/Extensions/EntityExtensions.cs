@@ -18,7 +18,7 @@ public static class EntityExtensions
         {
             //Do not lowercase the alias prefix
             var splitted = sAttributeName.Split('.');
-            sAttributeName = string.Format("{0}.{1}", splitted[0], splitted[1].ToLower());
+            sAttributeName = $"{splitted[0]}.{splitted[1].ToLower()}";
         }
         else
         {
@@ -37,31 +37,20 @@ public static class EntityExtensions
             return Guid.Empty; //Atrribute is null or doesn´t exists so it can´t be joined
         }
 
-        object keyValue = null;
-        AliasedValue aliasedValue;
-        if ((aliasedValue = e[sAttributeName] as AliasedValue) != null)
-        {
-            keyValue = aliasedValue.Value;
-        }
-        else
-        {
-            keyValue = e[sAttributeName];
-        }
+        AliasedValue? aliasedValue;
+        var keyValue = (aliasedValue = e[sAttributeName] as AliasedValue) != null ? aliasedValue.Value : e[sAttributeName];
 
-        var entityReference = keyValue as EntityReference;
-        if (entityReference != null)
+        if (keyValue is EntityReference entityReference)
         {
             return entityReference.Id;
         }
 
-        var optionSetValue = keyValue as OptionSetValue;
-        if (optionSetValue != null)
+        if (keyValue is OptionSetValue optionSetValue)
         {
             return optionSetValue.Value;
         }
 
-        var money = keyValue as Money;
-        if (money != null)
+        if (keyValue is Money money)
         {
             return money.Value;
         }
@@ -70,7 +59,7 @@ public static class EntityExtensions
     }
     public static Entity ProjectAttributes(this Entity e, ColumnSet qs, FakedDataverse state)
     {
-        if (qs == null || qs.AllColumns)
+        if (qs.AllColumns)
         {
             return RemoveNullAttributes(e); //return all the original attributes
         }
@@ -104,7 +93,7 @@ public static class EntityExtensions
         }
 
         //Return selected list of attributes in a projected entity
-        var projected = Activator.CreateInstance(e.GetType()) as Entity;
+        var projected = (Entity)Activator.CreateInstance(e.GetType());
         projected.LogicalName = e.LogicalName;
         projected.Id = e.Id;
 
@@ -136,7 +125,7 @@ public static class EntityExtensions
     /// </summary>
     /// <param name="attributeValue">The attribute value to clone.</param>
     /// <returns>The cloned attribute value.</returns>
-    private static object CloneAttribute(object attributeValue)
+    private static object? CloneAttribute(object? attributeValue)
     {
         // If the attribute value is null, return null.
         if (attributeValue == null)
@@ -153,16 +142,18 @@ public static class EntityExtensions
         // If the attribute value is an EntityReference, create a new EntityReference with the same logical name and ID.
         if (attributeValue is EntityReference reference)
         {
-            var clonedReference = new EntityReference(reference.LogicalName, reference.Id);
-            clonedReference.Name = (string)CloneAttribute(reference.Name);
+            var clonedReference = new EntityReference(reference.LogicalName, reference.Id)
+            {
+                Name = (string?)CloneAttribute(reference.Name),
+            };
 
             // If the reference has key attributes, clone them.
             if (reference.KeyAttributes != null)
             {
                 var clonedKeyAttributes = new KeyAttributeCollection();
-                clonedKeyAttributes.AddRange(reference.KeyAttributes.Select(kvp => new KeyValuePair<string, object>(
-                    (string)CloneAttribute(kvp.Key),
-                    kvp.Value
+                clonedKeyAttributes.AddRange(reference.KeyAttributes.Select(kvp => new KeyValuePair<string, object?>(
+                    kvp.Key,
+                    CloneAttribute(kvp.Value)
                 )).ToArray());
 
                 clonedReference.KeyAttributes = clonedKeyAttributes;
@@ -195,7 +186,7 @@ public static class EntityExtensions
             return clonedAliasedValue;
         }
 
-        // If the attribute value is a Money, create a new Money with the same value.
+        // If the attribute value is a Money, create new Money with the same value.
         if (attributeValue is Money money)
         {
             return new Money(money.Value);
@@ -287,7 +278,7 @@ public static class EntityExtensions
     {
         // Find all attributes that have a null value or an AliasedValue with a null value.
         IList<string> nullAttributes = entity.Attributes
-            .Where(attribute => attribute.Value == null || (attribute.Value is AliasedValue aliasedValue && aliasedValue.Value == null))
+            .Where(attribute => attribute.Value is null or AliasedValue { Value: null })
             .Select(attribute => attribute.Key).ToList();
 
         // Remove each null attribute from the entity.
@@ -301,8 +292,6 @@ public static class EntityExtensions
 
     public static Entity JoinAttributes(this Entity e, Entity otherEntity, ColumnSet columnSet, string alias)
     {
-        if (otherEntity == null) return e; //Left Join where otherEntity was not matched
-
         otherEntity = otherEntity.CloneEntity(); //To avoid joining entities from/to the same entities, which would cause collection modified exceptions
 
         if (columnSet.AllColumns)

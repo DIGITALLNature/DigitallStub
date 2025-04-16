@@ -9,15 +9,15 @@ namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
 abstract class FetchAggregate
 {
-    public string Attribute { get; set; }
-    public string OutputAlias { get; set; }
+    public string? Attribute { get; set; }
+    public string? OutputAlias { get; set; }
 
-    public object Process(IEnumerable<Entity> entities)
+    public object? Process(IEnumerable<Entity> entities)
     {
         return AggregateValues(entities.Select(e =>
             e.Contains(Attribute) ? e[Attribute] : null
         ));
     }
 
-    protected abstract object AggregateValues(IEnumerable<object> values);
+    protected abstract object? AggregateValues(IEnumerable<object?> values);
 }

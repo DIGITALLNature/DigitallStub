@@ -7,19 +7,19 @@ using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
-abstract class AliasedAggregate : FetchAggregate
+internal abstract class AliasedAggregate : FetchAggregate
 {
-    protected override object AggregateValues(IEnumerable<object> values)
+    protected override object? AggregateValues(IEnumerable<object?> values)
     {
-        var lst = values.Where(x => x != null);
-        bool alisedValue = lst.FirstOrDefault() is AliasedValue;
-        if (alisedValue)
+        var lst = values.Where(x => x != null).ToArray();
+        var aliasedValue = lst.FirstOrDefault() is AliasedValue;
+        if (aliasedValue)
         {
-            lst = lst.Select(x => (x as AliasedValue)?.Value);
+            lst = lst.Select(x => (x as AliasedValue)?.Value).ToArray();
         }
 
         return AggregateAliasedValues(lst);
     }
 
-    protected abstract object AggregateAliasedValues(IEnumerable<object> values);
+    protected abstract object? AggregateAliasedValues(IEnumerable<object?> values);
 }

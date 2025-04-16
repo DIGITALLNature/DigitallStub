@@ -2,7 +2,6 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System;
-using System.Diagnostics;
 using Digitall.Testing.Errors;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
@@ -14,9 +13,6 @@ public class BulkDeleteFake : OrganizationRequestFake<BulkDeleteRequest, BulkDel
 {
     public override BulkDeleteResponse Execute(BulkDeleteRequest organizationRequest, FakedDataverse state)
     {
-        Debug.Assert(state != null, nameof(state) + " != null");
-        Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
-
         if (string.IsNullOrEmpty(organizationRequest.JobName))
         {
             ErrorFactory.ThrowFault( "Can not Bulk delete without JobName");
@@ -46,7 +42,7 @@ public class BulkDeleteFake : OrganizationRequestFake<BulkDeleteRequest, BulkDel
         state.Create(asyncOpertation);
 
         // delete all records from all queries
-        foreach (QueryExpression queryExpression in organizationRequest.QuerySet)
+        foreach (QueryExpression queryExpression in organizationRequest.QuerySet ?? [])
         {
             EntityCollection recordsToDelete = state.RetrieveMultiple(queryExpression);
             foreach (Entity record in recordsToDelete.Entities)

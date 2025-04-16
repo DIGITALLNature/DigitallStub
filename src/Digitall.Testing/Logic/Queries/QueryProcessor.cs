@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Digitall.Testing.Extensions;
@@ -56,9 +56,10 @@ namespace Digitall.Testing.Logic.Queries
             _fetchProcessor.ValidateXmlDocument(xmlDocument);
 
             var entityNode = RetrieveFetchXmlNode(xmlDocument, "entity");
-            var query = new QueryExpression(entityNode.GetAttribute("name").Value);
-
-            query.ColumnSet = xmlDocument.ToColumnSet();
+            var query = new QueryExpression(entityNode?.GetAttribute("name")?.Value)
+            {
+                ColumnSet = xmlDocument.ToColumnSet(),
+            };
 
             // Ordering is done after grouping/aggregation
             if (!xmlDocument.IsAggregateFetchXml())
@@ -99,9 +100,10 @@ namespace Digitall.Testing.Logic.Queries
                 throw new Exception("Can't have <all-attributes /> present when using aggregate");
             }
 
-            var ns = xmlDoc.Root.Name.Namespace;
+            var ns = xmlDoc.Root?.Name.Namespace;
 
-            var entityName = RetrieveFetchXmlNode(xmlDoc, "entity")?.GetAttribute("name")?.Value;
+            var entityName = RetrieveFetchXmlNode(xmlDoc, "entity")?.GetAttribute("name")?.Value
+                             ?? throw new InvalidDataException("Invalid fetch xml: missing entity name");
             if (string.IsNullOrEmpty(entityName))
             {
                 throw new Exception("Can't find entity name for aggregate query");
@@ -112,8 +114,8 @@ namespace Digitall.Testing.Logic.Queries
 
             foreach (var attr in xmlDoc.Descendants(ns + "attribute"))
             {
-                //TODO: Find entity alias. Handle aliasedvalue in the query result.
-                var namespacedAlias = attr.Ancestors(ns + "link-entity").Select(x => x.GetAttribute("alias")?.Value != null ? x.GetAttribute("alias").Value : x.GetAttribute("name").Value).ToList();
+                //TODO: Find entity alias. Handle aliased value in the query result.
+                var namespacedAlias = attr.Ancestors(ns + "link-entity").Select(x => x.GetAttribute("alias")?.Value != null ? x.GetAttribute("alias")?.Value : x.GetAttribute("name")?.Value).ToList();
                 namespacedAlias.Add(attr.GetAttribute("alias")?.Value);
                 var alias = string.Join(".", namespacedAlias);
                 namespacedAlias.RemoveAt(namespacedAlias.Count - 1);
@@ -134,8 +136,7 @@ namespace Digitall.Testing.Logic.Queries
                     var dategrouping = attr.GetAttribute("dategrouping")?.Value;
                     if (dategrouping != null)
                     {
-                        DateGroupType t;
-                        if (!Enum.TryParse(dategrouping, true, out t))
+                        if (!Enum.TryParse(dategrouping, true, out DateGroupType t))
                         {
                             throw new Exception("Unknown dategrouping value '" + dategrouping + "'");
                         }
@@ -163,8 +164,8 @@ namespace Digitall.Testing.Logic.Queries
                         throw new Exception("Attributes must have be aggregated or grouped by when using aggregation");
                     }
 
-                    FetchAggregate newAgr = null;
-                    switch (agrFn?.ToLower())
+                    FetchAggregate newAgr;
+                    switch (agrFn.ToLower())
                     {
                         case "count":
                             newAgr = new CountAggregate();
@@ -237,10 +238,8 @@ namespace Digitall.Testing.Logic.Queries
             var result = new List<Entity>();
             foreach (var g in grouped)
             {
-                var firstInGroup = g.First();
-
                 // Find the aggregates values in the group
-                var ent = ProcessAggregatesForSingleGroup(entityName, g, aggregates);
+                var ent = ProcessAggregatesForSingleGroup(entityName, g.ToList(), aggregates);
 
                 // Find the group values
                 for (var rule = 0; rule < groups.Count; ++rule)
@@ -248,7 +247,7 @@ namespace Digitall.Testing.Logic.Queries
                     if (g.Key[rule] != null)
                     {
                         object value = g.Key[rule];
-                        ent[groups[rule].OutputAlias] = new AliasedValue(null, groups[rule].Attribute, value is ComparableEntityReference ? (value as ComparableEntityReference).entityReference : value);
+                        ent[groups[rule].OutputAlias] = new AliasedValue(null, groups[rule].Attribute, (value as ComparableEntityReference)?.entityReference ?? value);
                     }
                 }
 
@@ -258,7 +257,7 @@ namespace Digitall.Testing.Logic.Queries
             return result;
         }
 
-        private static Entity ProcessAggregatesForSingleGroup(string entityName, IEnumerable<Entity> entities, IList<FetchAggregate> aggregates)
+        private static Entity ProcessAggregatesForSingleGroup(string entityName, IList<Entity> entities, IList<FetchAggregate> aggregates)
         {
             var ent = new Entity(entityName);
 
@@ -327,9 +326,8 @@ namespace Digitall.Testing.Logic.Queries
             return query;
         }
 
-        private static XElement RetrieveFetchXmlNode(XContainer xContainer, string nodeName)
+        private static XElement? RetrieveFetchXmlNode(XContainer xContainer, string nodeName)
         {
-            Debug.Assert(xContainer != null, nameof(xContainer) + " != null");
             return xContainer.Descendants().FirstOrDefault(e => e.Name.LocalName.Equals(nodeName, StringComparison.Ordinal));
         }
 
