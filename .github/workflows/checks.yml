@@ -1,0 +1,36 @@
+name: Check Digitall.Testing
+
+on:
+  pull_request:
+    branches: [ "main", "beta" ]
+
+jobs:
+  check:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, windows-latest]
+    name: Build & Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: read
+      checks: write
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Restore DotNet
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.x
+        cache: true
+        cache-dependency-path: '**/packages.lock.json'
+
+    - name: Restore dependencies
+      run: dotnet restore --locked-mode
+
+    - name: Build
+      run: dotnet build --no-restore
+
+    - name: Run Tests
+      run: dotnet test --no-build --verbosity normal --logger "trx;LogFileName=test-results.trx" --blame-hang-timeout 3m
