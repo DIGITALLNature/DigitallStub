@@ -30,9 +30,9 @@
       },
       "Microsoft.Extensions.TimeProvider.Testing": {
         "type": "Direct",
-        "requested": "[9.3.0, )",
-        "resolved": "9.3.0",
-        "contentHash": "OcMro0DFeVm31Np9B8CzPUKh8zO1902dY+K2YbzjheyaTvwcCTA6YMU6ChiKAUeWAzJENgWW0weWYAbyu4utZw==",
+        "requested": "[9.0.0, )",
+        "resolved": "9.0.0",
+        "contentHash": "BVLDMoIt7le5yghYHvnlshFg7IBPwftA62Dz2i1GuEzL83KJ14z+tG3+sWwfSQPWaoRxetwATyo1Sl+4cUIcbA==",
         "dependencies": {
           "Microsoft.Bcl.TimeProvider": "8.0.1"
         }
@@ -54,9 +54,9 @@
       },
       "Microsoft.PowerPlatform.Dataverse.Client": {
         "type": "Direct",
-        "requested": "[1.2.3, )",
-        "resolved": "1.2.3",
-        "contentHash": "E30Nt0HdxFwG8xtHjQN7GjI5iZFwb7IRl53gbSqO6SDvH4FUIaDawGDpTWqg/7sfneEAot77TlqqWARcPuaD7A==",
+        "requested": "[1.2.5, )",
+        "resolved": "1.2.5",
+        "contentHash": "oENQDmg2b34O1xw37bD9eQHJTDu0IRbsbUn77dcKf7atYf5LaIdl76CKy5mc4ANXPitUaONVgXtOoGRbVpCzeg==",
         "dependencies": {
           "Microsoft.Extensions.Caching.Memory": "3.1.8",
           "Microsoft.Extensions.DependencyInjection": "3.1.8",
