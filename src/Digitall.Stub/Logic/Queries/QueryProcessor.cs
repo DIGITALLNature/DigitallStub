@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
+using Digitall.Stub.Extensions;
 using Digitall.Stub.Logic.Queries.FetchAggregation;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;

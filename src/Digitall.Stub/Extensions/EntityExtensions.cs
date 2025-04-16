@@ -7,9 +7,9 @@ using System.Linq;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
-namespace Digitall.Stub;
+namespace Digitall.Stub.Extensions;
 
-public static class Extensions
+public static class EntityExtensions
 {
 
     public static object KeySelector(this Entity e, string sAttributeName)
@@ -135,7 +135,7 @@ public static class Extensions
     /// </summary>
     /// <param name="attributeValue">The attribute value to clone.</param>
     /// <returns>The cloned attribute value.</returns>
-    internal static object CloneAttribute(object attributeValue)
+    private static object CloneAttribute(object attributeValue)
     {
         // If the attribute value is null, return null.
         if (attributeValue == null)
@@ -232,7 +232,7 @@ public static class Extensions
         return attributeValue;
     }
 
-    static void ProjectLinkedEntitiesAttributes(Entity e, Entity projected, LinkEntity le)
+    private static void ProjectLinkedEntitiesAttributes(Entity e, Entity projected, LinkEntity le)
     {
         var sAlias = string.IsNullOrWhiteSpace(le.EntityAlias) ? le.LinkToEntityName : le.EntityAlias;
 
@@ -296,15 +296,6 @@ public static class Extensions
         }
 
         return entity;
-    }
-
-    public static Entity JoinAttributes(this Entity e, IEnumerable<Entity> otherEntities, ColumnSet columnSet, string alias)
-    {
-        foreach (var otherEntity in otherEntities)
-        {
-            e.JoinAttributes(otherEntity, columnSet, alias);
-        }
-        return e;
     }
 
     public static Entity JoinAttributes(this Entity e, Entity otherEntity, ColumnSet columnSet, string alias)

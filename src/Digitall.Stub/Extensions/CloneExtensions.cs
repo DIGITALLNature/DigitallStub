@@ -5,7 +5,7 @@ using Force.DeepCloner;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
-namespace Digitall.Stub;
+namespace Digitall.Stub.Extensions;
 
 public static class CloneExtensions
 {

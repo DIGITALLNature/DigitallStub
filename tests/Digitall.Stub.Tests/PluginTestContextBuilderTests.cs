@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Digitall.APower;
+using Digitall.Stub.Extensions;
 using Digitall.Stub.Tests.Fixtures;
 using Digitall.Stub.Tests.Fixtures.SamplePlugin;
 using FluentAssertions;

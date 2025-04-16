@@ -4,7 +4,7 @@
 using System;
 using System.Globalization;
 
-namespace Digitall.Stub;
+namespace Digitall.Stub.Extensions;
 
     public static class DateTimeExtensions
     {

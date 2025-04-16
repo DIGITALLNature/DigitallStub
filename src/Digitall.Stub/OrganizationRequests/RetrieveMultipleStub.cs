@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
+using Digitall.Stub.Extensions;
 using Digitall.Stub.Logic.Queries;
 using DotNetEnv;
 using Microsoft.Xrm.Sdk;

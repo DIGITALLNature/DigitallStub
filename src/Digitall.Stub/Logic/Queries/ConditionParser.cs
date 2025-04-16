@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.ServiceModel;
 using Digitall.Stub.Errors;
+using Digitall.Stub.Extensions;
 using DotNetEnv;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
