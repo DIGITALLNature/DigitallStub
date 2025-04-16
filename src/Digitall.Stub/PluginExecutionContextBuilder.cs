@@ -2,7 +2,11 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Digitall.Stub.Extensions;
+using Digitall.Stub.Model;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.PluginTelemetry;
 using NSubstitute;
@@ -11,18 +15,40 @@ namespace Digitall.Stub;
 
 public class PluginExecutionContextBuilder
 {
-    public string MessageName { get; set; }
+    public PluginExecutionContextBuilder()
+    {
+    }
+
+    public PluginExecutionContextBuilder(IOrganizationService organizationService)
+    {
+        OrganizationService = organizationService;
+    }
+
+    public PluginExecutionContextBuilder(ITracingService tracingService, ILogger logger)
+    {
+        TracingService = tracingService;
+        Logger = logger;
+    }
+
+    public PluginExecutionContextBuilder(IOrganizationService organizationService, ITracingService tracingService, ILogger logger)
+    {
+        OrganizationService = organizationService;
+        TracingService = tracingService;
+        Logger = logger;
+    }
+
+    public string? MessageName { get; set; }
     public int Mode { get; set; }
     public int Stage { get; set; }
     public Target? Target { get; set; }
-    public ParameterCollection InputParameters { get; set; }
-    public ParameterCollection OutputParameters { get; set; }
+    public ParameterCollection InputParameters { get; set; } = [];
+    public ParameterCollection OutputParameters { get; set; } = [];
     public EntityImageCollection PreEntityImages { get; set; } = [];
     public EntityImageCollection PostEntityImages { get; set; } = [];
     public ParameterCollection SharedVariables { get; set; } = [];
     public Guid InitiatingUserId { get; set; } = Guid.NewGuid();
     public Guid CorrelationId { get; set; } = Guid.NewGuid();
-    public IOrganizationService OrganizationService { get; set; }
+    public IOrganizationService? OrganizationService { get; set; }
     public ITracingService TracingService { get; set; } = Substitute.For<ITracingService>();
     public ILogger Logger { get; set; } = Substitute.For<ILogger>();
 
@@ -77,144 +103,6 @@ public class PluginExecutionContextBuilder
 
         return serviceProvider;
     }
-}
-
-public static class PluginExecutionContextBuilderExtensions
-{
-    public static TPluginExecutionContextBuilder WithTarget<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, Entity target)
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.Target = new Target(target);
-        return builder;
-    }
-
-    public static TPluginExecutionContextBuilder WithTarget<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, EntityReference target)
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.Target = new Target(target);
-        return builder;
-    }
-
-    public static TPluginExecutionContextBuilder WithPreEntityImage<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, Entity preImage, string name = "PreImage")
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.PreEntityImages.Add(name, preImage);
-        return builder;
-    }
-
-    public static TPluginExecutionContextBuilder WithPreEntityImages<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, EntityImageCollection preImages)
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.PreEntityImages = preImages;
-        return builder;
-    }
-
-    public static TPluginExecutionContextBuilder WithPostEntityImage<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, Entity postImage, string name = "PostImage")
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.PostEntityImages.Add(name, postImage);
-        return builder;
-    }
-
-    public static TPluginExecutionContextBuilder WithPostEntityImages<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, EntityImageCollection postImages)
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.PostEntityImages = postImages;
-        return builder;
-    }
-
-    public static TPluginExecutionContextBuilder WithInputParameter<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, string key, object value)
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.InputParameters.Add(key, value);
-        return builder;
-    }
-
-    public static TPluginExecutionContextBuilder WithInputParameters<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, ParameterCollection parameters)
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.InputParameters = parameters;
-        return builder;
-    }
-
-    public static TPluginExecutionContextBuilder WithOutputParameter<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, string key, object value)
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.OutputParameters.Add(key, value);
-        return builder;
-    }
-
-    public static TPluginExecutionContextBuilder WithOutputParameters<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, ParameterCollection parameters)
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.OutputParameters = parameters;
-        return builder;
-    }
-
-    public static TPluginExecutionContextBuilder WithSharedVariable<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, string key, object value)
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.SharedVariables.Add(key, value);
-        return builder;
-    }
-
-    public static TPluginExecutionContextBuilder WithSharedVariables<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, ParameterCollection parameters)
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.SharedVariables = parameters;
-        return builder;
-    }
-
-    public static PluginExecutionContextBuilder WithInitiatingUserId<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, Guid userId)
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.InitiatingUserId = userId;
-        return builder;
-    }
-
-    public static PluginExecutionContextBuilder WithCorrelationId<TPluginExecutionContextBuilder>(this TPluginExecutionContextBuilder builder, Guid correlationId)
-        where TPluginExecutionContextBuilder : PluginExecutionContextBuilder
-    {
-        builder.CorrelationId = correlationId;
-        return builder;
-    }
-}
-
-public record Target
-{
-    public Target(Entity target)
-    {
-        Id = target.Id;
-        LogicalName = target.LogicalName;
-        Value = target;
-    }
-
-    public Target(EntityReference target)
-    {
-        Id = target.Id;
-        LogicalName = target.LogicalName;
-        Value = target;
-    }
-
-    public Guid Id { get; }
-    public string LogicalName { get; }
-    public object Value { get; }
-}
-
-public class DataverseStubBuilder : PluginExecutionContextBuilder
-{
-    public new DataverseStub OrganizationService { get; set; }
-}
-
-public static class DataverseStubBuilderExtensions
-{
-    public static DataverseStubBuilder WithData(this DataverseStubBuilder builder, params Entity[] records)
-    {
-        builder.OrganizationService.AddRange(records);
-        return builder;
-    }
-
-    // TODO add more extension methods e.g. to add stubs
 }
 
 // TODO move this class to separate package (dependency to AssemblyPower)
@@ -283,6 +171,9 @@ public class TestClass
             .WithData(new Entity("account"), new Entity("contact"))
             .BuildServiceProvider();
 
+        var serviceProviderWithCustomServices = new PluginExecutionContextBuilder(new MyFakeTracingService(), new MyFakeLogger())
+            .BuildServiceProvider();
+
         var plugin = new MyPlugin();
 
         // Act
@@ -296,4 +187,86 @@ public class TestClass
 public class MyPlugin : IPlugin
 {
     public void Execute(IServiceProvider serviceProvider) => throw new NotImplementedException();
+}
+
+public class MyFakeTracingService : ITracingService
+{
+    public void Trace(string format, params object[] args) => throw new NotImplementedException();
+}
+
+public class MyFakeLogger : ILogger
+{
+    public IDisposable BeginScope<TState>(TState state) => throw new NotImplementedException();
+
+    public IDisposable BeginScope(string messageFormat, params object[] args) => throw new NotImplementedException();
+
+    public bool IsEnabled(LogLevel logLevel) => throw new NotImplementedException();
+
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) => throw new NotImplementedException();
+
+    public void Log(LogLevel logLevel, EventId eventId, Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void Log(LogLevel logLevel, EventId eventId, string message, params object[] args) => throw new NotImplementedException();
+
+    public void Log(LogLevel logLevel, Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void Log(LogLevel logLevel, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogCritical(EventId eventId, Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogCritical(EventId eventId, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogCritical(Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogCritical(string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogDebug(EventId eventId, Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogDebug(EventId eventId, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogDebug(Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogDebug(string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogError(EventId eventId, Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogError(EventId eventId, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogError(Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogError(string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogInformation(EventId eventId, Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogInformation(EventId eventId, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogInformation(Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogInformation(string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogTrace(EventId eventId, Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogTrace(EventId eventId, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogTrace(Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogTrace(string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogWarning(EventId eventId, Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogWarning(EventId eventId, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogWarning(Exception exception, string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogWarning(string message, params object[] args) => throw new NotImplementedException();
+
+    public void LogMetric(string metricName, long value) => throw new NotImplementedException();
+
+    public void LogMetric(string metricName, IDictionary<string, string> metricDimensions, long value) => throw new NotImplementedException();
+
+    public void AddCustomProperty(string propertyName, string propertyValue) => throw new NotImplementedException();
+
+    public void Execute(string activityName, Action action, IEnumerable<KeyValuePair<string, string>> additionalCustomProperties = null) => throw new NotImplementedException();
+
+    public Task ExecuteAsync(string activityName, Func<Task> action, IEnumerable<KeyValuePair<string, string>> additionalCustomProperties = null) => throw new NotImplementedException();
 }

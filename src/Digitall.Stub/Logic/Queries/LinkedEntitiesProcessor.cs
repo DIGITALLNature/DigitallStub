@@ -7,6 +7,7 @@ using System.Linq;
 using System.ServiceModel;
 using System.Text.RegularExpressions;
 using Digitall.Stub.Errors;
+using Digitall.Stub.Extensions;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 

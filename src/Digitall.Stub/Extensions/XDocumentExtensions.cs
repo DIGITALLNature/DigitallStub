@@ -8,7 +8,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Microsoft.Xrm.Sdk.Query;
 
-namespace Digitall.Stub;
+namespace Digitall.Stub.Extensions;
 
 public static class XDocumentExtensions
 {
@@ -20,8 +20,7 @@ public static class XDocumentExtensions
     {
         var val = xElement.GetAttribute(attributeName)?.Value;
 
-        return "true".Equals(val, StringComparison.InvariantCultureIgnoreCase)
-               || "1".Equals(val, StringComparison.InvariantCultureIgnoreCase);
+        return "true".Equals(val, StringComparison.InvariantCultureIgnoreCase) || "1".Equals(val, StringComparison.InvariantCultureIgnoreCase);
     }
 
     public static bool IsDistincFetchXml(this XDocument xDocument) => xDocument.Root.IsAttributeTrue("distinct");
@@ -30,26 +29,19 @@ public static class XDocumentExtensions
     {
         Debug.Assert(xDocument != null, nameof(xDocument) + " != null");
         return xDocument.Elements() //fetch
-            .Elements()
-            .FirstOrDefault()
-            .ToColumnSet();
+            .Elements().FirstOrDefault().ToColumnSet();
     }
 
     public static ColumnSet ToColumnSet(this XElement el)
     {
-        var allAttributes = el.Elements()
-            .Where(e => e.Name.LocalName.Equals("all-attributes"))
-            .FirstOrDefault();
+        var allAttributes = el.Elements().Where(e => e.Name.LocalName.Equals("all-attributes")).FirstOrDefault();
 
         if (allAttributes != null)
         {
             return new ColumnSet(true);
         }
 
-        var attributes = el.Elements()
-            .Where(e => e.Name.LocalName.Equals("attribute"))
-            .Select(e => e.GetAttribute("name").Value)
-            .ToArray();
+        var attributes = el.Elements().Where(e => e.Name.LocalName.Equals("attribute")).Select(e => e.GetAttribute("name").Value).ToArray();
 
 
         return new ColumnSet(attributes);
@@ -75,22 +67,15 @@ public static class XDocumentExtensions
     public static int? ToCount(this XDocument xlDoc) =>
         //Check if all-attributes exist
         xlDoc.Elements() //fetch
-            .FirstOrDefault()
-            .ToCount();
+            .FirstOrDefault().ToCount();
 
     public static List<OrderExpression> ToOrderExpressionList(this XDocument xlDoc)
     {
         var orderByElements = xlDoc.Elements() //fetch
             .Elements() //entity
             .Elements() //child nodes of entity
-            .Where(el => el.Name.LocalName.Equals("order"))
-            .Select(el =>
-                new OrderExpression
-                {
-                    AttributeName = el.GetAttribute("attribute").Value,
-                    OrderType = el.IsAttributeTrue("descending") ? OrderType.Descending : OrderType.Ascending
-                })
-            .ToList();
+            .Where(el => el.Name.LocalName.Equals("order")).Select(el =>
+                new OrderExpression { AttributeName = el.GetAttribute("attribute").Value, OrderType = el.IsAttributeTrue("descending") ? OrderType.Descending : OrderType.Ascending }).ToList();
 
         return orderByElements;
     }
@@ -116,8 +101,7 @@ public static class XDocumentExtensions
     public static int? ToPageNumber(this XDocument xlDoc) =>
         //Check if all-attributes exist
         xlDoc.Elements() //fetch
-            .FirstOrDefault()
-            .ToPageNumber();
+            .FirstOrDefault().ToPageNumber();
 
 
     public static bool ToReturnTotalRecordCount(this XElement el)
@@ -139,8 +123,7 @@ public static class XDocumentExtensions
 
     public static bool ToReturnTotalRecordCount(this XDocument xlDoc) =>
         xlDoc.Elements() //fetch
-            .FirstOrDefault()
-            .ToReturnTotalRecordCount();
+            .FirstOrDefault().ToReturnTotalRecordCount();
 
     public static int? ToTopCount(this XElement el)
     {
@@ -163,8 +146,7 @@ public static class XDocumentExtensions
     public static int? ToTopCount(this XDocument xlDoc) =>
         //Check if all-attributes exist
         xlDoc.Elements() //fetch
-            .FirstOrDefault()
-            .ToTopCount();
+            .FirstOrDefault().ToTopCount();
 
     public static bool IsFetchXmlNodeValid(this XElement elem)
     {
@@ -187,15 +169,12 @@ public static class XDocumentExtensions
                 return elem.GetAttribute("name") != null;
 
             case "link-entity":
-                return elem.GetAttribute("name") != null
-                       && elem.GetAttribute("from") != null
-                       && elem.GetAttribute("to") != null;
+                return elem.GetAttribute("name") != null && elem.GetAttribute("from") != null && elem.GetAttribute("to") != null;
 
             case "order":
                 if (elem.Document.IsAggregateFetchXml())
                 {
-                    return elem.GetAttribute("alias") != null
-                           && elem.GetAttribute("attribute") == null;
+                    return elem.GetAttribute("alias") != null && elem.GetAttribute("attribute") == null;
                 }
                 else
                 {
@@ -203,12 +182,10 @@ public static class XDocumentExtensions
                 }
 
             case "condition":
-                return elem.GetAttribute("attribute") != null
-                       && elem.GetAttribute("operator") != null;
+                return elem.GetAttribute("attribute") != null && elem.GetAttribute("operator") != null;
 
             default:
                 throw new Exception(string.Format("Node {0} is not a valid FetchXml node or it doesn't have the required attributes", elem.Name.LocalName));
         }
     }
-
 }

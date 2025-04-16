@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Digitall.Stub.OrganizationRequests;
 using Microsoft.Xrm.Sdk;
 
-namespace Digitall.Stub;
+namespace Digitall.Stub.Extensions;
 
 public static class PluginTestContextBuilderExtensions
 {
