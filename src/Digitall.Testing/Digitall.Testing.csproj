@@ -14,7 +14,7 @@
       </PackageReference>
     </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="$(Configuration) != 'Release'">
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>$(AssemblyName).Tests</_Parameter1>
     </AssemblyAttribute>
