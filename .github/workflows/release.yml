@@ -1,0 +1,40 @@
+name: Release Digitall.Testing
+
+on:
+  push:
+    branches: [ "main", "beta" ]
+
+jobs:
+  release:
+    name: Semantic Release
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.CI_GITHUB_TOKEN }}
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Restore DotNet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.x
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      - name: Install packages
+        run: npm ci --no-fund --ignore-scripts
+      - name: Materialize Signing Key
+        id: write_sign_key_file
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: 'key.snk'
+          encodedString: ${{ secrets.SIGNING_KEY }}
+      - name: Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_TOKEN: ${{ secrets.NUGET_TOKEN }}
+          AssemblyOriginatorKeyFile: ${{ steps.write_sign_key_file.outputs.filePath }}
+        run: npx semantic-release

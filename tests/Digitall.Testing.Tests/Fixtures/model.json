@@ -1,0 +1,24 @@
+{
+  "Entities": [
+    "usersettings",
+    "transactioncurrency",
+    "serviceendpoint",
+    "annotation",
+    "account",
+    "contact"
+  ],
+  "Actions": [
+  ],
+  "CustomAPIs": [
+  ],
+  "AdditionalSdkMessages": [
+    "Disassociate",
+    "Associate"
+  ],
+  "SuppressTypeScript": true,
+  "SuppressMetaData": true,
+    "SuppressNullableSupport": true,
+  "EditableReadOnlyProperties": true,
+  "UseBaseLanguage": true,
+    "NameSpace": "Digitall.Stub.Tests.Fixtures"
+}
