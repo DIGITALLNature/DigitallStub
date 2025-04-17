@@ -32,4 +32,17 @@ public static class FakedDataverseBuilderExtensions
         builder.OrganizationService.AddRequests(requests);
         return builder;
     }
+
+    /// <summary>
+    /// Retrieves the underlying FakedDataverse service from the FakedDataverseBuilder at call time.
+    /// </summary>
+    /// <param name="builder">The FakedDataverseBuilder instance.</param>
+    /// <param name="service">The output parameter for the FakedDataverse service.</param>
+    /// <returns>The same FakedDataverseBuilder instance for method chaining.</returns>
+    public static FakedDataverseBuilder GetFakedDataverse(this FakedDataverseBuilder builder, out FakedDataverse service)
+    {
+        // Assign the OrganizationService from the builder to the output parameter
+        service = builder.OrganizationService;
+        return builder;
+    }
 }

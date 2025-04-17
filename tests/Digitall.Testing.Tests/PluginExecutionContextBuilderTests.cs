@@ -176,4 +176,16 @@ public class PluginExecutionContextBuilderTests
 
         tracingService.Received().Trace("TestPlugin: Execute");
     }
+
+    [TestMethod]
+    public void GetFakedDataverse_Should_Return_FakedDataverse()
+    {
+        var entity = new Entity("unittest", Guid.NewGuid());
+
+        var serviceProvider = new FakedDataverseBuilder()
+            .GetFakedDataverse(out var service)
+            .BuildServiceProvider();
+
+        service.Should().NotBeNull().And.BeOfType<FakedDataverse>();
+    }
 }
