@@ -16,6 +16,6 @@ public class FakedDataverseBuilder : PluginExecutionContextBuilder
     public new FakedDataverse OrganizationService
     {
         get => base.OrganizationService as FakedDataverse ?? throw new InvalidOperationException(@"¯\_(ツ)_/¯");
-        set { base.OrganizationService = value; }
+        private set { base.OrganizationService = value; }
     }
 }
