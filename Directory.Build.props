@@ -4,12 +4,12 @@
     <Company>DIGITALL Nature GmbH</Company>
     <Copyright>Copyright (c) DIGITALL Nature GmbH 2024</Copyright>
     <Authors>Marcel Kummerow</Authors>
-    <Product>Digitall Power Stub Dataverse</Product>
+    <Product>Digitall Power Testing Dataverse</Product>
     <PackageLicenseExpression>MS-RL</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/DIGITALLNature/DigitallStub</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/DIGITALLNature/DigitallTesting</PackageProjectUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>https://github.com/DIGITALLNature/DigitallStub/blob/main/CHANGELOG.md</PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/DIGITALLNature/DigitallTesting/blob/main/CHANGELOG.md</PackageReleaseNotes>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <SignAssembly>True</SignAssembly>
   </PropertyGroup>
