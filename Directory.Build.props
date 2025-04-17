@@ -15,10 +15,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFramework>net462</TargetFramework>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <LangVersion>latest</LangVersion>
     <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+    <Nullable>enable</Nullable>
+    <TargetFrameworks>net462;net8.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
