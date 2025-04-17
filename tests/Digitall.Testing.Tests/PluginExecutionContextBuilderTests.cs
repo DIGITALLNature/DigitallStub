@@ -3,6 +3,7 @@ using Digitall.Testing.Extensions;
 using Digitall.Testing.Tests.Fixtures;
 using Digitall.Testing.Tests.Fixtures.SamplePlugin;
 using FluentAssertions;
+using Microsoft.Extensions.Time.Testing;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using NSubstitute;
@@ -180,12 +181,33 @@ public class PluginExecutionContextBuilderTests
     [TestMethod]
     public void GetFakedDataverse_Should_Return_FakedDataverse()
     {
-        var entity = new Entity("unittest", Guid.NewGuid());
-
         var serviceProvider = new FakedDataverseBuilder()
             .GetFakedDataverse(out var service)
             .BuildServiceProvider();
 
         service.Should().NotBeNull().And.BeOfType<FakedDataverse>();
+    }
+
+    [TestMethod]
+    public void FakedDataverseBuilder_With_Custom_TimeProvider()
+    {
+        var serviceProvider = new FakedDataverseBuilder(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero)))
+            .GetFakedDataverse(out var service)
+            .BuildServiceProvider();
+
+        service.Should().NotBeNull().And.BeOfType<FakedDataverse>();
+        service.TimeProvider.GetUtcNow().Year.Should().Be(2000);
+    }
+
+    [TestMethod]
+    public void FakedDataverseBuilder_With_Custom_FakeDataverse()
+    {
+        var fakeDataverse = new FakedDataverse(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero)));
+        var serviceProvider = new FakedDataverseBuilder(fakeDataverse)
+            .GetFakedDataverse(out var service)
+            .BuildServiceProvider();
+
+        service.Should().NotBeNull().And.BeOfType<FakedDataverse>();
+        service.TimeProvider.GetUtcNow().Year.Should().Be(2000);
     }
 }
