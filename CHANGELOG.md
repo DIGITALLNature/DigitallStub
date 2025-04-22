@@ -1,3 +1,11 @@
+# [1.0.0-beta.2](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2025-04-22)
+
+
+### Features
+
+* allow TimeProvider in FakedDataverseBuilder ctors ([598d345](https://github.com/DIGITALLNature/DigitallTesting/commit/598d345271f5e336e71399fcd376657e8cd428b2))
+* expose of FakeDataverse in FakeDataverseBuilder ([49d1178](https://github.com/DIGITALLNature/DigitallTesting/commit/49d117899734e24eef30dd5d36dc853e4669e17a))
+
 # 1.0.0-beta.1 (2025-04-17)
 
 
