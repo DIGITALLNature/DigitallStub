@@ -1,3 +1,10 @@
+# [1.0.0-beta.3](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2025-04-24)
+
+
+### Bug Fixes
+
+* wrong post entity images mock ([#8](https://github.com/DIGITALLNature/DigitallTesting/issues/8)) ([f694c4f](https://github.com/DIGITALLNature/DigitallTesting/commit/f694c4f6cdf646447d75f4109f185831607fc63f))
+
 # [1.0.0-beta.2](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2025-04-22)
 
 
