@@ -89,7 +89,7 @@ public class PluginExecutionContextBuilder
         // pre / post images
         pluginExecutionContext.PreEntityImages.Returns(PreEntityImages);
         pluginExecutionContext.PreEntityImagesCollection.Returns([PreEntityImages]);
-        pluginExecutionContext.PostEntityImages.Returns(PreEntityImages);
+        pluginExecutionContext.PostEntityImages.Returns(PostEntityImages);
         pluginExecutionContext.PostEntityImagesCollection.Returns([PostEntityImages]);
 
         // shared variables
