@@ -1,3 +1,10 @@
+# [1.0.0-beta.4](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2025-04-25)
+
+
+### Features
+
+* add builder methods for relationships & entity metadata ([#9](https://github.com/DIGITALLNature/DigitallTesting/issues/9)) ([104069b](https://github.com/DIGITALLNature/DigitallTesting/commit/104069b7ba29422ee8c80c29452b4b9eca97ff99))
+
 # [1.0.0-beta.3](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2025-04-24)
 
 
