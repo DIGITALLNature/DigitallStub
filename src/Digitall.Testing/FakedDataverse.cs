@@ -66,6 +66,55 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
         }
     }
 
+    public void AddMetadata(EntityMetadata entityMetadata)
+    {
+        EntityMetadata.Add(entityMetadata.LogicalName, entityMetadata);
+
+        var relationships = new List<RelationshipMetadataBase>();
+        relationships.AddRange(entityMetadata.ManyToManyRelationships);
+        relationships.AddRange(entityMetadata.OneToManyRelationships);
+        relationships.AddRange(entityMetadata.ManyToOneRelationships);
+
+        AddRelationships(relationships);
+    }
+
+    public void AddMetadata(IEnumerable<EntityMetadata> entityMetadata)
+    {
+        foreach (var metadata in entityMetadata)
+        {
+            AddMetadata(metadata);
+        }
+    }
+
+    public void AddMetadata(params EntityMetadata[] entityMetadata)
+    {
+        foreach (var metadata in entityMetadata)
+        {
+            AddMetadata(metadata);
+        }
+    }
+
+    public void AddRelationship(RelationshipMetadataBase relationship)
+    {
+        Relationships[relationship.SchemaName] = relationship;
+    }
+
+    public void AddRelationships(IEnumerable<RelationshipMetadataBase> relationships)
+    {
+        foreach (var relationship in relationships)
+        {
+            AddRelationship(relationship);
+        }
+    }
+
+    public void AddRelationships(params RelationshipMetadataBase[] relationships)
+    {
+        foreach (var relationship in relationships)
+        {
+            AddRelationship(relationship);
+        }
+    }
+
     public void AddDefaultRequests()
     {
         Assembly a = typeof(IOrganizationRequestFake).Assembly;
