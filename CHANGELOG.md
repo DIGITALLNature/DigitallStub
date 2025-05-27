@@ -1,3 +1,10 @@
+# [1.0.0-beta.5](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.4...v1.0.0-beta.5) (2025-05-27)
+
+
+### Bug Fixes
+
+* add id attribute to intersect entity ([#10](https://github.com/DIGITALLNature/DigitallTesting/issues/10)) ([f477d4c](https://github.com/DIGITALLNature/DigitallTesting/commit/f477d4c26c1d4528a440e3d67ee9ff1a6b4cd4df))
+
 # [1.0.0-beta.4](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2025-04-25)
 
 
