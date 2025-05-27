@@ -444,6 +444,7 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
                     {
                         Attributes = new AttributeCollection
                         {
+                            { $"{manyToManyRelationshipMetadata.IntersectEntityName}id", Guid.NewGuid() },
                             { fromAttribute, entityId },
                             { toAttribute, relatedEntityReference.Id }
                         }
