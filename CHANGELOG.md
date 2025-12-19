@@ -1,3 +1,10 @@
+# [1.0.0-beta.6](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.5...v1.0.0-beta.6) (2025-12-19)
+
+
+### Features
+
+* fake for RetrieveEntity ([72c0dd8](https://github.com/DIGITALLNature/DigitallTesting/commit/72c0dd86a508061c21bab3756bb4aeed6576409f))
+
 # [1.0.0-beta.5](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.4...v1.0.0-beta.5) (2025-05-27)
 
 
