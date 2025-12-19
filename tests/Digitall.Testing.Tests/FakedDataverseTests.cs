@@ -1,8 +1,8 @@
 using System;
 using System.ServiceModel;
+using AwesomeAssertions;
 using Digitall.Testing.Errors;
 using Digitall.Testing.Tests.Fixtures;
-using FluentAssertions;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Query;

@@ -1,8 +1,8 @@
 using System;
+using AwesomeAssertions;
 using Digitall.Testing.Extensions;
 using Digitall.Testing.Tests.Fixtures;
 using Digitall.Testing.Tests.Fixtures.SamplePlugin;
-using FluentAssertions;
 using Microsoft.Extensions.Time.Testing;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;

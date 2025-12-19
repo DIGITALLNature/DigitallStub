@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AwesomeAssertions;
 using Digitall.Testing.Tests.Fixtures;
 using DotNetEnv;
-using FluentAssertions;
 using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Tests.OrganizationRequests;

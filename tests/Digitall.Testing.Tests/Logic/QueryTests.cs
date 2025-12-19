@@ -3,10 +3,10 @@
 
 using System;
 using System.Linq;
+using AwesomeAssertions;
 using Digitall.Testing.Logic.Queries;
 using Digitall.Testing.Tests.Fixtures;
 using DotNetEnv;
-using FluentAssertions;
 using Microsoft.Extensions.Time.Testing;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;

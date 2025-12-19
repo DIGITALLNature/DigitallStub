@@ -3,8 +3,8 @@
 
 using System;
 using System.Linq;
+using AwesomeAssertions;
 using Digitall.Testing.Tests.Fixtures;
-using FluentAssertions;
 
 namespace Digitall.Testing.Tests.OrganizationRequests;
 
