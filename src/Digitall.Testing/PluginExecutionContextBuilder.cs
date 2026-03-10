@@ -82,6 +82,7 @@ public class PluginExecutionContextBuilder
         pluginExecutionContext.UserId.Returns(UserId);
         pluginExecutionContext.CorrelationId.Returns(CorrelationId);
         pluginExecutionContext.Depth.Returns(Depth);
+        pluginExecutionContext.TenantId.Returns(TenantId);
 
         // parameters
         pluginExecutionContext.InputParameters.Returns(InputParameters);
@@ -124,6 +125,8 @@ public class PluginExecutionContextBuilder
 
         return serviceProvider;
     }
+
+    public Guid TenantId { get; set; } = Guid.NewGuid();
 
     public int Depth { get; set; } = 1;
 }
