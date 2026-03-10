@@ -1,3 +1,10 @@
+# [1.0.0-beta.7](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.6...v1.0.0-beta.7) (2026-03-10)
+
+
+### Features
+
+* for FakedDataverseBuild add method AddConfig ([da16128](https://github.com/DIGITALLNature/DigitallTesting/commit/da161282f2c35d82e55c23bdcc8d89e28b12bd2b))
+
 # [1.0.0-beta.6](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.5...v1.0.0-beta.6) (2025-12-19)
 
 
