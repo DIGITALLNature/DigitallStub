@@ -1,3 +1,10 @@
+# [1.0.0-beta.8](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2026-03-10)
+
+
+### Features
+
+* add Depth to PluginExecutionContextBuilder ([332cdf5](https://github.com/DIGITALLNature/DigitallTesting/commit/332cdf53b4ddbe01da66668407c4b222ddf217a1))
+
 # [1.0.0-beta.7](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.6...v1.0.0-beta.7) (2026-03-10)
 
 
