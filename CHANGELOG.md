@@ -1,3 +1,10 @@
+# [1.0.0-beta.9](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.8...v1.0.0-beta.9) (2026-03-10)
+
+
+### Features
+
+* add TenantId to PluginExecutionContextBuilder ([f77f5c9](https://github.com/DIGITALLNature/DigitallTesting/commit/f77f5c9b801cddea45a161c239f07ade8adb3328))
+
 # [1.0.0-beta.8](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2026-03-10)
 
 
