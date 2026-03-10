@@ -81,6 +81,7 @@ public class PluginExecutionContextBuilder
         pluginExecutionContext.InitiatingUserId.Returns(InitiatingUserId);
         pluginExecutionContext.UserId.Returns(UserId);
         pluginExecutionContext.CorrelationId.Returns(CorrelationId);
+        pluginExecutionContext.Depth.Returns(Depth);
 
         // parameters
         pluginExecutionContext.InputParameters.Returns(InputParameters);
@@ -123,6 +124,8 @@ public class PluginExecutionContextBuilder
 
         return serviceProvider;
     }
+
+    public int Depth { get; set; } = 1;
 }
 
 // TODO move this class to separate package (dependency to AssemblyPower)
