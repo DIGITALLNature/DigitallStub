@@ -2,6 +2,7 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System;
+using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Testing;
 
@@ -43,5 +44,27 @@ public class FakedDataverseBuilder : PluginExecutionContextBuilder
     {
         get => base.OrganizationService as FakedDataverse ?? throw new InvalidOperationException(@"¯\_(ツ)_/¯");
         private set { base.OrganizationService = value; }
+    }
+
+    public void AddConfig(string key, string defaultvalue, string? value = null)
+    {
+        var envVarDef = new Entity("environmentvariabledefinition")
+        {
+            Id = Guid.NewGuid(),
+            ["schemaname"] = key,
+            ["defaultvalue"] = defaultvalue
+        };
+        OrganizationService.Add(envVarDef);
+
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            var envVarVal = new Entity("environmentvariablevalue")
+            {
+                Id = Guid.NewGuid(),
+                ["environmentvariabledefinitionid"] = envVarDef.ToEntityReference(),
+                ["value"] = value
+            };
+            OrganizationService.Add(envVarVal);
+        }
     }
 }
