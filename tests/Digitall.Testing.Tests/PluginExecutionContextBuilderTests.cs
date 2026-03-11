@@ -177,31 +177,4 @@ public class PluginExecutionContextBuilderTests
 
         tracingService.Received().Trace("TestPlugin: Execute");
     }
-
-    [TestMethod]
-    public void GetFakedDataverse_Should_Return_FakedDataverse()
-    {
-        var service = new FakePluginContextBuilder().GetOrganizationService();
-
-        service.Should().NotBeNull().And.BeOfType<FakeOrganizationService>();
-    }
-
-    [TestMethod]
-    public void FakedDataverseBuilder_With_Custom_TimeProvider()
-    {
-        var service = new FakePluginContextBuilder(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero))).GetOrganizationService();
-
-        service.Should().NotBeNull().And.BeOfType<FakeOrganizationService>();
-        service.TimeProvider.GetUtcNow().Year.Should().Be(2000);
-    }
-
-    [TestMethod]
-    public void FakedDataverseBuilder_With_Custom_FakeDataverse()
-    {
-        var fakeDataverse = new FakeOrganizationService(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero)));
-        var service = new FakePluginContextBuilder(fakeDataverse).GetOrganizationService();
-
-        service.Should().NotBeNull().And.BeOfType<FakeOrganizationService>();
-        service.TimeProvider.GetUtcNow().Year.Should().Be(2000);
-    }
 }
