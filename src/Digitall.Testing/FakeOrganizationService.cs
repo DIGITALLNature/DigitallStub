@@ -69,9 +69,20 @@ public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationS
         EntityMetadata.Add(entityMetadata.LogicalName, entityMetadata);
 
         var relationships = new List<RelationshipMetadataBase>();
-        relationships.AddRange(entityMetadata.ManyToManyRelationships);
-        relationships.AddRange(entityMetadata.OneToManyRelationships);
-        relationships.AddRange(entityMetadata.ManyToOneRelationships);
+        if (entityMetadata.ManyToManyRelationships != null)
+        {
+            relationships.AddRange(entityMetadata.ManyToManyRelationships);
+        }
+
+        if (entityMetadata.OneToManyRelationships != null)
+        {
+            relationships.AddRange(entityMetadata.OneToManyRelationships);
+        }
+
+        if (entityMetadata.ManyToOneRelationships != null)
+        {
+            relationships.AddRange(entityMetadata.ManyToOneRelationships);
+        }
 
         AddRelationships(relationships);
     }
