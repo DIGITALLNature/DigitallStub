@@ -8,7 +8,7 @@ namespace Digitall.Testing.OrganizationRequests;
 
 public class ExecuteTransactionFake : OrganizationRequestFake<ExecuteTransactionRequest, ExecuteTransactionResponse>
 {
-    public override ExecuteTransactionResponse Execute(ExecuteTransactionRequest organizationRequest, FakedDataverse state)
+    public override ExecuteTransactionResponse Execute(ExecuteTransactionRequest organizationRequest, FakeOrganizationService state)
     {
         var response = new ExecuteTransactionResponse { ["Responses"] = new OrganizationResponseCollection() };
 

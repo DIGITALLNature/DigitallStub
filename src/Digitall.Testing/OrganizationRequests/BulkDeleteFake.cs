@@ -11,7 +11,7 @@ namespace Digitall.Testing.OrganizationRequests;
 
 public class BulkDeleteFake : OrganizationRequestFake<BulkDeleteRequest, BulkDeleteResponse>
 {
-    public override BulkDeleteResponse Execute(BulkDeleteRequest organizationRequest, FakedDataverse state)
+    public override BulkDeleteResponse Execute(BulkDeleteRequest organizationRequest, FakeOrganizationService state)
     {
         if (string.IsNullOrEmpty(organizationRequest.JobName))
         {

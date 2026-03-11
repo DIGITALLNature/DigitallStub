@@ -3,8 +3,9 @@ using AwesomeAssertions;
 using Digitall.Testing.Extensions;
 using Digitall.Testing.Tests.Fixtures;
 using Digitall.Testing.Tests.Fixtures.SamplePlugin;
-using Microsoft.Extensions.Time.Testing;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.PluginTelemetry;
 using Microsoft.Xrm.Sdk.Query;
 using NSubstitute;
 
@@ -38,7 +39,7 @@ public class PluginExecutionContextBuilderTests
     [TestMethod]
     public void PluginTestContext_FromDefaultBuilder_Should_HaveCommonServices()
     {
-        var serviceProvider = new FakedDataverseBuilder().BuildServiceProvider();
+        var serviceProvider = new FakePluginContextBuilder().BuildServiceProvider();
 
         serviceProvider.Should().NotBeNull();
 
@@ -63,7 +64,7 @@ public class PluginExecutionContextBuilderTests
     {
         var entity = new Entity("unittest", Guid.NewGuid());
 
-        var serviceProvider = new FakedDataverseBuilder()
+        var serviceProvider = new FakePluginContextBuilder()
             .AddData(entity)
             .BuildServiceProvider();
 
@@ -179,35 +180,116 @@ public class PluginExecutionContextBuilderTests
     }
 
     [TestMethod]
-    public void GetFakedDataverse_Should_Return_FakedDataverse()
+    public void SettingModeStageAndIds_Should_SetPluginExecutionContextFields()
     {
-        var serviceProvider = new FakedDataverseBuilder()
-            .GetFakedDataverse(out var service)
-            .BuildServiceProvider();
+        var initiatingUserId = Guid.NewGuid();
+        var correlationId = Guid.NewGuid();
 
-        service.Should().NotBeNull().And.BeOfType<FakedDataverse>();
+        var serviceProvider = new PluginExecutionContextBuilder
+        {
+            Mode = 1,
+            Stage = 40
+        }
+        .WithInitiatingUserId(initiatingUserId)
+        .WithCorrelationId(correlationId)
+        .WithMessageName(SdkMessageNames.Update)
+        .BuildServiceProvider();
+
+        var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
+
+        pluginContext.Should().NotBeNull();
+        pluginContext.Mode.Should().Be(1);
+        pluginContext.Stage.Should().Be(40);
+        pluginContext.InitiatingUserId.Should().Be(initiatingUserId);
+        pluginContext.CorrelationId.Should().Be(correlationId);
+        pluginContext.MessageName.Should().Be(SdkMessageNames.Update);
     }
 
     [TestMethod]
-    public void FakedDataverseBuilder_With_Custom_TimeProvider()
+    public void WithInputOutputSharedAndImages_Should_ExposeConfiguredCollections()
     {
-        var serviceProvider = new FakedDataverseBuilder(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero)))
-            .GetFakedDataverse(out var service)
+        var input = new ParameterCollection { ["in"] = 1 };
+        var output = new ParameterCollection { ["out"] = 2 };
+        var shared = new ParameterCollection { ["shared"] = 3 };
+        var preImages = new EntityImageCollection { ["Pre"] = new Entity("account", Guid.NewGuid()) };
+        var postImages = new EntityImageCollection { ["Post"] = new Entity("account", Guid.NewGuid()) };
+
+        var serviceProvider = new PluginExecutionContextBuilder()
+            .WithInputParameters(input)
+            .WithOutputParameters(output)
+            .WithSharedVariables(shared)
+            .WithPreEntityImages(preImages)
+            .WithPostEntityImages(postImages)
             .BuildServiceProvider();
 
-        service.Should().NotBeNull().And.BeOfType<FakedDataverse>();
-        service.TimeProvider.GetUtcNow().Year.Should().Be(2000);
+        var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
+        var pluginContext7 = serviceProvider.GetService(typeof(IPluginExecutionContext7)) as IPluginExecutionContext7;
+
+        pluginContext.Should().NotBeNull();
+        pluginContext7.Should().NotBeNull();
+        pluginContext.InputParameters.Should().BeSameAs(input);
+        pluginContext.OutputParameters.Should().BeSameAs(output);
+        pluginContext.SharedVariables.Should().BeSameAs(shared);
+        pluginContext.PreEntityImages.Should().BeSameAs(preImages);
+        pluginContext.PostEntityImages.Should().BeSameAs(postImages);
+        pluginContext7.PreEntityImagesCollection.Should().ContainSingle();
+        pluginContext7.PostEntityImagesCollection.Should().ContainSingle();
     }
 
     [TestMethod]
-    public void FakedDataverseBuilder_With_Custom_FakeDataverse()
+    public void OrganizationServiceFactory_Should_ReturnConfiguredService_ForAnyUser()
     {
-        var fakeDataverse = new FakedDataverse(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero)));
-        var serviceProvider = new FakedDataverseBuilder(fakeDataverse)
-            .GetFakedDataverse(out var service)
+        var organizationService = Substitute.For<IOrganizationService>();
+        var serviceProvider = new PluginExecutionContextBuilder(organizationService).BuildServiceProvider();
+
+        var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
+
+        organizationServiceFactory.Should().NotBeNull();
+        organizationServiceFactory.CreateOrganizationService(Guid.NewGuid()).Should().Be(organizationService);
+        organizationServiceFactory.CreateOrganizationService(null).Should().Be(organizationService);
+    }
+
+    [TestMethod]
+    public void LoggerConstructor_Should_RegisterILogger()
+    {
+        var logger = Substitute.For<ILogger>();
+        var serviceProvider = new PluginExecutionContextBuilder(logger).BuildServiceProvider();
+
+        var loggerFromContext = serviceProvider.GetService(typeof(ILogger));
+
+        loggerFromContext.Should().NotBeNull();
+        loggerFromContext.Should().Be(logger);
+    }
+
+    [TestMethod]
+    public void ExistingTargetParameter_Should_ThrowOnBuild_WhenTargetIsAlsoConfigured()
+    {
+        var action = () => new PluginExecutionContextBuilder()
+            .WithInputParameter("Target", new Entity("contact", Guid.NewGuid()))
+            .WithTarget(new Entity("account", Guid.NewGuid()))
             .BuildServiceProvider();
 
-        service.Should().NotBeNull().And.BeOfType<FakedDataverse>();
-        service.TimeProvider.GetUtcNow().Year.Should().Be(2000);
+        action.Should().Throw<ArgumentException>();
+    }
+
+    [TestMethod]
+    public void InvalidUserIdEnvVar_Should_DefaultToEmptyGuid()
+    {
+        var originalUserId = Environment.GetEnvironmentVariable("UserId");
+
+        try
+        {
+            Environment.SetEnvironmentVariable("UserId", "invalid-guid");
+
+            var serviceProvider = new PluginExecutionContextBuilder().BuildServiceProvider();
+            var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
+
+            pluginContext.Should().NotBeNull();
+            pluginContext.UserId.Should().Be(Guid.Empty);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("UserId", originalUserId);
+        }
     }
 }

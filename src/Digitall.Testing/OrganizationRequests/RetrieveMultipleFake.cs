@@ -17,7 +17,7 @@ namespace Digitall.Testing.OrganizationRequests;
 
 public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequest, RetrieveMultipleResponse>
     {
-        public override RetrieveMultipleResponse Execute(RetrieveMultipleRequest organizationRequest, FakedDataverse state)
+        public override RetrieveMultipleResponse Execute(RetrieveMultipleRequest organizationRequest, FakeOrganizationService state)
         {
             Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
 
@@ -203,7 +203,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             return output;
         }
 
-        internal static void PatchDateFormat(Entity record, FakedDataverse dataverse)
+        internal static void PatchDateFormat(Entity record, FakeOrganizationService dataverse)
         {
             if (dataverse.EntityMetadata.TryGetValue(record.LogicalName, out var entityMetadata))
             {

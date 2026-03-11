@@ -7,7 +7,7 @@ namespace Digitall.Testing.OrganizationRequests;
 
 public class UpdateFake : OrganizationRequestFake<UpdateRequest, UpdateResponse>
 {
-    public override UpdateResponse Execute(UpdateRequest organizationRequest, FakedDataverse state)
+    public override UpdateResponse Execute(UpdateRequest organizationRequest, FakeOrganizationService state)
     {
         state.Update(organizationRequest.Target);
 

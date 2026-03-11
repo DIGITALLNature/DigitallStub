@@ -10,7 +10,7 @@ namespace Digitall.Testing.OrganizationRequests;
 
 public class WhoAmIFake: OrganizationRequestFake<WhoAmIRequest,WhoAmIResponse>
 {
-    public override WhoAmIResponse Execute(WhoAmIRequest organizationRequest, FakedDataverse state)
+    public override WhoAmIResponse Execute(WhoAmIRequest organizationRequest, FakeOrganizationService state)
     {
         var userId = Guid.Parse(Environment.GetEnvironmentVariable("UserId") ?? Guid.Empty.ToString());
 
@@ -43,7 +43,7 @@ public class WhoAmIFake: OrganizationRequestFake<WhoAmIRequest,WhoAmIResponse>
         return buId;
     }
 
-    private static Guid GetOrganizationId(FakedDataverse state, Entity user, Guid buId) {
+    private static Guid GetOrganizationId(FakeOrganizationService state, Entity user, Guid buId) {
         var orgId = user.GetAttributeValue<Guid?>("organizationid") ?? Guid.Empty;
         if(orgId == Guid.Empty) {
             var bu = state

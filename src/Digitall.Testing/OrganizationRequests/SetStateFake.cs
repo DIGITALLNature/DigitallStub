@@ -9,7 +9,7 @@ namespace Digitall.Testing.OrganizationRequests;
 
 public class SetStateFake : OrganizationRequestFake<SetStateRequest, SetStateResponse>
 {
-    public override SetStateResponse Execute(SetStateRequest organizationRequest, FakedDataverse state)
+    public override SetStateResponse Execute(SetStateRequest organizationRequest, FakeOrganizationService state)
     { 
         Debug.Assert(state != null, nameof(state) + " != null");
         Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");

@@ -8,7 +8,7 @@ namespace Digitall.Testing.OrganizationRequests;
 
 public class CreateFake : OrganizationRequestFake<CreateRequest, CreateResponse>
 {
-    public override CreateResponse Execute(CreateRequest organizationRequest, FakedDataverse state)
+    public override CreateResponse Execute(CreateRequest organizationRequest, FakeOrganizationService state)
     {
         var guid = state.Create(organizationRequest.Target);
 

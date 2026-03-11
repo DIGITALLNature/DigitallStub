@@ -10,7 +10,7 @@ public abstract class OrganizationRequestFake<TIn, TOut> : IOrganizationRequestF
 {
     public Type ForType => typeof(TIn);
 
-    public OrganizationResponse Execute(OrganizationRequest organizationRequest, FakedDataverse state)
+    public OrganizationResponse Execute(OrganizationRequest organizationRequest, FakeOrganizationService state)
     {
         if(organizationRequest is not TIn @in)
         {
@@ -19,5 +19,5 @@ public abstract class OrganizationRequestFake<TIn, TOut> : IOrganizationRequestF
         return Execute(@in, state);
     }
 
-    public abstract TOut Execute(TIn organizationRequest,FakedDataverse state);
+    public abstract TOut Execute(TIn organizationRequest, FakeOrganizationService state);
 }

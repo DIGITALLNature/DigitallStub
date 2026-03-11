@@ -13,7 +13,7 @@ namespace Digitall.Testing.OrganizationRequests;
 
 public class RetrieveFake : OrganizationRequestFake<RetrieveRequest, RetrieveResponse>
 {
-    public override RetrieveResponse Execute(RetrieveRequest organizationRequest, FakedDataverse state)
+    public override RetrieveResponse Execute(RetrieveRequest organizationRequest, FakeOrganizationService state)
     {
         Debug.Assert(state != null, nameof(state) + " != null");
         Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");

@@ -14,7 +14,7 @@ public class DataContextTests
     [TestMethod]
     public void EmptyAccountSet_Should_Return_EmptyList()
     {
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddDefaultRequests();
 
         using (var dataContext = new DataContext(dataverse))
@@ -26,7 +26,7 @@ public class DataContextTests
     [TestMethod]
     public void FilledAccountSet_Should_NotBeEmpty()
     {
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddDefaultRequests();
 
         dataverse.Add(new Account(Guid.NewGuid()));
@@ -40,7 +40,7 @@ public class DataContextTests
     [TestMethod]
     public void ProjectionOfEarlyBound_Should_MaintainType()
     {
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddDefaultRequests();
 
         var accountId = Guid.NewGuid();

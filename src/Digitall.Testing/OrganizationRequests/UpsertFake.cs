@@ -9,7 +9,7 @@ namespace Digitall.Testing.OrganizationRequests;
 
 public class UpsertFake : OrganizationRequestFake<UpsertRequest, UpsertResponse>
 {
-    public override UpsertResponse Execute(UpsertRequest organizationRequest, FakedDataverse state)
+    public override UpsertResponse Execute(UpsertRequest organizationRequest, FakeOrganizationService state)
     {
         Debug.Assert(state != null, nameof(state) + " != null");
         Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");

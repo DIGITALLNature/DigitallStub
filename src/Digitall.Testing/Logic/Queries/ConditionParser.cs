@@ -88,7 +88,7 @@ public static class ConditionParser
 #endif
     }
 
-    public static Expression TranslateConditionExpression(QueryExpression queryExpression, FakedDataverse context, TypedConditionExpression condition, ParameterExpression entity)
+    public static Expression TranslateConditionExpression(QueryExpression queryExpression, FakeOrganizationService context, TypedConditionExpression condition, ParameterExpression entity)
     {
         Expression attributesProperty = Expression.Property(entity, "Attributes");
 
@@ -596,7 +596,7 @@ default:
                 expOrValues));
     }
 
-    private static Expression TranslateConditionExpressionGreaterThanOrEqual(FakedDataverse context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
+    private static Expression TranslateConditionExpressionGreaterThanOrEqual(FakeOrganizationService context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
         Expression.Or(
             TranslateConditionExpressionEqual(context.TimeProvider, tc, getAttributeValueExpr, containsAttributeExpr),
             TranslateConditionExpressionGreaterThan(tc, getAttributeValueExpr, containsAttributeExpr));
@@ -747,7 +747,7 @@ default:
                 expOrValues));
     }
 
-    private static Expression TranslateConditionExpressionLessThanOrEqual(FakedDataverse context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
+    private static Expression TranslateConditionExpressionLessThanOrEqual(FakeOrganizationService context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
         Expression.Or(
             TranslateConditionExpressionEqual(context.TimeProvider, tc, getAttributeValueExpr, containsAttributeExpr),
             TranslateConditionExpressionLessThan(tc, getAttributeValueExpr, containsAttributeExpr));

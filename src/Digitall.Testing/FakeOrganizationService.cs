@@ -18,11 +18,11 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing;
 
-public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
+public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationService
 {
     public readonly TimeProvider TimeProvider = timeProvider;
 
-    public FakedDataverse(): this(TimeProvider.System)
+    public FakeOrganizationService() : this(TimeProvider.System)
     {
     }
 
@@ -34,15 +34,13 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
 
     internal Dictionary<string, Dictionary<Guid, Entity>> State { get; } = new();
 
-    internal Dictionary<Type,IOrganizationRequestFake> OrganizationRequestFakes { get; } = new();
+    internal Dictionary<Type, IOrganizationRequestFake> OrganizationRequestFakes { get; } = new();
 
     private static List<Assembly> SearchProxyTypesAssembly()
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        return assemblies
-            .Where(assembly => !assembly.FullName.StartsWith("Microsoft.Xrm.Sdk", StringComparison.Ordinal)) // Ignore SDK
-            .Where(assembly => assembly.GetCustomAttributes(typeof(ProxyTypesAssemblyAttribute), true).Length != 0)
-            .ToList();
+        return assemblies.Where(assembly => !assembly.FullName.StartsWith("Microsoft.Xrm.Sdk", StringComparison.Ordinal)) // Ignore SDK
+            .Where(assembly => assembly.GetCustomAttributes(typeof(ProxyTypesAssemblyAttribute), true).Length != 0).ToList();
     }
 
     public void AddRequest(IOrganizationRequestFake fake)
@@ -118,8 +116,8 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
     public void AddDefaultRequests()
     {
         Assembly a = typeof(IOrganizationRequestFake).Assembly;
-        var requests = a.GetTypes()
-            .Where(type => type.IsClass && type is { IsAbstract: false, Namespace: "Digitall.Testing.OrganizationRequests" } && typeof(IOrganizationRequestFake).IsAssignableFrom(type)).ToList();
+        var requests = a.GetTypes().Where(type =>
+            type.IsClass && type is { IsAbstract: false, Namespace: "Digitall.Testing.OrganizationRequests" } && typeof(IOrganizationRequestFake).IsAssignableFrom(type)).ToList();
 
         foreach (var request in requests)
         {
@@ -144,8 +142,7 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
         var logicalName = "";
         if (typeParameter.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true).Length > 0)
         {
-            logicalName =
-                (typeParameter.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true)[0] as EntityLogicalNameAttribute).LogicalName;
+            logicalName = (typeParameter.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true)[0] as EntityLogicalNameAttribute).LogicalName;
         }
 
         if (string.IsNullOrWhiteSpace(logicalName))
@@ -188,8 +185,7 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
         {
             if (State.TryGetValue(entityRef.LogicalName, out var refState))
             {
-                var match = refState.Values
-                    .SingleOrDefault(e => entityRef.KeyAttributes.All(k => e.Contains(k.Key) && e[k.Key].Equals(k.Value)));
+                var match = refState.Values.SingleOrDefault(e => entityRef.KeyAttributes.All(k => e.Contains(k.Key) && e[k.Key].Equals(k.Value)));
 
                 if (match is not null)
                 {
@@ -225,13 +221,8 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
     {
         foreach (var modelAssembly in ModelAssemblies)
         {
-            var type = modelAssembly
-                .GetTypes()
-                .Where(t => typeof(Entity).IsAssignableFrom(t))
-                .Where(t => t.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true).Length > 0)
-                .SingleOrDefault(t =>
-                    ((EntityLogicalNameAttribute)t.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true)[0])
-                    .LogicalName.Equals(logicalname.ToLower()));
+            var type = modelAssembly.GetTypes().Where(t => typeof(Entity).IsAssignableFrom(t)).Where(t => t.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true).Length > 0)
+                .SingleOrDefault(t => ((EntityLogicalNameAttribute)t.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true)[0]).LogicalName.Equals(logicalname.ToLower()));
             if (type != null)
             {
                 EntityType = type;
@@ -256,12 +247,8 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
         attributeInfo = null;
         if (EntityTypeIsKnow(entity, out var entityType))
         {
-            attributeInfo = entityType
-                .GetProperties()
-                .Where(pi => pi.GetCustomAttributes(typeof(AttributeLogicalNameAttribute), true).Length > 0)
-                .FirstOrDefault(pi =>
-                    (pi.GetCustomAttributes(typeof(AttributeLogicalNameAttribute), true)[0] as
-                        AttributeLogicalNameAttribute).LogicalName.Equals(attribute));
+            attributeInfo = entityType.GetProperties().Where(pi => pi.GetCustomAttributes(typeof(AttributeLogicalNameAttribute), true).Length > 0).FirstOrDefault(pi =>
+                (pi.GetCustomAttributes(typeof(AttributeLogicalNameAttribute), true)[0] as AttributeLogicalNameAttribute).LogicalName.Equals(attribute));
         }
 
         return attributeInfo != null;
@@ -291,8 +278,7 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
         if (!IsKnownAttributeForType(entityLogicalName, attributeLogicalName, out _))
         {
             // Check if the attribute exists in the entity's metadata
-            if (!EntityMetadata.TryGetValue(entityLogicalName, out var entityMetadata)
-                || entityMetadata.Attributes.All(a => a.LogicalName != attributeLogicalName))
+            if (!EntityMetadata.TryGetValue(entityLogicalName, out var entityMetadata) || entityMetadata.Attributes.All(a => a.LogicalName != attributeLogicalName))
             {
                 // Throw a FaultException with a specific message
                 ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoAttribute, $"The attribute {attributeLogicalName} does not exist on this entity.");
@@ -300,7 +286,7 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
         }
     }
 
-    #region IOrganizationServer
+    #region IOrganizationService
 
     /// <summary>
     ///     Creates a new entity in the Dataverse.
@@ -314,7 +300,7 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
     {
         if (entity == null)
         {
-            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument,"Required field 'Target' is missing");
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Required field 'Target' is missing");
         }
 
         var clone = entity.CloneEntity();
@@ -355,7 +341,7 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
     {
         if (entity == null)
         {
-            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument,"Required field 'Target' is missing");
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Required field 'Target' is missing");
         }
 
         if (!State.TryGetValue(entity.LogicalName, out var value))
@@ -375,7 +361,7 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
     {
         if (entityName == null)
         {
-            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument,"Required member 'LogicalName' missing for field 'Target'");
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Required member 'LogicalName' missing for field 'Target'");
         }
 
         if (!State.TryGetValue(entityName, out var value))
@@ -407,67 +393,62 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
     {
         var relationshipMetadata = GetRelationship(relationship.SchemaName);
 
-            if (relationshipMetadata == null)
+        if (relationshipMetadata == null)
+        {
+            throw new Exception($"Relationship {relationship.SchemaName} does not exist in the metadata cache");
+        }
+
+
+        foreach (var relatedEntityReference in relatedEntities)
+        {
+            if (relationshipMetadata is ManyToManyRelationshipMetadata manyToManyRelationshipMetadata)
             {
-                throw new Exception($"Relationship {relationship.SchemaName} does not exist in the metadata cache");
+                var isFrom1to2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
+                var fromAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
+                var toAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
+                var fromEntityName = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1LogicalName : manyToManyRelationshipMetadata.Entity2LogicalName;
+                var toEntityName = isFrom1to2 ? manyToManyRelationshipMetadata.Entity2LogicalName : manyToManyRelationshipMetadata.Entity1LogicalName;
+
+                //Check records exist
+                var targetExists = CreateQuery(fromEntityName).FirstOrDefault(e => e.Id == entityId) != null;
+
+                if (!targetExists)
+                {
+                    throw new Exception($"{fromEntityName} with Id {entityId.ToString()} doesn't exist");
+                }
+
+                var relatedExists = CreateQuery(toEntityName).FirstOrDefault(e => e.Id == relatedEntityReference.Id) != null;
+
+                if (!relatedExists)
+                {
+                    throw new Exception($"{toEntityName} with Id {relatedEntityReference.Id.ToString()} doesn't exist");
+                }
+
+                var association = new Entity(manyToManyRelationshipMetadata.IntersectEntityName)
+                {
+                    Attributes = new AttributeCollection
+                    {
+                        { $"{manyToManyRelationshipMetadata.IntersectEntityName}id", Guid.NewGuid() }, { fromAttribute, entityId }, { toAttribute, relatedEntityReference.Id }
+                    }
+                };
+
+                Create(association);
             }
-
-
-            foreach (var relatedEntityReference in relatedEntities)
+            else if (relationshipMetadata is OneToManyRelationshipMetadata oneToManyRelationshipMetadata)
             {
-                if(relationshipMetadata is ManyToManyRelationshipMetadata manyToManyRelationshipMetadata)
+                //Get entity to update
+                var entityToUpdate = new Entity(relatedEntityReference.LogicalName)
                 {
-                    var isFrom1to2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
-                    var fromAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
-                    var toAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
-                    var fromEntityName = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1LogicalName : manyToManyRelationshipMetadata.Entity2LogicalName;
-                    var toEntityName = isFrom1to2 ? manyToManyRelationshipMetadata.Entity2LogicalName : manyToManyRelationshipMetadata.Entity1LogicalName;
+                    Id = relatedEntityReference.Id, [oneToManyRelationshipMetadata.ReferencingAttribute] = new EntityReference(entityName, entityId)
+                };
 
-                    //Check records exist
-                    var targetExists = CreateQuery(fromEntityName)
-                        .FirstOrDefault(e => e.Id == entityId) != null;
-
-                    if (!targetExists)
-                    {
-                        throw new Exception($"{fromEntityName} with Id {entityId.ToString()} doesn't exist");
-                    }
-
-                    var relatedExists = CreateQuery(toEntityName)
-                        .FirstOrDefault(e => e.Id == relatedEntityReference.Id) != null;
-
-                    if (!relatedExists)
-                    {
-                        throw new Exception($"{toEntityName} with Id {relatedEntityReference.Id.ToString()} doesn't exist");
-                    }
-
-                    var association = new Entity(manyToManyRelationshipMetadata.IntersectEntityName)
-                    {
-                        Attributes = new AttributeCollection
-                        {
-                            { $"{manyToManyRelationshipMetadata.IntersectEntityName}id", Guid.NewGuid() },
-                            { fromAttribute, entityId },
-                            { toAttribute, relatedEntityReference.Id }
-                        }
-                    };
-
-                    Create(association);
-                }
-                else if (relationshipMetadata is OneToManyRelationshipMetadata oneToManyRelationshipMetadata)
-                {
-                    //Get entity to update
-                    var entityToUpdate = new Entity(relatedEntityReference.LogicalName)
-                    {
-                        Id = relatedEntityReference.Id,
-                        [oneToManyRelationshipMetadata.ReferencingAttribute] = new EntityReference(entityName, entityId)
-                    };
-
-                    Update(entityToUpdate);
-                }
-                else
-                {
-                    throw new ArgumentException("RelationShip Metadata is not typed correctly");
-                }
+                Update(entityToUpdate);
             }
+            else
+            {
+                throw new ArgumentException("RelationShip Metadata is not typed correctly");
+            }
+        }
     }
 
 
@@ -483,17 +464,13 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
 
         foreach (var relatedEntity in relatedEntities)
         {
-            if(relationshipMetadata is ManyToManyRelationshipMetadata manyToManyRelationshipMetadata)
+            if (relationshipMetadata is ManyToManyRelationshipMetadata manyToManyRelationshipMetadata)
             {
                 var isFrom1to2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
                 var fromAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
                 var toAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
 
-                var query = new QueryExpression(manyToManyRelationshipMetadata.IntersectEntityName)
-                {
-                    ColumnSet = new ColumnSet(true),
-                    Criteria = new FilterExpression(LogicalOperator.And)
-                };
+                var query = new QueryExpression(manyToManyRelationshipMetadata.IntersectEntityName) { ColumnSet = new ColumnSet(true), Criteria = new FilterExpression(LogicalOperator.And) };
 
                 query.Criteria.AddCondition(new ConditionExpression(fromAttribute, ConditionOperator.Equal, entityId));
                 query.Criteria.AddCondition(new ConditionExpression(toAttribute, ConditionOperator.Equal, relatedEntity.Id));
@@ -515,7 +492,7 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
     public EntityCollection RetrieveMultiple(QueryBase query)
     {
         AddRequestIfNecessary(new RetrieveMultipleFake());
-        return ((RetrieveMultipleResponse)Execute(new RetrieveMultipleRequest{Query = query})).EntityCollection;
+        return ((RetrieveMultipleResponse)Execute(new RetrieveMultipleRequest { Query = query })).EntityCollection;
     }
 
     #endregion

@@ -66,6 +66,8 @@ public class PluginExecutionContextBuilder
     }
 
     public Guid CorrelationId { get; set; } = Guid.NewGuid();
+    public Guid TenantId { get; set; } = Guid.NewGuid();
+    public int Depth { get; set; } = 1;
 
     public IOrganizationService? OrganizationService { get; set; }
     public ITracingService TracingService { get; set; } = Substitute.For<ITracingService>();
@@ -124,61 +126,5 @@ public class PluginExecutionContextBuilder
         serviceProvider.GetService(typeof(ILogger)).Returns(Logger);
 
         return serviceProvider;
-    }
-
-    public Guid TenantId { get; set; } = Guid.NewGuid();
-
-    public int Depth { get; set; } = 1;
-}
-
-// TODO move this class to separate package (dependency to AssemblyPower)
-public class PluginExecutionContextBuilder<TPlugin, TRequest> : PluginExecutionContextBuilder where TPlugin : IPlugin where TRequest : OrganizationRequest, new()
-{
-    public PluginExecutionContextBuilder()
-    {
-        var registration = GetRegistrationInfo();
-
-        MessageName = registration.MessageName;
-        Mode = (int)registration.Mode;
-        Stage = (int)registration.Stage;
-    }
-
-    private static RegistrationInfo GetRegistrationInfo()
-    {
-        var request = new TRequest();
-        var messageName = request.RequestName;
-
-        var pluginRegistration = Attribute.GetCustomAttributes(typeof(TPlugin), typeof(PluginRegistrationAttribute)).Cast<PluginRegistrationAttribute>();
-
-        // TODO filter
-
-        return new RegistrationInfo { MessageName = messageName, Mode = PluginExecutionMode.Async, Stage = PluginExecutionStage.Post };
-    }
-
-    private record RegistrationInfo
-    {
-        public string MessageName { get; set; }
-        public PluginExecutionMode Mode { get; set; }
-        public PluginExecutionStage Stage { get; set; }
-    }
-
-    private enum PluginExecutionMode
-    {
-        // TODO use enum from AssemblyPower
-        Sync,
-        Async
-    }
-
-    private enum PluginExecutionStage
-    {
-        // TODO use enum from AssemblyPower
-        Pre,
-        Post
-    }
-
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    private class PluginRegistrationAttribute : Attribute
-    {
-        // TODO use class from AssemblyPower
     }
 }

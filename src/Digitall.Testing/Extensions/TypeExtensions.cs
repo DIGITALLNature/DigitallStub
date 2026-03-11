@@ -8,28 +8,29 @@ namespace Digitall.Testing.Extensions;
 
 public static class TypeExtensions
 {
-    public static bool IsOptionSet(this Type t)
+    extension(Type t)
     {
-        var nullableType = Nullable.GetUnderlyingType(t);
-        return t == typeof(OptionSetValue) || t.IsEnum || nullableType != null && nullableType.IsEnum;
-    }
+        public bool IsOptionSet()
+        {
+            var nullableType = Nullable.GetUnderlyingType(t);
+            return t == typeof(OptionSetValue) || t.IsEnum || nullableType is { IsEnum: true };
+        }
 
+        public bool IsOptionSetValueCollection()
+        {
+            var nullableType = Nullable.GetUnderlyingType(t);
+            return t == typeof(OptionSetValueCollection);
+        }
 
-    public static bool IsOptionSetValueCollection(this Type t)
-    {
-        var nullableType = Nullable.GetUnderlyingType(t);
-        return t == typeof(OptionSetValueCollection);
-    }
+        public bool IsDateTime()
+        {
+            var nullableType = Nullable.GetUnderlyingType(t);
+            return t == typeof(DateTime) || nullableType != null && nullableType == typeof(DateTime);
+        }
 
-
-    public static bool IsDateTime(this Type t)
-    {
-        var nullableType = Nullable.GetUnderlyingType(t);
-        return t == typeof(DateTime) || nullableType != null && nullableType == typeof(DateTime);
-    }
-
-    public static bool IsNullableEnum(this Type t)
-    {
-        return t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>) && t.GetGenericArguments()[0].IsEnum;
+        public bool IsNullableEnum()
+        {
+            return t.IsGenericType && t.GetGenericTypeDefinition() == typeof(Nullable<>) && t.GetGenericArguments()[0].IsEnum;
+        }
     }
 }
