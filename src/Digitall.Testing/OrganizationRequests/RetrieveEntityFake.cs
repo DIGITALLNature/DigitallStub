@@ -14,8 +14,6 @@ public class RetrieveEntityFake : OrganizationRequestFake<RetrieveEntityRequest,
     {
         Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
 
-        state.ThrowIfNotKnownEntityType(organizationRequest.LogicalName);
-
         var entityMetadata = state.EntityMetadata[organizationRequest.LogicalName];
 
         var results = new ParameterCollection {

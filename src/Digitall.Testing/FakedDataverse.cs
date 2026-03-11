@@ -519,4 +519,21 @@ public class FakedDataverse(TimeProvider timeProvider) : IOrganizationService
     }
 
     #endregion
+
+    public Entity RetrieveWithAlternateKey(string entityName, KeyAttributeCollection keys, ColumnSet columnSet)
+    {
+
+        if (!State.TryGetValue(entityName, out var value))
+        {
+            ThrowIfNotKnownEntityType(entityName);
+        }
+
+        Entity record = value.Values.SingleOrDefault(row => keys.All(key => row.Attributes.ContainsKey(key.Key) && row.Attributes[key.Key] != null && row.Attributes[key.Key].Equals(key.Value)));
+        if (record == null)
+        {
+            ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entityName}' With Key = {string.Join(",", keys.Keys)} Does Not Exist");
+        }
+
+        return record.ProjectAttributes(columnSet, this).CloneEntity();
+    }
 }
