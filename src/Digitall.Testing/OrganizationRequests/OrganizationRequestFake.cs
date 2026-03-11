@@ -19,5 +19,5 @@ public abstract class OrganizationRequestFake<TIn, TOut> : IOrganizationRequestF
         return Execute(@in, state);
     }
 
-    public abstract TOut Execute(TIn organizationRequest,FakeOrganizationService state);
+    public abstract TOut Execute(TIn organizationRequest, FakeOrganizationService state);
 }
