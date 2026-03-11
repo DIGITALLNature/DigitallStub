@@ -1,3 +1,10 @@
+# [1.0.0-beta.11](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.10...v1.0.0-beta.11) (2026-03-11)
+
+
+### Features
+
+* support for RetrieveWithAlternateKey ([8d00ee4](https://github.com/DIGITALLNature/DigitallTesting/commit/8d00ee43a49ba3c98bbfbca7556472d6dcbaf699))
+
 # [1.0.0-beta.10](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.9...v1.0.0-beta.10) (2026-03-11)
 
 
