@@ -31,7 +31,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.Equal, "A Corp");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -49,7 +49,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.AccountId, ConditionOperator.Equal, Guid.Parse("00000000-0000-0000-0001-000000000001"));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -67,7 +67,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.ParentAccountId, ConditionOperator.Equal, new EntityReference(Account.EntityLogicalName, Guid.Parse("00000000-0000-0000-0001-000000000001")));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -85,7 +85,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Address1UTCOffset, ConditionOperator.Equal, -120);
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -104,7 +104,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.Equal, new Money(123));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -122,7 +122,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketingOnly, ConditionOperator.Equal, true);
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -140,7 +140,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.Equal, new DateTime(2000,1,2));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -158,7 +158,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.AccountCategoryCode, ConditionOperator.Equal, new OptionSetValue(Account.Options.AccountCategoryCode.PreferredCustomer));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -176,7 +176,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.On, new DateTime(2000,1,2));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -194,7 +194,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.Today);
 
-        var dataverse = new FakedDataverse(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc)));
+        var dataverse = new FakeOrganizationService(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc)));
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -212,7 +212,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.Yesterday);
 
-        var dataverse = new FakedDataverse(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(1)));
+        var dataverse = new FakeOrganizationService(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(1)));
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -230,7 +230,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.Tomorrow);
 
-        var dataverse = new FakedDataverse(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
+        var dataverse = new FakeOrganizationService(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -250,7 +250,7 @@ public class QueryTests
 
         Environment.SetEnvironmentVariable("BusinessUnitId", TestData.BusinessUnitId.ToString("N"));
 
-        var dataverse = new FakedDataverse(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
+        var dataverse = new FakeOrganizationService(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -269,7 +269,7 @@ public class QueryTests
 
         Environment.SetEnvironmentVariable("UserId", TestData.UserId.ToString("N"));
 
-        var dataverse = new FakedDataverse(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
+        var dataverse = new FakeOrganizationService(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -290,7 +290,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.NotEqual, "A Corp");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -308,7 +308,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.AccountId, ConditionOperator.NotEqual, Guid.Parse("00000000-0000-0000-0001-000000000001"));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -326,7 +326,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.ParentAccountId, ConditionOperator.NotEqual, new EntityReference(Account.EntityLogicalName, Guid.Parse("00000000-0000-0000-0001-000000000001")));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -344,7 +344,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Address1UTCOffset, ConditionOperator.NotEqual, -120);
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -363,7 +363,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.NotEqual, new Money(123));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -381,7 +381,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketingOnly, ConditionOperator.NotEqual, true);
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -399,7 +399,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.NotEqual, new DateTime(2000,1,2));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -417,7 +417,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.AccountCategoryCode, ConditionOperator.NotEqual, new OptionSetValue(Account.Options.AccountCategoryCode.PreferredCustomer));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -435,7 +435,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.NotOn, new DateTime(2000,1,2));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -455,7 +455,7 @@ public class QueryTests
 
         Environment.SetEnvironmentVariable("BusinessUnitId", TestData.BusinessUnitId.ToString("N"));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -474,7 +474,7 @@ public class QueryTests
 
         Environment.SetEnvironmentVariable("UserId", TestData.UserId.ToString("N"));
 
-        var dataverse = new FakedDataverse(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
+        var dataverse = new FakeOrganizationService(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -495,7 +495,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.Like, "%Corp");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -513,7 +513,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.Like, "A C%");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -531,7 +531,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.Like, "%Corp");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -549,7 +549,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.BeginsWith, "A ");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -567,7 +567,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.EndsWith, "Corp");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -585,7 +585,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.Contains, "Corp");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -606,7 +606,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.NotLike, "%Corp");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -624,7 +624,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.NotLike, "A C%");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -642,7 +642,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.NotLike, "%Corp");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -660,7 +660,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.DoesNotBeginWith, "A ");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -678,7 +678,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.DoesNotEndWith, "Corp");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -696,7 +696,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.DoesNotContain, "Corp");
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -716,7 +716,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.AccountCategoryCode, ConditionOperator.Null);
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -734,7 +734,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.AccountCategoryCode, ConditionOperator.NotNull);
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -756,7 +756,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.GreaterThan, new Money(320));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -774,7 +774,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.GreaterEqual, new Money(321));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -792,7 +792,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.LessThan, new Money(124));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -810,7 +810,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.LessEqual, new Money(123));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -832,7 +832,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.In, new Money(123),new Money(321), new Money(111));
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -851,7 +851,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition("new_accountcategorycodemultiple", ConditionOperator.ContainValues, 3);
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -870,7 +870,7 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition("new_accountcategorycodemultiple", ConditionOperator.DoesNotContainValues, 1 , 2);
 
-        var dataverse = new FakedDataverse();
+        var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 

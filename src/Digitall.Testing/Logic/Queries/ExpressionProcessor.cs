@@ -11,7 +11,7 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Logic.Queries;
 
-public class ExpressionProcessor(FakedDataverse state)
+public class ExpressionProcessor(FakeOrganizationService state)
 {
     public IQueryable<Entity> FilterQuery(QueryExpression queryExpression, IQueryable<Entity> query)
     {

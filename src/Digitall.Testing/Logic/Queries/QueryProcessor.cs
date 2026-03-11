@@ -15,12 +15,12 @@ namespace Digitall.Testing.Logic.Queries
 {
     public class QueryProcessor
     {
-        private readonly FakedDataverse _state;
+        private readonly FakeOrganizationService _state;
         readonly LinkedEntitiesProcessor _linkedEntitiesProcessor;
         readonly ExpressionProcessor _expressionProcessor;
         readonly FetchProcessor _fetchProcessor;
 
-        public QueryProcessor(FakedDataverse state)
+        public QueryProcessor(FakeOrganizationService state)
         {
             _state = state ?? throw new ArgumentNullException(nameof(state));
             _linkedEntitiesProcessor = new LinkedEntitiesProcessor(_state, this);

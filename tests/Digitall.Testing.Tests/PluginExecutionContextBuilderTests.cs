@@ -38,7 +38,7 @@ public class PluginExecutionContextBuilderTests
     [TestMethod]
     public void PluginTestContext_FromDefaultBuilder_Should_HaveCommonServices()
     {
-        var serviceProvider = new FakedDataverseBuilder().BuildServiceProvider();
+        var serviceProvider = new FakePluginContextBuilder().BuildServiceProvider();
 
         serviceProvider.Should().NotBeNull();
 
@@ -63,7 +63,7 @@ public class PluginExecutionContextBuilderTests
     {
         var entity = new Entity("unittest", Guid.NewGuid());
 
-        var serviceProvider = new FakedDataverseBuilder()
+        var serviceProvider = new FakePluginContextBuilder()
             .AddData(entity)
             .BuildServiceProvider();
 
@@ -181,33 +181,33 @@ public class PluginExecutionContextBuilderTests
     [TestMethod]
     public void GetFakedDataverse_Should_Return_FakedDataverse()
     {
-        var serviceProvider = new FakedDataverseBuilder()
+        var serviceProvider = new FakePluginContextBuilder()
             .GetFakedDataverse(out var service)
             .BuildServiceProvider();
 
-        service.Should().NotBeNull().And.BeOfType<FakedDataverse>();
+        service.Should().NotBeNull().And.BeOfType<FakeOrganizationService>();
     }
 
     [TestMethod]
     public void FakedDataverseBuilder_With_Custom_TimeProvider()
     {
-        var serviceProvider = new FakedDataverseBuilder(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero)))
+        var serviceProvider = new FakePluginContextBuilder(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero)))
             .GetFakedDataverse(out var service)
             .BuildServiceProvider();
 
-        service.Should().NotBeNull().And.BeOfType<FakedDataverse>();
+        service.Should().NotBeNull().And.BeOfType<FakeOrganizationService>();
         service.TimeProvider.GetUtcNow().Year.Should().Be(2000);
     }
 
     [TestMethod]
     public void FakedDataverseBuilder_With_Custom_FakeDataverse()
     {
-        var fakeDataverse = new FakedDataverse(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero)));
-        var serviceProvider = new FakedDataverseBuilder(fakeDataverse)
+        var fakeDataverse = new FakeOrganizationService(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero)));
+        var serviceProvider = new FakePluginContextBuilder(fakeDataverse)
             .GetFakedDataverse(out var service)
             .BuildServiceProvider();
 
-        service.Should().NotBeNull().And.BeOfType<FakedDataverse>();
+        service.Should().NotBeNull().And.BeOfType<FakeOrganizationService>();
         service.TimeProvider.GetUtcNow().Year.Should().Be(2000);
     }
 }

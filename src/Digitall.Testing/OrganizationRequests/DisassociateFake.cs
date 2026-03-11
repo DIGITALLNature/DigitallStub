@@ -7,7 +7,7 @@ namespace Digitall.Testing.OrganizationRequests;
 
 public class DisassociateFake : OrganizationRequestFake<DisassociateRequest, DisassociateResponse>
 {
-    public override DisassociateResponse Execute(DisassociateRequest organizationRequest, FakedDataverse state)
+    public override DisassociateResponse Execute(DisassociateRequest organizationRequest, FakeOrganizationService state)
     {
         state.Disassociate(organizationRequest.Target.LogicalName, organizationRequest.Target.Id, organizationRequest.Relationship, organizationRequest.RelatedEntities);
 

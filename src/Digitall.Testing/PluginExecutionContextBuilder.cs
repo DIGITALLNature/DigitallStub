@@ -18,30 +18,30 @@ public class PluginExecutionContextBuilder
 
     public PluginExecutionContextBuilder(IOrganizationService organizationService)
     {
-        OrganizationService = organizationService;
+        _organizationService = organizationService;
     }
 
     public PluginExecutionContextBuilder(ITracingService tracingService)
     {
-        TracingService = tracingService;
+        _tracingService = tracingService;
     }
 
     public PluginExecutionContextBuilder(ILogger logger)
     {
-        Logger = logger;
+        _logger = logger;
     }
 
     public PluginExecutionContextBuilder(ITracingService tracingService, ILogger logger)
     {
-        TracingService = tracingService;
-        Logger = logger;
+        _tracingService = tracingService;
+        _logger = logger;
     }
 
     public PluginExecutionContextBuilder(IOrganizationService organizationService, ITracingService tracingService, ILogger logger)
     {
-        OrganizationService = organizationService;
-        TracingService = tracingService;
-        Logger = logger;
+        _organizationService = organizationService;
+        _tracingService = tracingService;
+        _logger = logger;
     }
 
     public string? MessageName { get; set; }
@@ -66,10 +66,10 @@ public class PluginExecutionContextBuilder
     }
 
     public Guid CorrelationId { get; set; } = Guid.NewGuid();
-
-    public IOrganizationService? OrganizationService { get; set; }
-    public ITracingService TracingService { get; set; } = Substitute.For<ITracingService>();
-    public ILogger Logger { get; set; } = Substitute.For<ILogger>();
+    
+    private readonly IOrganizationService? _organizationService;
+    private readonly ITracingService _tracingService = Substitute.For<ITracingService>();
+    private readonly ILogger _logger = Substitute.For<ILogger>();
 
     public IServiceProvider BuildServiceProvider()
     {
@@ -105,7 +105,7 @@ public class PluginExecutionContextBuilder
 
         // organization service
         var organizationServiceFactory = Substitute.For<IOrganizationServiceFactory>();
-        organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(OrganizationService);
+        organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(_organizationService);
 
         // service provider
         var serviceProvider = Substitute.For<IServiceProvider>();
@@ -118,8 +118,8 @@ public class PluginExecutionContextBuilder
         serviceProvider.GetService(typeof(IPluginExecutionContext6)).Returns(pluginExecutionContext);
         serviceProvider.GetService(typeof(IPluginExecutionContext7)).Returns(pluginExecutionContext);
         serviceProvider.GetService(typeof(IOrganizationServiceFactory)).Returns(organizationServiceFactory);
-        serviceProvider.GetService(typeof(ITracingService)).Returns(TracingService);
-        serviceProvider.GetService(typeof(ILogger)).Returns(Logger);
+        serviceProvider.GetService(typeof(ITracingService)).Returns(_tracingService);
+        serviceProvider.GetService(typeof(ILogger)).Returns(_logger);
 
         return serviceProvider;
     }

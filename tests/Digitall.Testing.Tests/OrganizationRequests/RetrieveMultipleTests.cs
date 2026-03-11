@@ -24,7 +24,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void Stubs_Dispatch_Working()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName));
 
@@ -36,7 +36,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryExpression_Top()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -51,7 +51,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryExpression_Paging()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 19).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -81,7 +81,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryExpression_EmptyPageOnPaging()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -112,7 +112,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryExpression_Destinct()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
         sut.AddRange(TestData.Default);
 
         var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) {
@@ -151,7 +151,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryExpression_Empty()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -167,7 +167,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryExpression_TotalRecords()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -182,7 +182,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryExpression_Order()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 50).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}", ExchangeRate = x}));
@@ -206,7 +206,7 @@ public class RetrieveMultipleTests
    [TestMethod]
     public void QueryByAttribute_Top()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -221,7 +221,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryByAttribute_Paging()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 19).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -251,7 +251,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryByAttribute_EmptyPageOnPaging()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -282,7 +282,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryByAttribute_Empty()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -298,7 +298,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryByAttribute_TotalRecords()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -313,7 +313,7 @@ public class RetrieveMultipleTests
     [TestMethod]
     public void QueryByAttribute_Order()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 50).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}", ExchangeRate = x}));

@@ -7,7 +7,7 @@ namespace Digitall.Testing.OrganizationRequests;
 
 public class DeleteFake : OrganizationRequestFake<DeleteRequest, DeleteResponse>
 {
-    public override DeleteResponse Execute(DeleteRequest organizationRequest, FakedDataverse state)
+    public override DeleteResponse Execute(DeleteRequest organizationRequest, FakeOrganizationService state)
     {
         state.Delete(organizationRequest.Target.LogicalName, organizationRequest.Target.Id);
 

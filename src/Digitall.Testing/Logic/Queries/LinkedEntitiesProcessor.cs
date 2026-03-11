@@ -15,11 +15,11 @@ namespace Digitall.Testing.Logic.Queries
 {
     public class LinkedEntitiesProcessor
     {
-        private readonly FakedDataverse _state;
+        private readonly FakeOrganizationService _state;
         private readonly QueryProcessor _queryProcessor;
         readonly Dictionary<string, int> _linkedEntities = new Dictionary<string, int>();
 
-        public LinkedEntitiesProcessor(FakedDataverse state, QueryProcessor queryProcessor)
+        public LinkedEntitiesProcessor(FakeOrganizationService state, QueryProcessor queryProcessor)
         {
             _state = state;
             _queryProcessor = queryProcessor;

@@ -18,7 +18,7 @@ public class WhoAmITests
     [TestMethod]
     public void Stubs_Dispatch_Working()
     {
-        var sut = new FakedDataverse();
+        var sut = new FakeOrganizationService();
         sut.AddRequest(new WhoAmIFake());
 
         var result = sut.Execute(new WhoAmIRequest());

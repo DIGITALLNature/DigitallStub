@@ -12,7 +12,7 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Logic.Queries;
 
-internal class FetchProcessor(FakedDataverse state)
+internal class FetchProcessor(FakeOrganizationService state)
 {
     private readonly IEnumerable<ConditionOperator> _operatorsNotToConvertArray =
     [
