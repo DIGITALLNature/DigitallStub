@@ -34,8 +34,8 @@ public class OrganizationRequestFakeTests
         var response = (CreateResponse)_sut.Execute(request);
 
         response.id.Should().NotBe(Guid.Empty);
-        _sut.State[Account.EntityLogicalName].ContainsKey(response.id).Should().BeTrue();
-        _sut.State[Account.EntityLogicalName][response.id].GetAttributeValue<string>("name").Should().Be("Test Account");
+        _sut.InternalState[Account.EntityLogicalName].ContainsKey(response.id).Should().BeTrue();
+        _sut.InternalState[Account.EntityLogicalName][response.id].GetAttributeValue<string>("name").Should().Be("Test Account");
     }
 
     [TestMethod]
@@ -50,7 +50,7 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        _sut.State[Account.EntityLogicalName][id].GetAttributeValue<string>("name").Should().Be("New Name");
+        _sut.InternalState[Account.EntityLogicalName][id].GetAttributeValue<string>("name").Should().Be("New Name");
     }
 
     [TestMethod]
@@ -64,7 +64,7 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        _sut.State[Account.EntityLogicalName].ContainsKey(id).Should().BeFalse();
+        _sut.InternalState[Account.EntityLogicalName].ContainsKey(id).Should().BeFalse();
     }
 
     [TestMethod]
@@ -98,7 +98,7 @@ public class OrganizationRequestFakeTests
         var response = (UpsertResponse)_sut.Execute(request);
 
         response.Results["RecordCreated"].Should().Be(true);
-        _sut.State[Account.EntityLogicalName].ContainsKey(id).Should().BeTrue();
+        _sut.InternalState[Account.EntityLogicalName].ContainsKey(id).Should().BeTrue();
     }
 
     [TestMethod]
@@ -114,7 +114,7 @@ public class OrganizationRequestFakeTests
         var response = (UpsertResponse)_sut.Execute(request);
 
         response.Results["RecordCreated"].Should().Be(false);
-        _sut.State[Account.EntityLogicalName][id].GetAttributeValue<string>("name").Should().Be("Updated");
+        _sut.InternalState[Account.EntityLogicalName][id].GetAttributeValue<string>("name").Should().Be("Updated");
     }
 
     [TestMethod]
@@ -133,7 +133,7 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        var updated = _sut.State[Account.EntityLogicalName][id];
+        var updated = _sut.InternalState[Account.EntityLogicalName][id];
         updated.GetAttributeValue<OptionSetValue>("statecode").Value.Should().Be(1);
         updated.GetAttributeValue<OptionSetValue>("statuscode").Value.Should().Be(2);
     }
@@ -155,7 +155,7 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        var updated = _sut.State[Account.EntityLogicalName][id];
+        var updated = _sut.InternalState[Account.EntityLogicalName][id];
         updated.GetAttributeValue<EntityReference>("ownerid").Id.Should().Be(userId);
         updated.GetAttributeValue<EntityReference>("owninguser").Id.Should().Be(userId);
     }
@@ -232,7 +232,7 @@ public class OrganizationRequestFakeTests
         var response = (ExecuteTransactionResponse)_sut.Execute(request);
 
         response.Responses.Count.Should().Be(2);
-        _sut.State[Account.EntityLogicalName].Count.Should().Be(2);
+        _sut.InternalState[Account.EntityLogicalName].Count.Should().Be(2);
     }
 
     [TestMethod]
@@ -266,8 +266,8 @@ public class OrganizationRequestFakeTests
         var response = (Microsoft.Crm.Sdk.Messages.BulkDeleteResponse)_sut.Execute(request);
 
         response.Results.ContainsKey("JobId").Should().BeTrue();
-        _sut.State[Account.EntityLogicalName].ContainsKey(id1).Should().BeFalse();
-        _sut.State[Account.EntityLogicalName].ContainsKey(id2).Should().BeTrue();
+        _sut.InternalState[Account.EntityLogicalName].ContainsKey(id1).Should().BeFalse();
+        _sut.InternalState[Account.EntityLogicalName].ContainsKey(id2).Should().BeTrue();
     }
 
     [TestMethod]

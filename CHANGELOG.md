@@ -1,3 +1,10 @@
+# [1.0.0-beta.13](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.12...v1.0.0-beta.13) (2026-03-11)
+
+
+### Features
+
+* extract state from FakeOrganizationService into FakeOrganizationServiceState ([#12](https://github.com/DIGITALLNature/DigitallTesting/issues/12))
+
 # [1.0.0-beta.12](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.11...v1.0.0-beta.12) (2026-03-11)
 
 

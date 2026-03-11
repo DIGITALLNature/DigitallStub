@@ -20,7 +20,7 @@
         <PackageReference Include="Microsoft.PowerPlatform.Dataverse.Client" Version="1.2.10" />
         <PackageReference Include="MSTest.TestAdapter" Version="4.1.0" />
         <PackageReference Include="MSTest.TestFramework" Version="4.1.0" />
-        <PackageReference Update="Microsoft.SourceLink.GitHub" Version="10.0.103">
+        <PackageReference Update="Microsoft.SourceLink.GitHub" Version="10.0.200">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

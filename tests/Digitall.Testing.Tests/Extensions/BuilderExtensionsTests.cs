@@ -65,7 +65,7 @@ public class BuilderExtensionsTests
         builder.AddData(entity);
 
         var service = builder.GetOrganizationService();
-        service.State["account"].Should().ContainKey(entity.Id);
+        service.InternalState["account"].Should().ContainKey(entity.Id);
     }
 
     [TestMethod]
@@ -76,7 +76,7 @@ public class BuilderExtensionsTests
         builder.AddConfig("my_key", "default_val", "override_val");
 
         var service = builder.GetOrganizationService();
-        service.State.Should().ContainKey("environmentvariabledefinition");
-        service.State.Should().ContainKey("environmentvariablevalue");
+        service.InternalState.Should().ContainKey("environmentvariabledefinition");
+        service.InternalState.Should().ContainKey("environmentvariablevalue");
     }
 }

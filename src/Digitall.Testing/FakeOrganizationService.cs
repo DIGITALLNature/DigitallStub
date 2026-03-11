@@ -18,30 +18,51 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing;
 
-public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationService
+public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganizationServiceState state) : IOrganizationService
 {
     public readonly TimeProvider TimeProvider = timeProvider;
+
+    public FakeOrganizationServiceState State { get; } = state;
+
+    public FakeOrganizationService(FakeOrganizationServiceState state) : this(TimeProvider.System, state)
+    {
+    }
+
+    public FakeOrganizationService(TimeProvider timeProvider) : this(timeProvider, new FakeOrganizationServiceState())
+    {
+    }
 
     public FakeOrganizationService() : this(TimeProvider.System)
     {
     }
 
-    public List<Assembly> ModelAssemblies { get; set; } = SearchProxyTypesAssembly();
+    [Obsolete("Use State.ModelAssemblies instead.")]
+    public List<Assembly> ModelAssemblies
+    {
+        get => State.ModelAssemblies;
+        set => State.ModelAssemblies = value;
+    }
 
-    public Dictionary<string, EntityMetadata> EntityMetadata { get; set; } = new();
+    [Obsolete("Use State.EntityMetadata instead.")]
+    public Dictionary<string, EntityMetadata> EntityMetadata
+    {
+        get => State.EntityMetadata;
+        set => State.EntityMetadata = value;
+    }
 
-    public Dictionary<string, RelationshipMetadataBase> Relationships { get; set; } = new();
+    [Obsolete("Use State.Relationships instead.")]
+    public Dictionary<string, RelationshipMetadataBase> Relationships
+    {
+        get => State.Relationships;
+        set => State.Relationships = value;
+    }
 
-    internal Dictionary<string, Dictionary<Guid, Entity>> State { get; } = new();
+    internal Dictionary<string, Dictionary<Guid, Entity>> ServiceState => State.Entities;
+
+    [Obsolete("Use ServiceState or State.Entities instead. This property is kept for backward compatibility with tests but might be removed in the future.")]
+    internal Dictionary<string, Dictionary<Guid, Entity>> InternalState => ServiceState;
 
     internal Dictionary<Type, IOrganizationRequestFake> OrganizationRequestFakes { get; } = new();
-
-    private static List<Assembly> SearchProxyTypesAssembly()
-    {
-        var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        return assemblies.Where(assembly => !assembly.FullName.StartsWith("Microsoft.Xrm.Sdk", StringComparison.Ordinal)) // Ignore SDK
-            .Where(assembly => assembly.GetCustomAttributes(typeof(ProxyTypesAssemblyAttribute), true).Length != 0).ToList();
-    }
 
     public void AddRequest(IOrganizationRequestFake fake)
     {
@@ -167,7 +188,7 @@ public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationS
     public IQueryable<T> CreateQuery<T>(string entityLogicalName) where T : Entity
     {
         var entityStateCopy = new List<T>();
-        if (!State.TryGetValue(entityLogicalName, out var entityState))
+        if (!ServiceState.TryGetValue(entityLogicalName, out var entityState))
         {
             return entityStateCopy.AsQueryable(); //Empty list
         }
@@ -186,15 +207,15 @@ public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationS
 
     public void Add(Entity entity)
     {
-        if (!State.TryGetValue(entity.LogicalName, out var value))
+        if (!ServiceState.TryGetValue(entity.LogicalName, out var value))
         {
             value = new Dictionary<Guid, Entity>();
-            State.Add(entity.LogicalName, value);
+            ServiceState.Add(entity.LogicalName, value);
         }
 
         foreach (var entityRef in entity.Attributes.Values.OfType<EntityReference>().Where(er => er.KeyAttributes?.Count > 0))
         {
-            if (State.TryGetValue(entityRef.LogicalName, out var refState))
+            if (ServiceState.TryGetValue(entityRef.LogicalName, out var refState))
             {
                 var match = refState.Values.SingleOrDefault(e => entityRef.KeyAttributes.All(k => e.Contains(k.Key) && e[k.Key].Equals(k.Value)));
 
@@ -228,7 +249,7 @@ public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationS
     /// <param name="logicalname">The logical name of the entity.</param>
     /// <param name="EntityType">The Type of the entity if it is known, otherwise null.</param>
     /// <returns>True if the entity type is known, otherwise false.</returns>
-    public bool EntityTypeIsKnow(string logicalname, out Type EntityType)
+    public bool EntityTypeIsKnown(string logicalname, out Type EntityType)
     {
         foreach (var modelAssembly in ModelAssemblies)
         {
@@ -256,7 +277,7 @@ public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationS
     public bool IsKnownAttributeForType(string entity, string attribute, out PropertyInfo attributeInfo)
     {
         attributeInfo = null;
-        if (EntityTypeIsKnow(entity, out var entityType))
+        if (EntityTypeIsKnown(entity, out var entityType))
         {
             attributeInfo = entityType.GetProperties().Where(pi => pi.GetCustomAttributes(typeof(AttributeLogicalNameAttribute), true).Length > 0).FirstOrDefault(pi =>
                 (pi.GetCustomAttributes(typeof(AttributeLogicalNameAttribute), true)[0] as AttributeLogicalNameAttribute).LogicalName.Equals(attribute));
@@ -271,7 +292,7 @@ public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationS
     /// <param name="entityType">The entity type to check for knowledge.</param>
     public void ThrowIfNotKnownEntityType(string entityType)
     {
-        if (!EntityTypeIsKnow(entityType, out _))
+        if (!EntityTypeIsKnown(entityType, out _))
         {
             ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoEntity, $"The entity with a name = '{entityType}' with namemapping = 'Logical' was not found in the MetadataCache.");
         }
@@ -334,7 +355,7 @@ public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationS
 
     public Entity Retrieve(string entityName, Guid id, ColumnSet columnSet)
     {
-        if (!State.TryGetValue(entityName, out var value))
+        if (!ServiceState.TryGetValue(entityName, out var value))
         {
             ThrowIfNotKnownEntityType(entityName);
         }
@@ -355,7 +376,7 @@ public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationS
             ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Required field 'Target' is missing");
         }
 
-        if (!State.TryGetValue(entity.LogicalName, out var value))
+        if (!ServiceState.TryGetValue(entity.LogicalName, out var value))
         {
             ThrowIfNotKnownEntityType(entity.LogicalName);
         }
@@ -375,7 +396,7 @@ public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationS
             ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Required member 'LogicalName' missing for field 'Target'");
         }
 
-        if (!State.TryGetValue(entityName, out var value))
+        if (!ServiceState.TryGetValue(entityName, out var value))
         {
             ThrowIfNotKnownEntityType(entityName);
         }
@@ -406,7 +427,7 @@ public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationS
 
         if (relationshipMetadata == null)
         {
-            throw new Exception($"Relationship {relationship.SchemaName} does not exist in the metadata cache");
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Relationship {relationship.SchemaName} does not exist in the metadata cache");
         }
 
 
@@ -469,7 +490,7 @@ public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationS
 
         if (relationshipMetadata == null)
         {
-            throw new Exception($"Relationship {relationship.SchemaName} does not exist in the metadata cache");
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Relationship {relationship.SchemaName} does not exist in the metadata cache");
         }
 
 
@@ -511,7 +532,7 @@ public class FakeOrganizationService(TimeProvider timeProvider) : IOrganizationS
     public Entity RetrieveWithAlternateKey(string entityName, KeyAttributeCollection keys, ColumnSet columnSet)
     {
 
-        if (!State.TryGetValue(entityName, out var value))
+        if (!ServiceState.TryGetValue(entityName, out var value))
         {
             ThrowIfNotKnownEntityType(entityName);
         }

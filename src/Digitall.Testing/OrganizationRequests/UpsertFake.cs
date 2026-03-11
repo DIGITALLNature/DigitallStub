@@ -18,7 +18,7 @@ public class UpsertFake : OrganizationRequestFake<UpsertRequest, UpsertResponse>
         var entityId = organizationRequest.Target.Id;
 
         bool recordCreated;
-        if (state.State.ContainsKey(entityLogicalName) && state.State[entityLogicalName].ContainsKey(entityId))
+        if (state.ServiceState.ContainsKey(entityLogicalName) && state.ServiceState[entityLogicalName].ContainsKey(entityId))
         {
             recordCreated = false;
             state.Update(organizationRequest.Target);

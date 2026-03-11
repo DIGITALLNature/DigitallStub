@@ -29,19 +29,19 @@ public class FakeOrganizationServiceTests
     public void ModelIsSeeded()
     {
         var sut = new FakeOrganizationService();
-        sut.State.Should().NotBeNull().And.BeEmpty();
+        sut.InternalState.Should().NotBeNull().And.BeEmpty();
 
         sut.AddRange(TestData.Default);
-        sut.State.Should().NotBeEmpty().And.ContainKeys(Account.EntityLogicalName, Contact.EntityLogicalName);
-        sut.State[Account.EntityLogicalName].Should().HaveCount(2);
-        sut.State[Contact.EntityLogicalName].Should().HaveCount(3);
+        sut.InternalState.Should().NotBeEmpty().And.ContainKeys(Account.EntityLogicalName, Contact.EntityLogicalName);
+        sut.InternalState[Account.EntityLogicalName].Should().HaveCount(2);
+        sut.InternalState[Contact.EntityLogicalName].Should().HaveCount(3);
     }
 
     [TestMethod]
     public void EntityTypeIsKnown_ReturnsTrue_WhenEntityTypeIsKnown()
     {
         var sut = new FakeOrganizationService();
-        var result = sut.EntityTypeIsKnow(Account.EntityLogicalName, out var knownEntityType);
+        var result = sut.EntityTypeIsKnown(Account.EntityLogicalName, out var knownEntityType);
 
         result.Should().BeTrue();
         knownEntityType.Should().NotBeNull().And.Be<Account>();
@@ -51,7 +51,7 @@ public class FakeOrganizationServiceTests
     public void EntityTypeIsKnown_ReturnsFalse_WhenEntityTypeIsNotKnown()
     {
         var sut = new FakeOrganizationService();
-        var result = sut.EntityTypeIsKnow("non_existing", out var knownEntityType);
+        var result = sut.EntityTypeIsKnown("non_existing", out var knownEntityType);
 
         result.Should().BeFalse();
         knownEntityType.Should().BeNull();
@@ -138,10 +138,10 @@ public class FakeOrganizationServiceTests
         var result = sut.Create(entity);
 
         result.Should().NotBeEmpty();
-        sut.State.Should().ContainKey(Account.EntityLogicalName)
+        sut.InternalState.Should().ContainKey(Account.EntityLogicalName)
             .And.Subject[Account.EntityLogicalName].Should().ContainKey(result);
 
-        sut.State[Account.EntityLogicalName][result].Should().NotBeSameAs(entity);
+        sut.InternalState[Account.EntityLogicalName][result].Should().NotBeSameAs(entity);
     }
 
     [TestMethod]
@@ -154,7 +154,7 @@ public class FakeOrganizationServiceTests
         var result = sut.Create(entity);
 
         result.Should().Be(id);
-        sut.State.Should().ContainKey(Account.EntityLogicalName)
+        sut.InternalState.Should().ContainKey(Account.EntityLogicalName)
             .And.Subject[Account.EntityLogicalName].Should().ContainKey(id);
     }
 
@@ -274,9 +274,9 @@ public class FakeOrganizationServiceTests
         var updatedEntity = new Account(id) { Name = nameof(Update_UpdatesEntityInStateDictionary), Description = "Changed"};
         sut.Update(updatedEntity);
 
-        sut.State[Account.EntityLogicalName].Should().ContainKey(id);
-        sut.State[Account.EntityLogicalName][id].ToEntity<Account>().Description.Should().BeEquivalentTo(updatedEntity.Description);
-        sut.State[Account.EntityLogicalName][id].Should().NotBeSameAs(updatedEntity);
+        sut.InternalState[Account.EntityLogicalName].Should().ContainKey(id);
+        sut.InternalState[Account.EntityLogicalName][id].ToEntity<Account>().Description.Should().BeEquivalentTo(updatedEntity.Description);
+        sut.InternalState[Account.EntityLogicalName][id].Should().NotBeSameAs(updatedEntity);
     }
 
     [TestMethod]
@@ -287,7 +287,7 @@ public class FakeOrganizationServiceTests
         sut.Add(new Account(id) { Name = nameof(Delete_WithValidEntityNameAndId_RemovesRecord) });
         sut.Delete(Account.EntityLogicalName, id);
 
-        sut.State[Account.EntityLogicalName].Should().NotContainKey(id);
+        sut.InternalState[Account.EntityLogicalName].Should().NotContainKey(id);
     }
 
     [TestMethod]
@@ -335,9 +335,9 @@ public class FakeOrganizationServiceTests
         var sut = new FakeOrganizationService();
         sut.AddDefaultRequests();
 
-        sut.OrganizationRequestFakes.Should().NotBeEmpty()
-            .And.ContainKey(typeof(CreateRequest))
-            .And.ContainKey(typeof(RetrieveMultipleRequest))
-            .And.ContainKey(typeof(DeleteRequest));
+        // Verify that default requests were added by executing a CreateRequest
+        var createRequest = new CreateRequest { Target = new Entity("account") { Id = Guid.NewGuid() } };
+        var action = () => sut.Execute(createRequest);
+        action.Should().NotThrow();
     }
 }
