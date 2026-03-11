@@ -95,13 +95,18 @@ public static class FakeDataverseBuilderExtensions
 
             if (File.Exists(path))
             {
-                var metadata = (EntityMetadata)serializer.ReadObject(File.OpenRead(path));
-                builder.GetOrganizationService().AddMetadata(metadata);
+                using var fileStream = File.OpenRead(path);
+                var metadata = (EntityMetadata?)serializer.ReadObject(fileStream);
+                if (metadata != null) builder.GetOrganizationService().AddMetadata(metadata);
             }
             else if (Directory.Exists(path))
             {
-                var metadata = Directory.GetFiles(path, "*.xml").Select(file => (EntityMetadata)serializer.ReadObject(File.OpenRead(file)));
-                builder.GetOrganizationService().AddMetadata(metadata);
+                foreach (var file in Directory.EnumerateFiles(path, "*.xml"))
+                {
+                    using var fileStream = File.OpenRead(file);
+                    var metadata = (EntityMetadata?)serializer.ReadObject(fileStream);
+                    if (metadata != null) builder.GetOrganizationService().AddMetadata(metadata);
+                }
             }
             else
             {
