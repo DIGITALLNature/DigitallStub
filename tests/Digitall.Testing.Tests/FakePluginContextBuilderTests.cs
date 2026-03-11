@@ -11,7 +11,7 @@ namespace Digitall.Testing.Tests;
 public class FakePluginContextBuilderTests
 {
     [TestMethod]
-    public void GetOrganizationService_Should_Return_FakedDataverse()
+    public void GetOrganizationService_Should_Return_FakeOrganizationService()
     {
         var service = new FakePluginContextBuilder().GetOrganizationService();
 
