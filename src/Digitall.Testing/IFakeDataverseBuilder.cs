@@ -6,5 +6,5 @@ namespace Digitall.Testing;
 public interface IFakeDataverseBuilder<out TOrganizationService>
     where TOrganizationService : FakeOrganizationService
 {
-    TOrganizationService OrganizationService { get; }
+    TOrganizationService GetOrganizationService();
 }

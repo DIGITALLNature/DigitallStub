@@ -19,58 +19,49 @@ public static class FakeDataverseBuilderExtensions
     {
         public TBuilder AddData(IEnumerable<Entity> records)
         {
-            builder.OrganizationService.AddRange(records);
+            builder.GetOrganizationService().AddRange(records);
             return builder;
         }
 
         public TBuilder AddData(params Entity[] records)
         {
-            builder.OrganizationService.AddRange(records);
+            builder.GetOrganizationService().AddRange(records);
             return builder;
         }
 
         public TBuilder AddOrganizationRequests(IEnumerable<IOrganizationRequestFake> requests)
         {
-            builder.OrganizationService.AddRequests(requests);
+            builder.GetOrganizationService().AddRequests(requests);
             return builder;
         }
 
         public TBuilder AddOrganizationRequests(params IOrganizationRequestFake[] requests)
         {
-            builder.OrganizationService.AddRequests(requests);
+            builder.GetOrganizationService().AddRequests(requests);
             return builder;
         }
 
         public TBuilder AddEntityMetadata(IEnumerable<EntityMetadata> metadata)
         {
-            builder.OrganizationService.AddMetadata(metadata);
+            builder.GetOrganizationService().AddMetadata(metadata);
             return builder;
         }
 
         public TBuilder AddEntityMetadata(params EntityMetadata[] metadata)
         {
-            builder.OrganizationService.AddMetadata(metadata);
+            builder.GetOrganizationService().AddMetadata(metadata);
             return builder;
         }
 
         public TBuilder AddRelationships(IEnumerable<RelationshipMetadataBase> relationships)
         {
-            builder.OrganizationService.AddRelationships(relationships);
+            builder.GetOrganizationService().AddRelationships(relationships);
             return builder;
         }
 
         public TBuilder AddRelationships(params RelationshipMetadataBase[] relationships)
         {
-            builder.OrganizationService.AddRelationships(relationships);
-            return builder;
-        }
-
-        /// <summary>
-        /// Retrieves the underlying <see cref="FakeOrganizationService"/> from the builder at call time.
-        /// </summary>
-        public TBuilder GetFakedDataverse(out FakeOrganizationService service)
-        {
-            service = builder.OrganizationService;
+            builder.GetOrganizationService().AddRelationships(relationships);
             return builder;
         }
 
@@ -81,12 +72,12 @@ public static class FakeDataverseBuilderExtensions
         public TBuilder AddConfig(string key, string defaultValue, string? value = null)
         {
             var envVarDef = new Entity("environmentvariabledefinition") { Id = Guid.NewGuid(), ["schemaname"] = key, ["defaultvalue"] = defaultValue };
-            builder.OrganizationService.Add(envVarDef);
+            builder.GetOrganizationService().Add(envVarDef);
 
             if (!string.IsNullOrWhiteSpace(value))
             {
                 var envVarVal = new Entity("environmentvariablevalue") { Id = Guid.NewGuid(), ["environmentvariabledefinitionid"] = envVarDef.ToEntityReference(), ["value"] = value };
-                builder.OrganizationService.Add(envVarVal);
+                builder.GetOrganizationService().Add(envVarVal);
             }
 
             return builder;
@@ -105,12 +96,12 @@ public static class FakeDataverseBuilderExtensions
             if (File.Exists(path))
             {
                 var metadata = (EntityMetadata)serializer.ReadObject(File.OpenRead(path));
-                builder.OrganizationService.AddMetadata(metadata);
+                builder.GetOrganizationService().AddMetadata(metadata);
             }
             else if (Directory.Exists(path))
             {
                 var metadata = Directory.GetFiles(path, "*.xml").Select(file => (EntityMetadata)serializer.ReadObject(File.OpenRead(file)));
-                builder.OrganizationService.AddMetadata(metadata);
+                builder.GetOrganizationService().AddMetadata(metadata);
             }
             else
             {

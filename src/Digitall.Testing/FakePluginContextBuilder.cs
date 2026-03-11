@@ -14,38 +14,36 @@ public class FakePluginContextBuilder : PluginExecutionContextBuilder, IFakeData
     /// <summary>
     /// Creates a new instance of <see cref="FakePluginContextBuilder"/> with a default <see cref="FakeOrganizationService"/>.
     /// </summary>
-    public FakePluginContextBuilder()
+    public FakePluginContextBuilder() : this(TimeProvider.System)
     {
-        var svc = new FakeOrganizationService();
-        svc.AddDefaultRequests();
-        OrganizationService = svc;
     }
 
     /// <summary>
     /// Creates a new instance of <see cref="FakePluginContextBuilder"/> with a <see cref="FakeOrganizationService"/>
     /// using the given <see cref="TimeProvider"/>.
     /// </summary>
-    public FakePluginContextBuilder(TimeProvider timeProvider)
+    public FakePluginContextBuilder(TimeProvider timeProvider) : base(ConfigureOrganizationService(timeProvider))
     {
-        var svc = new FakeOrganizationService(timeProvider);
-        svc.AddDefaultRequests();
-        OrganizationService = svc;
     }
 
     /// <summary>
     /// Creates a new instance of <see cref="FakePluginContextBuilder"/> with the provided <see cref="FakeOrganizationService"/> instance.
     /// </summary>
-    public FakePluginContextBuilder(FakeOrganizationService fakeOrganizationService)
+    public FakePluginContextBuilder(FakeOrganizationService organizationService) : base(organizationService)
     {
-        OrganizationService = fakeOrganizationService;
     }
 
     /// <summary>
     /// Strongly typed access to the underlying <see cref="FakeOrganizationService"/>.
     /// </summary>
-    public new FakeOrganizationService OrganizationService
+    public FakeOrganizationService GetOrganizationService() =>
+        OrganizationService as FakeOrganizationService ?? throw new InvalidOperationException("OrganizationService is not a FakeOrganizationService.");
+
+    private static FakeOrganizationService ConfigureOrganizationService(TimeProvider timeProvider)
     {
-        get => base.OrganizationService as FakeOrganizationService ?? throw new InvalidOperationException("OrganizationService is not a FakeOrganizationService.");
-        private set => base.OrganizationService = value;
+        var organizationService = new FakeOrganizationService(timeProvider);
+        organizationService.AddDefaultRequests();
+
+        return organizationService;
     }
 }
