@@ -17,7 +17,7 @@ namespace Digitall.Testing.Tests;
 public class FakeDataverseBuilderTests
 {
     [TestMethod]
-    public void GetOrganizationService_Should_Return_FakedDataverseAsync()
+    public void GetOrganizationService_Should_Return_FakeOrganizationServiceAsync()
     {
         var service = new FakeDataverseBuilder().GetOrganizationService();
 
