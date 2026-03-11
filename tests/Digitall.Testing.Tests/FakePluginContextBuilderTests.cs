@@ -28,7 +28,7 @@ public class FakePluginContextBuilderTests
     }
 
     [TestMethod]
-    public void FakePluginContextBuilder_With_Custom_FakeDataverse()
+    public void FakePluginContextBuilder_With_Custom_FakeOrganizationService()
     {
         var fakeOrganizationService = new FakeOrganizationService(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero)));
         var service = new FakePluginContextBuilder(fakeOrganizationService).GetOrganizationService();
