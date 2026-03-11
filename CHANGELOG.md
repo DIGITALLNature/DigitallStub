@@ -1,3 +1,10 @@
+# [1.0.0-beta.12](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.11...v1.0.0-beta.12) (2026-03-11)
+
+
+### Features
+
+* add support for IOrganizationServiceAsync2 ([#11](https://github.com/DIGITALLNature/DigitallTesting/issues/11)) ([6ccdbfe](https://github.com/DIGITALLNature/DigitallTesting/commit/6ccdbfe185c1bc8da86c2382eafb85d48de47dba))
+
 # [1.0.0-beta.11](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.10...v1.0.0-beta.11) (2026-03-11)
 
 
