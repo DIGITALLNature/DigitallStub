@@ -1,3 +1,31 @@
+# [1.0.0-beta.11](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.10...v1.0.0-beta.11) (2026-03-11)
+
+
+### Features
+
+* support for RetrieveWithAlternateKey ([8d00ee4](https://github.com/DIGITALLNature/DigitallTesting/commit/8d00ee43a49ba3c98bbfbca7556472d6dcbaf699))
+
+# [1.0.0-beta.10](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.9...v1.0.0-beta.10) (2026-03-11)
+
+
+### Features
+
+* add Fake for Retrieve ([b5e4335](https://github.com/DIGITALLNature/DigitallTesting/commit/b5e4335d6057845ae0d4ce17d55fddf3399a85f2))
+
+# [1.0.0-beta.9](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.8...v1.0.0-beta.9) (2026-03-10)
+
+
+### Features
+
+* add TenantId to PluginExecutionContextBuilder ([f77f5c9](https://github.com/DIGITALLNature/DigitallTesting/commit/f77f5c9b801cddea45a161c239f07ade8adb3328))
+
+# [1.0.0-beta.8](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2026-03-10)
+
+
+### Features
+
+* add Depth to PluginExecutionContextBuilder ([332cdf5](https://github.com/DIGITALLNature/DigitallTesting/commit/332cdf53b4ddbe01da66668407c4b222ddf217a1))
+
 # [1.0.0-beta.7](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.6...v1.0.0-beta.7) (2026-03-10)
 
 

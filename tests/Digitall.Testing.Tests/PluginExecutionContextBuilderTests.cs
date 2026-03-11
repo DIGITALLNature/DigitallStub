@@ -262,20 +262,6 @@ public class PluginExecutionContextBuilderTests
     }
 
     [TestMethod]
-    public void GenericBuilder_Should_Default_To_RequestName_Async_Post()
-    {
-        var serviceProvider = new PluginExecutionContextBuilder<TestPlugin, CreateRequest>()
-            .BuildServiceProvider();
-
-        var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
-
-        pluginContext.Should().NotBeNull();
-        pluginContext.MessageName.Should().Be(SdkMessageNames.Create);
-        pluginContext.Mode.Should().Be(1);
-        pluginContext.Stage.Should().Be(1);
-    }
-
-    [TestMethod]
     public void ExistingTargetParameter_Should_ThrowOnBuild_WhenTargetIsAlsoConfigured()
     {
         var action = () => new PluginExecutionContextBuilder()

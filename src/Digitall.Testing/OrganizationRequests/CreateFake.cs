@@ -15,7 +15,7 @@ public class CreateFake : OrganizationRequestFake<CreateRequest, CreateResponse>
         return new CreateResponse
         {
             ResponseName = "Create",
-            Results = new ParameterCollection { { "id", guid } }
+            Results = new ParameterCollection { { nameof (CreateResponse.id), guid } }
         };
     }
 }
