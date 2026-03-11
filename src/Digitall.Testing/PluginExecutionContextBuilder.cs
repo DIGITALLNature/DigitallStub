@@ -69,9 +69,9 @@ public class PluginExecutionContextBuilder
     public Guid TenantId { get; set; } = Guid.NewGuid();
     public int Depth { get; set; } = 1;
 
-    public readonly IOrganizationService? OrganizationService;
-    public readonly ITracingService TracingService = Substitute.For<ITracingService>();
-    public readonly ILogger Logger = Substitute.For<ILogger>();
+    public IOrganizationService? OrganizationService { get; set; }
+    public ITracingService TracingService { get; set; } = Substitute.For<ITracingService>();
+    public ILogger Logger { get; set; } = Substitute.For<ILogger>();
 
     public IServiceProvider BuildServiceProvider()
     {
