@@ -28,10 +28,10 @@ public class FakePluginContextBuilderTests
     }
 
     [TestMethod]
-    public void FakePluginContextBuilder_With_Custom_FakeDataverse()
+    public void FakePluginContextBuilder_With_Custom_FakeOrganizationService()
     {
-        var fakeDataverse = new FakeOrganizationService(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero)));
-        var service = new FakePluginContextBuilder(fakeDataverse).GetOrganizationService();
+        var fakeOrganizationService = new FakeOrganizationService(new FakeTimeProvider(new DateTimeOffset(2000, 1, 1, 0, 0, 0, TimeSpan.Zero)));
+        var service = new FakePluginContextBuilder(fakeOrganizationService).GetOrganizationService();
 
         service.Should().NotBeNull().And.BeOfType<FakeOrganizationService>();
         service.TimeProvider.GetUtcNow().Year.Should().Be(2000);
