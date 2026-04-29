@@ -9,7 +9,7 @@
 #################################################################################
 version: "1.0"
 
-linter: jetbrains/qodana-cdnet:latest
+linter: jetbrains/qodana-cdnet:2026.1-eap
 
 #Specify inspection profile for code analysis
 profile:
