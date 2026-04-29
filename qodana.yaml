@@ -9,7 +9,7 @@
 #################################################################################
 version: "1.0"
 
-linter: jetbrains/qodana-cdnet:2026.1-eap
+linter: jetbrains/qodana-cdnet:latest
 
 #Specify inspection profile for code analysis
 profile:
@@ -17,6 +17,7 @@ profile:
 
 dotnet:
   solution: ./Digitall.Testing.slnx
+  configuration: Debug
 
 #Enable inspections
 include:
@@ -29,7 +30,7 @@ exclude:
       - tests
 
 #Execute shell command before Qodana execution (Applied in CI/CD pipeline)
-bootstrap: dotnet build ./Digitall.Testing.slnx
+bootstrap: dotnet restore ./Digitall.Testing.slnx && dotnet build ./Digitall.Testing.slnx --configuration Debug
 
 #Install IDE plugins before Qodana execution (Applied in CI/CD pipeline)
 #plugins:
