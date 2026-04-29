@@ -1,3 +1,10 @@
+# [1.0.0-beta.13](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.12...v1.0.0-beta.13) (2026-04-29)
+
+
+### Bug Fixes
+
+* return orgservice in PluginExecutionContextBuilder when userid is null ([bcf818a](https://github.com/DIGITALLNature/DigitallTesting/commit/bcf818a5c47a42a9d7e23a4c8222669e9047ac5b))
+
 # [1.0.0-beta.13](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.12...v1.0.0-beta.13) (2026-03-11)
 
 
