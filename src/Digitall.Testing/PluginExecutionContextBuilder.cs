@@ -110,6 +110,7 @@ public class PluginExecutionContextBuilder
         // organization service
         var organizationServiceFactory = Substitute.For<IOrganizationServiceFactory>();
         organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(OrganizationService);
+        organizationServiceFactory.CreateOrganizationService(null).Returns(OrganizationService);
 
         // service provider
         var serviceProvider = Substitute.For<IServiceProvider>();
