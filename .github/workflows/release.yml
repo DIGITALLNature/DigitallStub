@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.CI_GITHUB_TOKEN }}
       - name: Install pnpm
@@ -32,6 +32,8 @@ jobs:
           cache-dependency-path: '**/packages.lock.json'
       - name: Install packages
         run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Dotnet Restore
+        run: dotnet restore
       - name: Materialize Signing Key
         id: write_sign_key_file
         uses: timheuer/base64-to-file@v1
