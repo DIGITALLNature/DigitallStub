@@ -5,7 +5,7 @@
     <Copyright>Copyright (c) DIGITALL Nature GmbH 2024</Copyright>
     <Authors>Marcel Kummerow</Authors>
     <Product>Digitall Power Testing Dataverse</Product>
-    <PackageLicenseExpression>MS-PL</PackageLicenseExpression>
+    <PackageLicenseExpression>MS-RL</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/DIGITALLNature/DigitallTesting</PackageProjectUrl>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
