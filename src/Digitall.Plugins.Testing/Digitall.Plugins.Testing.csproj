@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TargetFrameworks>net462;net10.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.TimeProvider" Version="10.0.7"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Digitall.Dataverse.Testing\Digitall.Dataverse.Testing.csproj"/>
+  </ItemGroup>
+
+</Project>
