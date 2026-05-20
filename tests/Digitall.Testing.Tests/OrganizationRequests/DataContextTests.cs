@@ -16,10 +16,8 @@ public class DataContextTests
         var dataverse = new FakeOrganizationService();
         dataverse.AddDefaultRequests();
 
-        using (var dataContext = new DataContext(dataverse))
-        {
-            await Assert.That(dataContext.AccountSet).IsEmpty();
-        }
+        using var dataContext = new DataContext(dataverse);
+        await Assert.That(dataContext.AccountSet).IsEmpty();
     }
 
     [Test]
@@ -30,10 +28,8 @@ public class DataContextTests
 
         dataverse.Add(new Account(Guid.NewGuid()));
 
-        using (var dataContext = new DataContext(dataverse))
-        {
-            await Assert.That(dataContext.AccountSet).IsNotEmpty();
-        }
+        using var dataContext = new DataContext(dataverse);
+        await Assert.That(dataContext.AccountSet).IsNotEmpty();
     }
 
     [Test]

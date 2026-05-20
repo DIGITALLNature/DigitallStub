@@ -127,7 +127,7 @@ public class FakeOrganizationServiceTests
     public async Task Create_ThrowsInvalidArgumentFault_WhenEntityIsNull()
     {
         var dataverse = new FakeOrganizationService();
-        Action action = () => dataverse.Create(null);
+        Action action = () => dataverse.Create(null!);
 
         var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(action);
         await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.InvalidArgument);
@@ -247,7 +247,7 @@ public class FakeOrganizationServiceTests
     public async Task Update_ThrowsInvalidArgumentFault_WhenEntityIsNull()
     {
         var sut = new FakeOrganizationService();
-        var action = () => sut.Update(null);
+        var action = () => sut.Update(null!);
 
         var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(action);
         await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.InvalidArgument);
@@ -299,7 +299,7 @@ public class FakeOrganizationServiceTests
         var id = Guid.NewGuid();
         sut.Add(new Account(id) { Name = nameof(Delete_WithNullEntityName_ThrowsFault) });
 
-        var action = () => sut.Delete(null, id);
+        var action = () => sut.Delete(null!, id);
         var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(action);
         await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.InvalidArgument);
     }

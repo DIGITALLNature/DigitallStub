@@ -9,7 +9,7 @@ namespace Digitall.Testing.Logic.Queries;
 
 public static class QueryExpressionExtensions
 {
-    public static string GetEntityNameFromAlias(this QueryExpression queryExpression, string alias)
+    public static string GetEntityNameFromAlias(this QueryExpression queryExpression, string? alias)
     {
         if (alias == null)
             return queryExpression.EntityName;

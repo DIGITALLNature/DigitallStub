@@ -20,7 +20,7 @@ public static class XDocumentExtensions
         public ColumnSet? ToColumnSet()
         {
             ArgumentNullException.ThrowIfNull(xDocument);
-            return xDocument?.Elements() //fetch
+            return xDocument.Elements() //fetch
                 .Elements().FirstOrDefault()?.ToColumnSet();
         }
     }

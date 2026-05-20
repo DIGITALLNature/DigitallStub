@@ -6,43 +6,34 @@ using Microsoft.Xrm.Sdk.Metadata;
 
 namespace Digitall.Testing;
 
-public class MetadataService
+public class MetadataService(Dictionary<string, EntityMetadata> entityMetadata, Dictionary<string, RelationshipMetadataBase> relationships)
 {
-    private readonly Dictionary<string, EntityMetadata> _entityMetadata;
-    private readonly Dictionary<string, RelationshipMetadataBase> _relationships;
-
-    public MetadataService(Dictionary<string, EntityMetadata> entityMetadata, Dictionary<string, RelationshipMetadataBase> relationships)
+    public void AddMetadata(EntityMetadata metadata)
     {
-        _entityMetadata = entityMetadata;
-        _relationships = relationships;
+        entityMetadata.Add(metadata.LogicalName, metadata);
+
+        var relationshipsList = new List<RelationshipMetadataBase>();
+        if (metadata.ManyToManyRelationships != null)
+        {
+            relationshipsList.AddRange(metadata.ManyToManyRelationships);
+        }
+
+        if (metadata.OneToManyRelationships != null)
+        {
+            relationshipsList.AddRange(metadata.OneToManyRelationships);
+        }
+
+        if (metadata.ManyToOneRelationships != null)
+        {
+            relationshipsList.AddRange(metadata.ManyToOneRelationships);
+        }
+
+        AddRelationships(relationshipsList);
     }
 
-    public void AddMetadata(EntityMetadata entityMetadata)
+    public void AddMetadata(IEnumerable<EntityMetadata> metadataCollection)
     {
-        _entityMetadata.Add(entityMetadata.LogicalName, entityMetadata);
-
-        var relationships = new List<RelationshipMetadataBase>();
-        if (entityMetadata.ManyToManyRelationships != null)
-        {
-            relationships.AddRange(entityMetadata.ManyToManyRelationships);
-        }
-
-        if (entityMetadata.OneToManyRelationships != null)
-        {
-            relationships.AddRange(entityMetadata.OneToManyRelationships);
-        }
-
-        if (entityMetadata.ManyToOneRelationships != null)
-        {
-            relationships.AddRange(entityMetadata.ManyToOneRelationships);
-        }
-
-        AddRelationships(relationships);
-    }
-
-    public void AddMetadata(IEnumerable<EntityMetadata> entityMetadata)
-    {
-        foreach (var metadata in entityMetadata)
+        foreach (var metadata in metadataCollection)
         {
             AddMetadata(metadata);
         }
@@ -50,24 +41,19 @@ public class MetadataService
 
     public void AddRelationship(RelationshipMetadataBase relationship)
     {
-        _relationships[relationship.SchemaName] = relationship;
+        relationships[relationship.SchemaName] = relationship;
     }
 
-    public void AddRelationships(IEnumerable<RelationshipMetadataBase> relationships)
+    public void AddRelationships(IEnumerable<RelationshipMetadataBase> items)
     {
-        foreach (var relationship in relationships)
+        foreach (var relationship in items)
         {
             AddRelationship(relationship);
         }
     }
 
-    public RelationshipMetadataBase GetRelationship(string relationshipSchemaName)
+    public RelationshipMetadataBase? GetRelationship(string relationshipSchemaName)
     {
-        if (_relationships.ContainsKey(relationshipSchemaName))
-        {
-            return _relationships[relationshipSchemaName];
-        }
-
-        return null;
+        return relationships.GetValueOrDefault(relationshipSchemaName);
     }
 }

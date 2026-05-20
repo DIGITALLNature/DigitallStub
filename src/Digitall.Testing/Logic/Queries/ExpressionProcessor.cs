@@ -158,7 +158,7 @@ public class ExpressionProcessor(FakeOrganizationService state)
                 {
                     // Special case for referencing the name of an EntityReference
                     var slicedAttributeName = ce.AttributeName.Substring(0, ce.AttributeName.Length - 4);
-                    if (state.IsKnownAttributeForType(linkedEntity.LinkToEntityName, slicedAttributeName, out var attributeInfo) && attributeInfo.PropertyType == typeof(EntityReference))
+                    if (state.IsKnownAttributeForType(linkedEntity.LinkToEntityName, slicedAttributeName, out var attributeInfo) && attributeInfo!.PropertyType == typeof(EntityReference))
                     {
                         // Update the attribute name to avoid conflicts with the naming pattern
                         ce.AttributeName = slicedAttributeName;
@@ -244,7 +244,7 @@ public class ExpressionProcessor(FakeOrganizationService state)
 
                 if (state.IsKnownAttributeForType(cEntityName, sAttributeName, out var propertyInfo))
                 {
-                    typedExpression.AttributeType = propertyInfo.PropertyType;
+                    typedExpression.AttributeType = propertyInfo!.PropertyType;
 
                     // Special case when filtering on the name of a Lookup
                     if (typedExpression.AttributeType == typeof(EntityReference) &&  sAttributeName.EndsWith("name", StringComparison.Ordinal))
@@ -253,7 +253,7 @@ public class ExpressionProcessor(FakeOrganizationService state)
 
                         if (state.IsKnownAttributeForType(cEntityName, realAttributeName, out var attributeInfo))
                         {
-                            if (attributeInfo.PropertyType == typeof(EntityReference))
+                            if (attributeInfo!.PropertyType == typeof(EntityReference))
                             {
                                 // Need to make Lookups work against the real attribute, not the "name" suffixed attribute that doesn't exist
                                 c.AttributeName = realAttributeName;

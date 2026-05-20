@@ -8,14 +8,14 @@ namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
 abstract class FetchGrouping
 {
-    public string Attribute { get; set; }
-    public string OutputAlias { get; set; }
+    public required string Attribute { get; init; }
+    public required string OutputAlias { get; init; }
 
-    public IComparable Process(Entity entity)
+    public IComparable? Process(Entity entity)
     {
         var attr = entity.Contains(Attribute) ? entity[Attribute] : null;
         return FindGroupValue(attr);
     }
 
-    public abstract IComparable FindGroupValue(object attributeValue);
+    protected abstract IComparable? FindGroupValue(object? attributeValue);
 }

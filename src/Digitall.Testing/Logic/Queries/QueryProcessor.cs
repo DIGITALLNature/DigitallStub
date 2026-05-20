@@ -100,7 +100,7 @@ public class QueryProcessor
                 throw new Exception("Can't have <all-attributes /> present when using aggregate");
             }
 
-            var ns = xmlDoc.Root?.Name.Namespace;
+            var ns = xmlDoc.Root!.Name.Namespace;
 
             var entityName = RetrieveFetchXmlNode(xmlDoc, "entity")?.GetAttribute("name")?.Value
                              ?? throw new InvalidDataException("Invalid fetch xml: missing entity name");
@@ -246,7 +246,7 @@ public class QueryProcessor
                 {
                     if (g.Key[rule] != null)
                     {
-                        object value = g.Key[rule];
+                        object value = g.Key[rule]!;
                         ent[groups[rule].OutputAlias] = new AliasedValue(null, groups[rule].Attribute, (value as ComparableEntityReference)?.EntityReference ?? value);
                     }
                 }
@@ -294,27 +294,17 @@ public class QueryProcessor
                 IOrderedQueryable<Entity> orderedQuery;
 
                 var order = qe.Orders[0];
-                if (order.OrderType == OrderType.Ascending)
-                {
-                    orderedQuery = query.OrderBy(e => e.Attributes.ContainsKey(order.AttributeName) ? e[order.AttributeName] : null, new XrmOrderByAttributeComparer());
-                }
-                else
-                {
-                    orderedQuery = query.OrderByDescending(e => e.Attributes.ContainsKey(order.AttributeName) ? e[order.AttributeName] : null, new XrmOrderByAttributeComparer());
-                }
+                orderedQuery = order.OrderType == OrderType.Ascending
+                    ? query.OrderBy(e => e.Attributes.ContainsKey(order.AttributeName) ? e[order.AttributeName] : null, new XrmOrderByAttributeComparer())
+                    : query.OrderByDescending(e => e.Attributes.ContainsKey(order.AttributeName) ? e[order.AttributeName] : null, new XrmOrderByAttributeComparer());
 
                 //Subsequent orders should use ThenBy and ThenByDescending
                 for (var i = 1; i < qe.Orders.Count; i++)
                 {
                     var thenOrder = qe.Orders[i];
-                    if (thenOrder.OrderType == OrderType.Ascending)
-                    {
-                        orderedQuery = orderedQuery.ThenBy(e => e.Attributes.ContainsKey(thenOrder.AttributeName) ? e[thenOrder.AttributeName] : null, new XrmOrderByAttributeComparer());
-                    }
-                    else
-                    {
-                        orderedQuery = orderedQuery.ThenByDescending(e => e[thenOrder.AttributeName], new XrmOrderByAttributeComparer());
-                    }
+                    orderedQuery = thenOrder.OrderType == OrderType.Ascending
+                        ? orderedQuery.ThenBy(e => e.Attributes.ContainsKey(thenOrder.AttributeName) ? e[thenOrder.AttributeName] : null, new XrmOrderByAttributeComparer())
+                        : orderedQuery.ThenByDescending(e => e[thenOrder.AttributeName], new XrmOrderByAttributeComparer());
                 }
 
                 query = orderedQuery;
@@ -331,8 +321,8 @@ public class QueryProcessor
 
         private static List<Entity> OrderAggregateResult(XDocument xmlDoc, IQueryable<Entity> result)
         {
-            var ns = xmlDoc.Root.Name.Namespace;
-            foreach (var order in xmlDoc.Root.Element(ns + "entity").Elements(ns + "order"))
+            var ns = xmlDoc.Root!.Name.Namespace;
+            foreach (var order in xmlDoc.Root.Element(ns + "entity")!.Elements(ns + "order"))
             {
                 var alias = order.GetAttribute("alias")?.Value;
 
@@ -346,10 +336,9 @@ public class QueryProcessor
                     throw new Exception("An alias is required for an order clause for an aggregate Query.");
                 }
 
-                if (order.IsAttributeTrue("descending"))
-                    result = result.OrderByDescending(e => e.Attributes.ContainsKey(alias) ? e.Attributes[alias] : null, new XrmOrderByAttributeComparer());
-                else
-                    result = result.OrderBy(e => e.Attributes.ContainsKey(alias) ? e.Attributes[alias] : null, new XrmOrderByAttributeComparer());
+                result = order.IsAttributeTrue("descending")
+                    ? result.OrderByDescending(e => e.Attributes.ContainsKey(alias) ? e.Attributes[alias] : null, new XrmOrderByAttributeComparer())
+                    : result.OrderBy(e => e.Attributes.ContainsKey(alias) ? e.Attributes[alias] : null, new XrmOrderByAttributeComparer());
             }
 
             return result.ToList();

@@ -8,15 +8,13 @@ namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
 class SimpleValueGroup : FetchGrouping
 {
-    public override IComparable FindGroupValue(object attributeValue)
+    protected override IComparable? FindGroupValue(object? attributeValue)
     {
         if (attributeValue is EntityReference entityRef)
         {
-            return new ComparableEntityReference(entityRef) as IComparable;
+            return new ComparableEntityReference(entityRef);
         }
-        else
-        {
-            return attributeValue as IComparable;
-        }
+
+        return attributeValue as IComparable;
     }
 }

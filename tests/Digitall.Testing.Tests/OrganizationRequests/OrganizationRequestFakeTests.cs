@@ -13,7 +13,7 @@ namespace Digitall.Testing.Tests.OrganizationRequests;
 
 public class OrganizationRequestFakeTests
 {
-    private FakeOrganizationService _sut;
+    private FakeOrganizationService _sut = null!;
 
     [Before(Test)]
     public async Task Setup()
@@ -269,7 +269,7 @@ public class OrganizationRequestFakeTests
     public async Task RetrieveEntityFake_Should_ReturnMetadata()
     {
         _sut.AddRequest(new RetrieveEntityFake());
-        var metadata = new Microsoft.Xrm.Sdk.Metadata.EntityMetadata { LogicalName = Account.EntityLogicalName };
+        var metadata = new EntityMetadata { LogicalName = Account.EntityLogicalName };
         _sut.EntityMetadata.Add(Account.EntityLogicalName, metadata);
 
         var request = new RetrieveEntityRequest { LogicalName = Account.EntityLogicalName };

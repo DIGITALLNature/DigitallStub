@@ -7,43 +7,28 @@ namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
 class DateTimeGroup : FetchGrouping
 {
-    public DateGroupType Type { get; set; }
+    public DateGroupType Type { get; init; }
 
-    public override IComparable FindGroupValue(object attributeValue)
+    protected override IComparable? FindGroupValue(object? attributeValue)
     {
-        if (attributeValue == null) return null;
-
-        if (!(attributeValue is DateTime || attributeValue is DateTime?))
+        if (attributeValue is not DateTime d)
         {
+            if (attributeValue == null) return null;
             throw new Exception("Can only do date grouping of DateTime values");
         }
 
-        var d = attributeValue as DateTime?;
-
-        switch (Type)
+        return Type switch
         {
-            case DateGroupType.DateTime:
-                return d;
-
-            case DateGroupType.Day:
-                return d?.Day;
-
-            case DateGroupType.Week:
-                var cal = System.Globalization.DateTimeFormatInfo.InvariantInfo;
-                return cal.Calendar.GetWeekOfYear(d.Value, cal.CalendarWeekRule, cal.FirstDayOfWeek);
-
-            case DateGroupType.Month:
-                return d?.Month;
-
-            case DateGroupType.Quarter:
-                return (d?.Month + 2) / 3;
-
-            case DateGroupType.Year:
-                return d?.Year;
-
-            default:
-                throw new Exception("Unhandled date group type");
-        }
+            DateGroupType.DateTime => d,
+            DateGroupType.Day => d.Day,
+            DateGroupType.Week => System.Globalization.DateTimeFormatInfo.InvariantInfo.Calendar
+                .GetWeekOfYear(d, System.Globalization.DateTimeFormatInfo.InvariantInfo.CalendarWeekRule,
+                    System.Globalization.DateTimeFormatInfo.InvariantInfo.FirstDayOfWeek),
+            DateGroupType.Month => d.Month,
+            DateGroupType.Quarter => (d.Month + 2) / 3,
+            DateGroupType.Year => d.Year,
+            _ => throw new Exception("Unhandled date group type")
+        };
     }
 }
 
