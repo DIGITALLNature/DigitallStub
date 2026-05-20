@@ -201,7 +201,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             return output;
         }
 
-        internal static void PatchDateFormat(Entity record, FakeOrganizationService dataverse)
+        private static void PatchDateFormat(Entity record, FakeOrganizationService dataverse)
         {
             if (dataverse.EntityMetadata.TryGetValue(record.LogicalName, out var entityMetadata))
             {
