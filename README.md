@@ -1,106 +1,710 @@
-# DigitallStub
+# Digitall.Testing
 
-A .NET stub implementation for Microsoft Dataverse testing, providing a lightweight, in-memory `IOrganizationService`.
+[![NuGet](https://img.shields.io/nuget/v/Digitall.Testing)](https://www.nuget.org/packages/Digitall.Testing)
+[![Build](https://github.com/DIGITALLNature/DigitallTesting/actions/workflows/build.yml/badge.svg)](https://github.com/DIGITALLNature/DigitallTesting/actions/workflows/build.yml)
+[![License: MS-PL](https://img.shields.io/badge/License-MS--PL-blue.svg)](Licence.md)
+
+A comprehensive, in-memory testing framework for **Microsoft Dataverse** / Power Platform. It provides a lightweight `IOrganizationService` (and `IOrganizationServiceAsync2`) implementation that enables fast, deterministic unit tests **without any connection to a live Dataverse environment**.
+
+---
+
+## Table of Contents
+
+- [Features](#features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Architecture Overview](#architecture-overview)
+- [Core Components](#core-components)
+  - [FakeOrganizationService](#fakeorganizationservice)
+  - [FakeOrganizationServiceAsync](#fakeorganizationserviceasync)
+  - [FakeDataverseBuilder](#fakedataversebuilder)
+  - [PluginExecutionContextBuilder](#pluginexecutioncontextbuilder)
+  - [FakePluginContextBuilder](#fakeplugincontextbuilder)
+  - [SpyOrganizationRequestFake](#spyorganizationrequestfake)
+- [Query Support](#query-support)
+  - [QueryExpression](#queryexpression)
+  - [QueryByAttribute](#querybyattribute)
+  - [FetchXml](#fetchxml)
+  - [FetchXml Aggregation](#fetchxml-aggregation)
+  - [LINQ Queries](#linq-queries)
+- [Organization Request Fakes](#organization-request-fakes)
+- [Relationship Management](#relationship-management)
+- [Metadata Support](#metadata-support)
+- [Plugin Testing](#plugin-testing)
+- [Configuration](#configuration)
+- [Project Structure](#project-structure)
+- [Build & Test](#build--test)
+- [CI/CD & Release](#cicd--release)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
 
 ## Features
 
-- **FakeOrganizationService**: In-memory implementation of `IOrganizationService`.
-- **Query Support**: Supports `QueryExpression`, `QueryByAttribute`, and `FetchXml`.
-- **Request Fakes**: Extensible architecture for mocking `OrganizationRequest` messages.
-- **Early-Bound Support**: Automatically discovers early-bound entity types via `[assembly:ProxyTypesAssembly]`.
-- **Plugin Testing**: Utilities for building and testing Dataverse plugins (e.g., `PluginExecutionContextBuilder`).
+| Category | Capability |
+|----------|-----------|
+| **CRUD Operations** | Full Create, Retrieve, Update, Delete with real Dataverse error codes |
+| **Async Support** | `IOrganizationServiceAsync2` implementation with `CancellationToken` support |
+| **Query Engine** | `QueryExpression`, `QueryByAttribute`, `FetchXml` (including aggregation) |
+| **LINQ** | `CreateQuery<T>()` support for early-bound and late-bound LINQ queries |
+| **Relationships** | 1:N, N:1, and N:N relationship association/disassociation |
+| **Plugin Testing** | Fluent `PluginExecutionContextBuilder` for IPluginExecutionContext7 |
+| **Early-Bound** | Auto-discovery of `[ProxyTypesAssembly]` types with reflection caching |
+| **Request Extensibility** | Pluggable `IOrganizationRequestFake` architecture |
+| **Spy Support** | `SpyOrganizationRequestFake<TReq, TRes>` for recording and verifying calls |
+| **Time Abstraction** | `TimeProvider` injection for deterministic time-based tests |
+| **Error Fidelity** | Authentic `FaultException<OrganizationServiceFault>` with real error codes |
+| **Performance** | FastCloner deep cloning, cached reflection lookups |
+
+---
 
 ## Prerequisites
 
-- **.NET SDK**: Supports `net462` and `net10.0`.
-- **IDE**: Rider or Visual Studio.
+- **.NET SDK 10.0+** (see `global.json` for exact version)
+- **IDE**: JetBrains Rider, Visual Studio 2022+, or VS Code with C# Dev Kit
 
-## Setup & Build
+---
 
-1.  **Restore Dependencies**:
-    ```bash
-    dotnet restore
-    ```
-2.  **Build Solution**:
-    ```bash
-    dotnet build
-    ```
+## Installation
 
-## Usage
+Install from NuGet:
 
-### Basic Example
+```bash
+dotnet add package Digitall.Testing
+```
+
+Or add to your `.csproj`:
+
+```xml
+<PackageReference Include="Digitall.Testing" Version="1.0.0-beta.*" />
+```
+
+---
+
+## Quick Start
+
+### Basic CRUD Test
 
 ```csharp
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
-using AwesomeAssertions;
 using Digitall.Testing;
 
-[TestClass]
-public class DataverseStubTests
+public class AccountTests
 {
-    [TestMethod]
+    [Test]
     public void Should_CreateAndRetrieveEntity()
     {
-        // Arrange: Initialize the fake service
-        var service = new FakeOrganizationService();
-        var account = new Entity("account")
-        {
-            ["name"] = "Test Account"
-        };
+        // Arrange — use the builder for a fully configured service
+        var service = new FakeDataverseBuilder().GetOrganizationService();
 
-        // Act: Perform operations
+        var account = new Entity("account") { ["name"] = "Contoso Ltd" };
+
+        // Act
         var id = service.Create(account);
         var retrieved = service.Retrieve("account", id, new ColumnSet("name"));
 
-        // Assert: Verify results
-        retrieved.Should().NotBeNull();
-        retrieved["name"].Should().Be("Test Account");
+        // Assert
+        Assert.That(retrieved["name"], Is.EqualTo("Contoso Ltd"));
     }
 }
 ```
 
-### Early-Bound Entities
+### Using Early-Bound Entities
 
-To use early-bound types, ensure your test assembly (or the assembly containing the types) has the `ProxyTypesAssembly` attribute:
+Ensure your test assembly has the `ProxyTypesAssembly` attribute:
 
 ```csharp
 [assembly: Microsoft.Xrm.Sdk.Client.ProxyTypesAssembly]
 ```
 
-## Testing
+Then use typed entities directly:
 
-Tests are located in `tests/Digitall.Testing.Tests`.
+```csharp
+var service = new FakeDataverseBuilder().GetOrganizationService();
+var account = new Account { Name = "Contoso Ltd" };
+var id = service.Create(account);
+```
 
-- **Run all tests**:
-  ```bash
-  dotnet test
-  ```
-- **Run specific tests**:
-  ```bash
-  dotnet test --filter Name~YourTestName
-  ```
+---
 
-## Configuration (Environment Variables)
+## Architecture Overview
 
-The `FakeOrganizationService` and its internal components can be influenced by the following environment variables:
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Your Test Code                           │
+├─────────────────────────────────────────────────────────────┤
+│  FakeDataverseBuilder / FakePluginContextBuilder (Fluent)    │
+├─────────────────────────────────────────────────────────────┤
+│  FakeOrganizationServiceAsync (IOrganizationServiceAsync2)   │
+│  └── FakeOrganizationService (IOrganizationService)          │
+│       ├── RequestFakeRegistry → IOrganizationRequestFake     │
+│       ├── EntityTypeResolver (reflection + caching)          │
+│       ├── FakeOrganizationServiceState (entity store)        │
+│       └── MetadataService (entity/relationship metadata)     │
+├─────────────────────────────────────────────────────────────┤
+│  Logic Layer                                                 │
+│  ├── QueryProcessor (orchestrates query execution)           │
+│  ├── ExpressionProcessor (filter/condition evaluation)       │
+│  ├── LinkedEntitiesProcessor (JOIN logic)                    │
+│  ├── FetchProcessor (FetchXml → QueryExpression)             │
+│  ├── ConditionParser (50+ ConditionOperator types)           │
+│  └── FetchAggregation (COUNT, SUM, AVG, MIN, MAX, grouping) │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Core Components
+
+### FakeOrganizationService
+
+The central class implementing `IOrganizationService`. It provides:
+
+- **CRUD**: `Create`, `Retrieve`, `Update`, `Delete` with proper error handling
+- **Queries**: `RetrieveMultiple` supporting all three query types
+- **Relationships**: `Associate` / `Disassociate` for 1:N and N:N
+- **Execute**: Dispatches `OrganizationRequest` to registered `IOrganizationRequestFake` handlers
+- **Alternate Keys**: `Retrieve` with `KeyAttributeCollection` support
+
+```csharp
+var service = new FakeOrganizationService();
+service.AddDefaultRequests(); // registers built-in request fakes
+```
+
+### FakeOrganizationServiceAsync
+
+Extends `FakeOrganizationService` with `IOrganizationServiceAsync2`, wrapping all operations in `Task`-returning methods with `CancellationToken` support. Ideal for testing code that uses `IOrganizationServiceAsync` or `ServiceClient`.
+
+```csharp
+var service = new FakeOrganizationServiceAsync();
+var id = await service.CreateAsync(entity, cancellationToken);
+```
+
+### FakeDataverseBuilder
+
+A fluent builder that creates a fully configured `FakeOrganizationServiceAsync` with default request fakes pre-registered:
+
+```csharp
+var service = new FakeDataverseBuilder()
+    .AddData(account, contact)              // pre-seed entities
+    .AddEntityMetadata(accountMetadata)     // register metadata
+    .AddRelationships(m2mRelationship)      // register relationships
+    .LoadMetadata("./metadata/")            // load from XML files
+    .GetOrganizationService();
+```
+
+**Builder extension methods:**
+- `.AddData(params Entity[])` — pre-seed the in-memory store
+- `.AddOrganizationRequests(params IOrganizationRequestFake[])` — register custom fakes
+- `.AddEntityMetadata(params EntityMetadata[])` — register entity metadata
+- `.AddRelationships(params RelationshipMetadataBase[])` — register relationships
+- `.LoadMetadata(string path)` — load `EntityMetadata` from XML (file or directory)
+- `.AddConfig(key, envVar, defaultValue)` — configure environment variables
+
+### PluginExecutionContextBuilder
+
+Fluent builder for creating `IServiceProvider` instances configured for plugin testing:
+
+```csharp
+var serviceProvider = new PluginExecutionContextBuilder(organizationService)
+    .WithMessageName("Update")
+    .WithStage(40)                          // Post-operation
+    .WithMode(0)                            // Synchronous
+    .WithTarget(targetEntity)
+    .WithPreEntityImage(preImage)
+    .WithPostEntityImage(postImage)
+    .WithInputParameter("Target", entity)
+    .WithOutputParameter("id", resultId)
+    .WithSharedVariable("key", "value")
+    .WithInitiatingUserId(userId)
+    .WithDepth(1)
+    .WithCorrelationId(correlationId)
+    .BuildServiceProvider();
+
+// Resolve plugin services
+var context = (IPluginExecutionContext7)serviceProvider.GetService(typeof(IPluginExecutionContext7));
+var factory = (IOrganizationServiceFactory)serviceProvider.GetService(typeof(IOrganizationServiceFactory));
+```
+
+### FakePluginContextBuilder
+
+Combines `PluginExecutionContextBuilder` with an auto-configured `FakeOrganizationService`, implementing `IFakeDataverseBuilder<FakeOrganizationService>`. Perfect for end-to-end plugin tests:
+
+```csharp
+var builder = new FakePluginContextBuilder();
+
+// Access the underlying service for data setup
+var service = builder.GetOrganizationService();
+service.Create(new Entity("account") { ["name"] = "Test" });
+
+// Build the plugin context
+var serviceProvider = builder
+    .WithMessageName("Create")
+    .WithTarget(entity)
+    .BuildServiceProvider();
+```
+
+### SpyOrganizationRequestFake
+
+A generic spy that records all `Execute` calls and allows configuring return values:
+
+```csharp
+// Create a spy for a custom request
+var spy = new SpyOrganizationRequestFake<MyCustomRequest, MyCustomResponse>(
+    (request, service) => new MyCustomResponse { Result = "OK" }
+);
+
+service.AddRequest(spy);
+
+// Execute the request
+service.Execute(new MyCustomRequest());
+
+// Verify
+Assert.That(spy.ReceivedRequests, Has.Count.EqualTo(1));
+```
+
+---
+
+## Query Support
+
+### QueryExpression
+
+Full support for `QueryExpression` including:
+
+- **ColumnSet** projection (specific columns or `AllColumns`)
+- **FilterExpression** with nested `And`/`Or` logical operators
+- **50+ ConditionOperators** (Equal, NotEqual, Like, In, Between, Null, fiscal year operators, etc.)
+- **LinkEntity** joins (Inner, LeftOuter) with nested link entities
+- **OrderExpression** (ascending/descending on multiple attributes)
+- **Paging** via `PageInfo` with proper `MoreRecords` and `PagingCookie` support
+- **TopCount** limiting
+- **Distinct** result filtering
+
+```csharp
+var query = new QueryExpression("contact")
+{
+    ColumnSet = new ColumnSet("firstname", "lastname"),
+    Criteria = new FilterExpression(LogicalOperator.And)
+    {
+        Conditions =
+        {
+            new ConditionExpression("statecode", ConditionOperator.Equal, 0),
+            new ConditionExpression("lastname", ConditionOperator.Like, "Smith%")
+        }
+    },
+    LinkEntities =
+    {
+        new LinkEntity("contact", "account", "parentcustomerid", "accountid", JoinOperator.Inner)
+        {
+            EntityAlias = "acc",
+            Columns = new ColumnSet("name")
+        }
+    },
+    Orders = { new OrderExpression("lastname", OrderType.Ascending) },
+    PageInfo = new PagingInfo { Count = 50, PageNumber = 1, ReturnTotalRecordCount = true }
+};
+
+var result = service.RetrieveMultiple(query);
+```
+
+### QueryByAttribute
+
+Simplified attribute-based queries (internally converted to `QueryExpression`):
+
+```csharp
+var query = new QueryByAttribute("account")
+{
+    ColumnSet = new ColumnSet("name", "revenue")
+};
+query.AddAttributeValue("statecode", 0);
+query.AddAttributeValue("ownerid", userId);
+
+var result = service.RetrieveMultiple(query);
+```
+
+### FetchXml
+
+Full FetchXml parsing with conversion to `QueryExpression`:
+
+```csharp
+var fetchXml = @"
+<fetch top='10'>
+  <entity name='account'>
+    <attribute name='name' />
+    <attribute name='revenue' />
+    <filter>
+      <condition attribute='statecode' operator='eq' value='0' />
+    </filter>
+    <order attribute='name' />
+  </entity>
+</fetch>";
+
+var result = service.RetrieveMultiple(new FetchExpression(fetchXml));
+```
+
+### FetchXml Aggregation
+
+Supports aggregate queries with grouping:
+
+```csharp
+var fetchXml = @"
+<fetch aggregate='true'>
+  <entity name='opportunity'>
+    <attribute name='estimatedvalue' alias='total_value' aggregate='sum' />
+    <attribute name='ownerid' alias='owner' groupby='true' />
+    <filter>
+      <condition attribute='statecode' operator='eq' value='0' />
+    </filter>
+  </entity>
+</fetch>";
+
+var result = service.RetrieveMultiple(new FetchExpression(fetchXml));
+```
+
+**Supported aggregates:** `count`, `countcolumn`, `sum`, `avg`, `min`, `max`
+**Grouping:** By attribute value, by date (day, week, month, quarter, year, fiscal period/year)
+
+### LINQ Queries
+
+```csharp
+// Early-bound
+var accounts = service.CreateQuery<Account>()
+    .Where(a => a.Name.StartsWith("Contoso"))
+    .ToList();
+
+// Late-bound
+var contacts = service.CreateQuery("contact")
+    .Where(c => (string)c["lastname"] == "Smith")
+    .ToList();
+```
+
+---
+
+## Organization Request Fakes
+
+Built-in fakes for common Dataverse operations:
+
+| Request Type | Fake Class | Description |
+|-------------|-----------|-------------|
+| `CreateRequest` | `CreateFake` | Entity creation with duplicate detection |
+| `RetrieveRequest` | `RetrieveFake` | Entity retrieval with column projection |
+| `RetrieveMultipleRequest` | `RetrieveMultipleFake` | Query execution pipeline |
+| `UpdateRequest` | `UpdateFake` | Entity updates with existence validation |
+| `DeleteRequest` | `DeleteFake` | Entity deletion |
+| `UpsertRequest` | `UpsertFake` | Create-or-update semantics |
+| `AssociateRequest` | `AssociateFake` | Relationship association |
+| `DisassociateRequest` | `DisassociateFake` | Relationship disassociation |
+| `SetStateRequest` | `SetStateFake` | Entity state/status changes |
+| `AssignRequest` | `AssignRequestFake` | Record ownership assignment |
+| `WhoAmIRequest` | `WhoAmIFake` | Current user identity |
+| `RetrieveEntityRequest` | `RetrieveEntityFake` | Entity metadata retrieval |
+| `ExecuteTransactionRequest` | `ExecuteTransactionFake` | Batch transaction execution |
+| `BulkDeleteRequest` | `BulkDeleteFake` | Bulk delete operations |
+
+### Custom Request Fakes
+
+Implement `IOrganizationRequestFake` or extend `OrganizationRequestFake<TReq, TRes>`:
+
+```csharp
+public class MyCustomRequestFake : OrganizationRequestFake<MyCustomRequest, MyCustomResponse>
+{
+    public override MyCustomResponse Execute(MyCustomRequest request, FakeOrganizationService service)
+    {
+        // Custom logic
+        return new MyCustomResponse { /* ... */ };
+    }
+}
+
+// Register
+service.AddRequest(new MyCustomRequestFake());
+```
+
+---
+
+## Relationship Management
+
+### 1:N Relationships
+
+```csharp
+// Register relationship metadata
+service.AddRelationship(new OneToManyRelationshipMetadata
+{
+    SchemaName = "account_contacts",
+    ReferencedEntity = "account",
+    ReferencedAttribute = "accountid",
+    ReferencingEntity = "contact",
+    ReferencingAttribute = "parentcustomerid"
+});
+
+// Associate contacts to an account
+service.Associate("account", accountId,
+    new Relationship("account_contacts"),
+    new EntityReferenceCollection
+    {
+        new EntityReference("contact", contactId1),
+        new EntityReference("contact", contactId2)
+    });
+```
+
+### N:N Relationships
+
+```csharp
+// Register M2M relationship
+service.AddRelationship(new ManyToManyRelationshipMetadata
+{
+    SchemaName = "systemuser_account",
+    Entity1LogicalName = "systemuser",
+    Entity1IntersectAttribute = "systemuserid",
+    Entity2LogicalName = "account",
+    Entity2IntersectAttribute = "accountid",
+    IntersectEntityName = "systemuser_account"
+});
+
+// Associate
+service.Associate("account", accountId,
+    new Relationship("systemuser_account"),
+    new EntityReferenceCollection { new EntityReference("systemuser", userId) });
+
+// Disassociate
+service.Disassociate("account", accountId,
+    new Relationship("systemuser_account"),
+    new EntityReferenceCollection { new EntityReference("systemuser", userId) });
+```
+
+---
+
+## Metadata Support
+
+Entity metadata enables type validation and relationship processing:
+
+```csharp
+// Programmatic metadata registration
+service.AddMetadata(new EntityMetadata
+{
+    LogicalName = "account",
+    // ... attributes, relationships
+});
+
+// Load from serialized XML files (DataContractSerializer format)
+var service = new FakeDataverseBuilder()
+    .LoadMetadata("./metadata/account.xml")   // single file
+    .LoadMetadata("./metadata/")              // all *.xml in directory
+    .GetOrganizationService();
+```
+
+---
+
+## Plugin Testing
+
+### End-to-End Plugin Test
+
+```csharp
+[Test]
+public void MyPlugin_OnAccountUpdate_ShouldSetModifiedFlag()
+{
+    // Arrange
+    var builder = new FakePluginContextBuilder();
+    var service = builder.GetOrganizationService();
+
+    var account = new Entity("account") { Id = Guid.NewGuid(), ["name"] = "Old Name" };
+    service.Create(account);
+
+    var target = new Entity("account") { Id = account.Id, ["name"] = "New Name" };
+
+    var serviceProvider = builder
+        .WithMessageName("Update")
+        .WithStage(40)
+        .WithTarget(target)
+        .WithPreEntityImage(account, "PreImage")
+        .BuildServiceProvider();
+
+    // Act
+    var plugin = new MyPlugin();
+    plugin.Execute(serviceProvider);
+
+    // Assert
+    var updated = service.Retrieve("account", account.Id, new ColumnSet(true));
+    Assert.That(updated["modifiedflag"], Is.True);
+}
+```
+
+### Testing with TimeProvider
+
+```csharp
+using Microsoft.Extensions.Time.Testing;
+
+var fakeTime = new FakeTimeProvider(new DateTimeOffset(2025, 1, 15, 10, 0, 0, TimeSpan.Zero));
+var service = new FakeOrganizationService(fakeTime);
+
+// Advance time in tests
+fakeTime.Advance(TimeSpan.FromDays(30));
+```
+
+---
+
+## Configuration
+
+The `FakeOrganizationService` uses environment variables for configurable behavior:
 
 | Variable | Description | Default |
-| :--- | :--- | :--- |
-| `MaxRetrieveCount` | Maximum number of records returned by `RetrieveMultiple`. | `5000` |
-| `UserId` | The ID of the current user (used in `WhoAmI` and `EqualUserId` filters). | `Guid.Empty` |
-| `BusinessUnitId` | The ID of the current business unit. | `Guid.Empty` |
-| `FiscalYearStart` | Start date for fiscal year calculations. | Current Year Start |
+|----------|-------------|---------|
+| `MaxRetrieveCount` | Maximum records returned by `RetrieveMultiple` | `5000` |
+| `UserId` | Current user ID (used in `WhoAmI` and `EqualUserId` filters) | `Guid.Empty` |
+| `BusinessUnitId` | Current business unit ID | `Guid.Empty` |
+| `FiscalYearStart` | Start date for fiscal year calculations | Current year start |
+
+Configure via the builder:
+
+```csharp
+var service = new FakeDataverseBuilder()
+    .AddConfig("MaxRetrieveCount", "MaxRetrieveCount", "1000")
+    .GetOrganizationService();
+```
+
+---
 
 ## Project Structure
 
-- `src/Digitall.Testing`: Core library containing `FakeOrganizationService`.
-  - `Extensions`: Utilities for Entities, QueryExpressions, etc.
-  - `OrganizationRequests`: Custom fakes for specific `OrganizationRequest` types.
-  - `Logic`: Internal logic for query processing and state management.
-- `tests/Digitall.Testing.Tests`: Unit tests for the library.
+```
+DigitallTesting/
+├── src/Digitall.Testing/                    # Core library (NuGet package)
+│   ├── FakeOrganizationService.cs           # IOrganizationService implementation
+│   ├── FakeOrganizationServiceAsync.cs      # IOrganizationServiceAsync2 implementation
+│   ├── FakeOrganizationServiceState.cs      # Internal entity store
+│   ├── FakeDataverseBuilder.cs              # Fluent builder for service setup
+│   ├── FakePluginContextBuilder.cs          # Combined plugin + service builder
+│   ├── PluginExecutionContextBuilder.cs     # Plugin context configuration
+│   ├── EntityTypeResolver.cs                # Early-bound type discovery & caching
+│   ├── MetadataService.cs                   # Metadata cache management
+│   ├── RequestFakeRegistry.cs               # Request handler registry
+│   ├── SpyOrganizationRequestFake.cs        # Generic spy for request verification
+│   ├── Extensions/                          # Extension methods
+│   │   ├── EntityExtensions.cs              # Entity cloning, projection, joins
+│   │   ├── FakeDataverseBuilderExtensions.cs # Builder fluent API
+│   │   ├── PluginExecutionContextBuilderExtensions.cs
+│   │   ├── QueryExpressionExtensions.cs     # Query helpers
+│   │   ├── DateTimeExtensions.cs            # Fiscal year/date utilities
+│   │   ├── DeepCloneExtensions.cs           # FastCloner integration
+│   │   ├── TypeExtensions.cs                # Reflection helpers
+│   │   └── XDocumentExtensions.cs           # FetchXml parsing
+│   ├── Logic/                               # Query processing engine
+│   │   ├── Queries/
+│   │   │   ├── QueryProcessor.cs            # Query orchestration
+│   │   │   ├── ExpressionProcessor.cs       # Filter evaluation
+│   │   │   ├── ConditionParser.cs           # 50+ condition operators
+│   │   │   ├── LinkedEntitiesProcessor.cs   # JOIN logic
+│   │   │   ├── FetchProcessor.cs            # FetchXml → QueryExpression
+│   │   │   ├── Validators.cs                # Type/attribute validation
+│   │   │   └── FetchAggregation/            # Aggregate functions
+│   │   │       ├── CountAggregate.cs
+│   │   │       ├── SumAggregate.cs
+│   │   │       ├── AvgAggregate.cs
+│   │   │       ├── MinAggregate.cs
+│   │   │       ├── MaxAggregate.cs
+│   │   │       └── ...                      # Grouping support
+│   │   └── XrmOrderByAttributeComparer.cs   # Sorting logic
+│   ├── OrganizationRequests/                # Built-in request fakes
+│   │   ├── IOrganizationRequestFake.cs      # Extension interface
+│   │   ├── OrganizationRequestFake.cs       # Typed base class
+│   │   ├── CreateFake.cs
+│   │   ├── RetrieveFake.cs
+│   │   ├── RetrieveMultipleFake.cs
+│   │   ├── UpdateFake.cs
+│   │   ├── DeleteFake.cs
+│   │   ├── UpsertFake.cs
+│   │   ├── AssociateFake.cs
+│   │   ├── DisassociateFake.cs
+│   │   ├── SetStateFake.cs
+│   │   ├── AssignRequestFake.cs
+│   │   ├── WhoAmIFake.cs
+│   │   ├── RetrieveEntityFake.cs
+│   │   ├── ExecuteTransactionFake.cs
+│   │   └── BulkDeleteFake.cs
+│   ├── Model/                               # Internal models
+│   │   └── Target.cs                        # Plugin target wrapper
+│   └── Errors/                              # Error infrastructure
+│       ├── ErrorCodes.cs                    # Dataverse error code constants
+│       └── ErrorFactory.cs                  # FaultException factory
+├── tests/Digitall.Testing.Tests/            # Unit tests
+│   ├── FakeOrganizationServiceTests.cs
+│   ├── FakeDataverseBuilderTests.cs
+│   ├── FakePluginContextBuilderTests.cs
+│   ├── PluginExecutionContextBuilderTests.cs
+│   ├── Extensions/                          # Extension method tests
+│   ├── Logic/                               # Query processor tests
+│   ├── OrganizationRequests/                # Request fake tests
+│   └── Fixtures/                            # Test data and helpers
+├── .github/workflows/                       # CI/CD
+│   ├── build.yml                            # PR build + test
+│   ├── release.yml                          # Semantic release + NuGet publish
+│   ├── checks.yml                           # Additional checks
+│   ├── codeql.yml                           # Security scanning
+│   └── qodana_code_quality.yml              # JetBrains Qodana analysis
+├── Directory.Build.props                    # Shared MSBuild properties & versioning
+├── global.json                              # .NET SDK version pinning
+├── package.json                             # semantic-release & commitlint config
+└── qodana.yaml                              # Qodana configuration
+```
+
+---
+
+## Build & Test
+
+```bash
+# Restore dependencies
+dotnet restore
+
+# Build the solution
+dotnet build --configuration Release
+
+# Run all tests
+dotnet test --configuration Release
+
+# Run specific tests by filter
+dotnet test --filter "Name~QueryProcessor"
+
+# Run tests with detailed output
+dotnet test -- --output Detailed
+```
+
+---
+
+## CI/CD & Release
+
+This project uses [semantic-release](https://github.com/semantic-release/semantic-release) for automated versioning and publishing:
+
+- **Build workflow** (`build.yml`): Runs on all non-release branches; builds and tests the solution.
+- **Release workflow** (`release.yml`): Runs on `main` and `beta` branches; performs semantic versioning, NuGet publish, changelog generation, and GitHub release creation.
+- **Commit conventions**: [Conventional Commits](https://www.conventionalcommits.org/) enforced via [commitlint](https://commitlint.js.org/) and [Husky](https://typicode.github.io/husky/) git hooks.
+
+### Commit Message Format
+
+```
+type(scope): description
+
+feat: add FetchXml aggregate support       → minor version bump
+fix: correct paging cookie generation      → patch version bump
+feat!: remove deprecated API               → major version bump
+```
+
+---
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`feat/my-feature`)
+3. Write tests for your changes
+4. Ensure all tests pass (`dotnet test`)
+5. Commit using [Conventional Commits](https://www.conventionalcommits.org/)
+6. Open a Pull Request
+
+---
 
 ## License
 
-This project is licensed under the Microsoft Public License (MS-PL). See [Licence.md](Licence.md) for details.
+This project is licensed under the **Microsoft Public License (MS-PL)**. See [Licence.md](Licence.md) for details.
+
+© 2024 DIGITALL Nature GmbH
