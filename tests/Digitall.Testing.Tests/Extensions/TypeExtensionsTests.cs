@@ -2,67 +2,66 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System;
-using AwesomeAssertions;
+using System.Threading.Tasks;
 using Digitall.Testing.Extensions;
 using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Testing.Tests.Extensions;
 
-[TestClass]
 public class TypeExtensionsTests
 {
-    [TestMethod]
-    public void IsOptionSet_Should_ReturnTrue_For_OptionSetValue()
+    [Test]
+    public async Task IsOptionSet_Should_ReturnTrue_For_OptionSetValue()
     {
-        typeof(OptionSetValue).IsOptionSet().Should().BeTrue();
+        await Assert.That(typeof(OptionSetValue).IsOptionSet()).IsTrue();
     }
 
-    [TestMethod]
-    public void IsOptionSet_Should_ReturnTrue_For_Enum()
+    [Test]
+    public async Task IsOptionSet_Should_ReturnTrue_For_Enum()
     {
-        typeof(DayOfWeek).IsOptionSet().Should().BeTrue();
+        await Assert.That(typeof(DayOfWeek).IsOptionSet()).IsTrue();
     }
 
-    [TestMethod]
-    public void IsOptionSet_Should_ReturnTrue_For_NullableEnum()
+    [Test]
+    public async Task IsOptionSet_Should_ReturnTrue_For_NullableEnum()
     {
-        typeof(DayOfWeek?).IsOptionSet().Should().BeTrue();
+        await Assert.That(typeof(DayOfWeek?).IsOptionSet()).IsTrue();
     }
 
-    [TestMethod]
-    public void IsOptionSet_Should_ReturnFalse_For_OtherTypes()
+    [Test]
+    public async Task IsOptionSet_Should_ReturnFalse_For_OtherTypes()
     {
-        typeof(string).IsOptionSet().Should().BeFalse();
-        typeof(int).IsOptionSet().Should().BeFalse();
+        await Assert.That(typeof(string).IsOptionSet()).IsFalse();
+        await Assert.That(typeof(int).IsOptionSet()).IsFalse();
     }
 
-    [TestMethod]
-    public void IsOptionSetValueCollection_Should_ReturnTrue_For_OptionSetValueCollection()
+    [Test]
+    public async Task IsOptionSetValueCollection_Should_ReturnTrue_For_OptionSetValueCollection()
     {
-        typeof(OptionSetValueCollection).IsOptionSetValueCollection().Should().BeTrue();
+        await Assert.That(typeof(OptionSetValueCollection).IsOptionSetValueCollection()).IsTrue();
     }
 
-    [TestMethod]
-    public void IsDateTime_Should_ReturnTrue_For_DateTime()
+    [Test]
+    public async Task IsDateTime_Should_ReturnTrue_For_DateTime()
     {
-        typeof(DateTime).IsDateTime().Should().BeTrue();
+        await Assert.That(typeof(DateTime).IsDateTime()).IsTrue();
     }
 
-    [TestMethod]
-    public void IsDateTime_Should_ReturnTrue_For_NullableDateTime()
+    [Test]
+    public async Task IsDateTime_Should_ReturnTrue_For_NullableDateTime()
     {
-        typeof(DateTime?).IsDateTime().Should().BeTrue();
+        await Assert.That(typeof(DateTime?).IsDateTime()).IsTrue();
     }
 
-    [TestMethod]
-    public void IsNullableEnum_Should_ReturnTrue_For_NullableEnum()
+    [Test]
+    public async Task IsNullableEnum_Should_ReturnTrue_For_NullableEnum()
     {
-        typeof(DayOfWeek?).IsNullableEnum().Should().BeTrue();
+        await Assert.That(typeof(DayOfWeek?).IsNullableEnum()).IsTrue();
     }
 
-    [TestMethod]
-    public void IsNullableEnum_Should_ReturnFalse_For_NonNullableEnum()
+    [Test]
+    public async Task IsNullableEnum_Should_ReturnFalse_For_NonNullableEnum()
     {
-        typeof(DayOfWeek).IsNullableEnum().Should().BeFalse();
+        await Assert.That(typeof(DayOfWeek).IsNullableEnum()).IsFalse();
     }
 }

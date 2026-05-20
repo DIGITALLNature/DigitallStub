@@ -3,28 +3,27 @@
 
 using System;
 using System.Linq;
-using AwesomeAssertions;
+using System.Threading.Tasks;
 using Digitall.Testing.Tests.Fixtures;
 
 namespace Digitall.Testing.Tests.OrganizationRequests;
 
-[TestClass]
 public class DataContextTests
 {
-    [TestMethod]
-    public void EmptyAccountSet_Should_Return_EmptyList()
+    [Test]
+    public async Task EmptyAccountSet_Should_Return_EmptyList()
     {
         var dataverse = new FakeOrganizationService();
         dataverse.AddDefaultRequests();
 
         using (var dataContext = new DataContext(dataverse))
         {
-            dataContext.AccountSet.Should().BeEmpty();
+            await Assert.That(dataContext.AccountSet).IsEmpty();
         }
     }
 
-    [TestMethod]
-    public void FilledAccountSet_Should_NotBeEmpty()
+    [Test]
+    public async Task FilledAccountSet_Should_NotBeEmpty()
     {
         var dataverse = new FakeOrganizationService();
         dataverse.AddDefaultRequests();
@@ -33,12 +32,12 @@ public class DataContextTests
 
         using (var dataContext = new DataContext(dataverse))
         {
-            dataContext.AccountSet.Should().NotBeEmpty();
+            await Assert.That(dataContext.AccountSet).IsNotEmpty();
         }
     }
 
-    [TestMethod]
-    public void ProjectionOfEarlyBound_Should_MaintainType()
+    [Test]
+    public async Task ProjectionOfEarlyBound_Should_MaintainType()
     {
         var dataverse = new FakeOrganizationService();
         dataverse.AddDefaultRequests();
@@ -53,20 +52,20 @@ public class DataContextTests
 
         using (var dataContext = new DataContext(dataverse))
         {
-            dataContext.AccountSet.Select(a => a.Id).Single().Should().Be(accountId);
+            await Assert.That(dataContext.AccountSet.Select(a => a.Id).Single()).IsEqualTo(accountId);
         }
 
         using (var dataContext = new DataContext(dataverse))
         {
-            dataContext.AccountSet.Select(a => a.Name).Single().Should().Be(accountName);
+            await Assert.That(dataContext.AccountSet.Select(a => a.Name).Single()).IsEqualTo(accountName);
         }
 
-        account.Id.Should().Be(accountId);
-        account.Name.Should().Be(accountName);
+        await Assert.That(account.Id).IsEqualTo(accountId);
+        await Assert.That(account.Name).IsEqualTo(accountName);
 
         using (var dataContext = new DataContext(dataverse))
         {
-            dataContext.AccountSet.Select(a => a.Name).Single().Should().Be(accountName);
+            await Assert.That(dataContext.AccountSet.Select(a => a.Name).Single()).IsEqualTo(accountName);
         }
     }
 }

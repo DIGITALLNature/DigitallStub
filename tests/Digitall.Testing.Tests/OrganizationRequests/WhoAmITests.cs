@@ -1,28 +1,30 @@
 // Copyright (c) DIGITALL Nature. All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
-using AwesomeAssertions;
+using System.Threading.Tasks;
 using Digitall.Testing.OrganizationRequests;
 using DotNetEnv;
 using Microsoft.Crm.Sdk.Messages;
 
 namespace Digitall.Testing.Tests.OrganizationRequests;
 
-[TestClass]
 public class WhoAmITests
 {
-    [ClassInitialize]
-    public static void MyClassInitialize(TestContext testContext) => Env.Load();
+    [Before(Class)]
+    public static async Task MyClassInitialize()
+    {
+        Env.Load();
+        await Task.CompletedTask;
+    }
 
-
-    [TestMethod]
-    public void Stubs_Dispatch_Working()
+    [Test]
+    public async Task Stubs_Dispatch_Working()
     {
         var sut = new FakeOrganizationService();
         sut.AddRequest(new WhoAmIFake());
 
         var result = sut.Execute(new WhoAmIRequest());
 
-        result.Should().BeAssignableTo<WhoAmIResponse>();
+        await Assert.That(result).IsTypeOf<WhoAmIResponse>();
     }
 }
