@@ -171,7 +171,7 @@ public class PluginExecutionContextBuilderTests
         var plugin = new TestPlugin();
         plugin.Execute(serviceProvider);
 
-        tracingServiceMock.Trace("TestPlugin: Execute", Arg.Any<object[]>()).WasCalled();
+        tracingServiceMock.Trace("TestPlugin: Execute", Any<object[]>()).WasCalled();
         return Task.CompletedTask;
     }
 
@@ -272,8 +272,10 @@ public class PluginExecutionContextBuilderTests
     [Test]
     public async Task Mode_Should_BeSettableAfterConstruction()
     {
-        var builder = new PluginExecutionContextBuilder();
-        builder.Mode = 1;
+        var builder = new PluginExecutionContextBuilder
+        {
+            Mode = 1
+        };
 
         var serviceProvider = builder.BuildServiceProvider();
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
@@ -285,8 +287,10 @@ public class PluginExecutionContextBuilderTests
     [Test]
     public async Task Stage_Should_BeSettableAfterConstruction()
     {
-        var builder = new PluginExecutionContextBuilder();
-        builder.Stage = 40;
+        var builder = new PluginExecutionContextBuilder
+        {
+            Stage = 40
+        };
 
         var serviceProvider = builder.BuildServiceProvider();
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;

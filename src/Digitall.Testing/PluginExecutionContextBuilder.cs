@@ -106,7 +106,7 @@ public class PluginExecutionContextBuilder
 
         // organization service
         var organizationServiceFactory = IOrganizationServiceFactory.Mock();
-        organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(OrganizationService!);
+        organizationServiceFactory.CreateOrganizationService(Any<Guid?>()).Returns(OrganizationService!);
 
         // service provider
         var serviceProvider = IServiceProvider.Mock();

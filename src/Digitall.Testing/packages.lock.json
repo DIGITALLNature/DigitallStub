@@ -63,9 +63,9 @@
       },
       "TUnit.Mocks": {
         "type": "Direct",
-        "requested": "[1.45.8, )",
-        "resolved": "1.45.8",
-        "contentHash": "w1DSdhQZad3WXfJhX6C6KJVulidJW0NtybBZBzTArKGCL85icp97eedlr28nfofWk9WOtnrtuekaLlN+wgijDg=="
+        "requested": "[1.45.22, )",
+        "resolved": "1.45.22",
+        "contentHash": "uWtP+VSBehJZiRDZjma7nwSSUck71etVUi48JyLZDPEllrKGec4WhnkIjdM2b4W0AhaIbFOz/SFRml1VCj+38w=="
       },
       "Microsoft.Build.Tasks.Git": {
         "type": "Transitive",

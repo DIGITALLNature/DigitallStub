@@ -37,7 +37,7 @@ public class SpyOrganizationRequestFakeTests
 
         sut.Execute(request, service);
 
-        await Assert.That(sut.ReceivedRequests).HasCount().EqualTo(1);
+        await Assert.That(sut.ReceivedRequests).Count().IsEqualTo(1);
         await Assert.That(sut.ReceivedRequests[0]).IsEqualTo(request);
     }
 
@@ -54,7 +54,7 @@ public class SpyOrganizationRequestFakeTests
         sut.Execute(request2, service);
         sut.Execute(request3, service);
 
-        await Assert.That(sut.ReceivedRequests).HasCount().EqualTo(3);
+        await Assert.That(sut.ReceivedRequests).Count().IsEqualTo(3);
         await Assert.That(sut.ReceivedRequests[0]).IsEqualTo(request1);
         await Assert.That(sut.ReceivedRequests[1]).IsEqualTo(request2);
         await Assert.That(sut.ReceivedRequests[2]).IsEqualTo(request3);
@@ -106,7 +106,7 @@ public class SpyOrganizationRequestFakeTests
         var request = new WhoAmIRequest();
         sut.Execute(request, new FakeOrganizationService());
 
-        await Assert.That(sut.ReceivedRequests).HasCount().EqualTo(1);
+        await Assert.That(sut.ReceivedRequests).Count().IsEqualTo(1);
         await Assert.That(sut.ReceivedRequests[0]).IsEqualTo(request);
     }
 
@@ -119,7 +119,7 @@ public class SpyOrganizationRequestFakeTests
 
         service.Execute(new WhoAmIRequest());
 
-        await Assert.That(sut.ReceivedRequests).HasCount().EqualTo(1);
+        await Assert.That(sut.ReceivedRequests).Count().IsEqualTo(1);
     }
 
     [Test]
@@ -132,7 +132,7 @@ public class SpyOrganizationRequestFakeTests
         service.Execute(new WhoAmIRequest());
         service.Execute(new WhoAmIRequest());
 
-        await Assert.That(sut.ReceivedRequests).HasCount().EqualTo(2);
+        await Assert.That(sut.ReceivedRequests).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -142,10 +142,10 @@ public class SpyOrganizationRequestFakeTests
         var service = new FakeOrganizationService();
         service.AddRequest(sut);
 
-        var account = new Digitall.Testing.Tests.Fixtures.Account { Name = "Test" };
+        var account = new Fixtures.Account { Name = "Test" };
         service.Execute(new CreateRequest { Target = account });
 
-        await Assert.That(sut.ReceivedRequests).HasCount().EqualTo(1);
+        await Assert.That(sut.ReceivedRequests).Count().IsEqualTo(1);
         await Assert.That(sut.ReceivedRequests[0].Target).IsEqualTo(account);
     }
 }
