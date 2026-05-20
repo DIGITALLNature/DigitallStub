@@ -130,13 +130,13 @@ public class PluginExecutionContextBuilderTests
     [Test]
     public async Task SettingTracingService_Should_OverwriteDefault()
     {
-        var tracingService = Mock.Of<ITracingService>().Object;
-        var serviceProvider = new PluginExecutionContextBuilder(tracingService)
+        var tracingService = Mock.Of<ITracingService>();
+        var serviceProvider = new PluginExecutionContextBuilder((ITracingService)tracingService)
             .BuildServiceProvider();
 
         var tracingServiceFromContext = serviceProvider.GetService(typeof(ITracingService));
         await Assert.That(tracingServiceFromContext).IsNotNull();
-        await Assert.That(tracingServiceFromContext).IsEqualTo(tracingService);
+        await Assert.That(tracingServiceFromContext).IsEqualTo((ITracingService)tracingService);
     }
 
     [Test]
@@ -165,7 +165,7 @@ public class PluginExecutionContextBuilderTests
     public async Task TestPlugin_Durchstich()
     {
         var tracingServiceMock = Mock.Of<ITracingService>();
-        var serviceProvider = new PluginExecutionContextBuilder(tracingServiceMock.Object)
+        var serviceProvider = new PluginExecutionContextBuilder((ITracingService)tracingServiceMock)
             .BuildServiceProvider();
 
         var plugin = new TestPlugin();
@@ -234,26 +234,26 @@ public class PluginExecutionContextBuilderTests
     [Test]
     public async Task OrganizationServiceFactory_Should_ReturnConfiguredService_ForAnyUser()
     {
-        var organizationService = Mock.Of<IOrganizationService>().Object;
-        var serviceProvider = new PluginExecutionContextBuilder(organizationService).BuildServiceProvider();
+        var organizationService = Mock.Of<IOrganizationService>();
+        var serviceProvider = new PluginExecutionContextBuilder((IOrganizationService)organizationService).BuildServiceProvider();
 
         var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
 
         await Assert.That(organizationServiceFactory).IsNotNull();
-        await Assert.That(organizationServiceFactory!.CreateOrganizationService(Guid.NewGuid())).IsEqualTo(organizationService);
-        await Assert.That(organizationServiceFactory.CreateOrganizationService(null)).IsEqualTo(organizationService);
+        await Assert.That(organizationServiceFactory!.CreateOrganizationService(Guid.NewGuid())).IsEqualTo((IOrganizationService)organizationService);
+        await Assert.That(organizationServiceFactory.CreateOrganizationService(null)).IsEqualTo((IOrganizationService)organizationService);
     }
 
     [Test]
     public async Task LoggerConstructor_Should_RegisterILogger()
     {
-        var logger = Mock.Of<ILogger>().Object;
-        var serviceProvider = new PluginExecutionContextBuilder(logger).BuildServiceProvider();
+        var logger = Mock.Of<ILogger>();
+        var serviceProvider = new PluginExecutionContextBuilder((ILogger)logger).BuildServiceProvider();
 
         var loggerFromContext = serviceProvider.GetService(typeof(ILogger));
 
         await Assert.That(loggerFromContext).IsNotNull();
-        await Assert.That(loggerFromContext).IsEqualTo(logger);
+        await Assert.That(loggerFromContext).IsEqualTo((ILogger)logger);
     }
 
     [Test]
