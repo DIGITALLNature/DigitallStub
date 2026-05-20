@@ -64,7 +64,7 @@ public class BuilderExtensionsTests
         builder.AddData(entity);
 
         var service = builder.GetOrganizationService();
-        await Assert.That(service.InternalState["account"].ContainsKey(entity.Id)).IsTrue();
+        await Assert.That(service.ServiceState["account"].ContainsKey(entity.Id)).IsTrue();
     }
 
     [Test]
@@ -75,7 +75,7 @@ public class BuilderExtensionsTests
         builder.AddConfig("my_key", "default_val", "override_val");
 
         var service = builder.GetOrganizationService();
-        await Assert.That(service.InternalState.ContainsKey("environmentvariabledefinition")).IsTrue();
-        await Assert.That(service.InternalState.ContainsKey("environmentvariablevalue")).IsTrue();
+        await Assert.That(service.ServiceState.ContainsKey("environmentvariabledefinition")).IsTrue();
+        await Assert.That(service.ServiceState.ContainsKey("environmentvariablevalue")).IsTrue();
     }
 }

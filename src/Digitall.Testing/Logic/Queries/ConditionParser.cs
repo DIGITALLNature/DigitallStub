@@ -81,11 +81,7 @@ public static class ConditionParser
 
     private static FaultException ThrowFaultException(string faultReason)
     {
-#if NETFRAMEWORK
-        throw new FaultException(new FaultReason(faultReason));
-#else
         throw new FaultException(faultReason);
-#endif
     }
 
     public static Expression TranslateConditionExpression(QueryExpression queryExpression, FakeOrganizationService context, TypedConditionExpression condition, ParameterExpression entity)

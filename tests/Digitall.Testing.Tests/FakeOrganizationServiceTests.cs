@@ -32,15 +32,15 @@ public class FakeOrganizationServiceTests
     public async Task ModelIsSeeded()
     {
         var sut = new FakeOrganizationService();
-        await Assert.That(sut.InternalState).IsNotNull();
-        await Assert.That(sut.InternalState).IsEmpty();
+        await Assert.That(sut.ServiceState).IsNotNull();
+        await Assert.That(sut.ServiceState).IsEmpty();
 
         sut.AddRange(TestData.Default);
-        await Assert.That(sut.InternalState).IsNotEmpty();
-        await Assert.That(sut.InternalState.ContainsKey(Account.EntityLogicalName)).IsTrue();
-        await Assert.That(sut.InternalState.ContainsKey(Contact.EntityLogicalName)).IsTrue();
-        await Assert.That(sut.InternalState[Account.EntityLogicalName]).Count().IsEqualTo(2);
-        await Assert.That(sut.InternalState[Contact.EntityLogicalName]).Count().IsEqualTo(3);
+        await Assert.That(sut.ServiceState).IsNotEmpty();
+        await Assert.That(sut.ServiceState.ContainsKey(Account.EntityLogicalName)).IsTrue();
+        await Assert.That(sut.ServiceState.ContainsKey(Contact.EntityLogicalName)).IsTrue();
+        await Assert.That(sut.ServiceState[Account.EntityLogicalName]).Count().IsEqualTo(2);
+        await Assert.That(sut.ServiceState[Contact.EntityLogicalName]).Count().IsEqualTo(3);
     }
 
     [Test]
@@ -142,9 +142,9 @@ public class FakeOrganizationServiceTests
         var result = sut.Create(entity);
 
         await Assert.That(result).IsNotEqualTo(Guid.Empty);
-        await Assert.That(sut.InternalState.ContainsKey(Account.EntityLogicalName)).IsTrue();
-        await Assert.That(sut.InternalState[Account.EntityLogicalName].ContainsKey(result)).IsTrue();
-        await Assert.That(sut.InternalState[Account.EntityLogicalName][result]).IsNotSameReferenceAs(entity);
+        await Assert.That(sut.ServiceState.ContainsKey(Account.EntityLogicalName)).IsTrue();
+        await Assert.That(sut.ServiceState[Account.EntityLogicalName].ContainsKey(result)).IsTrue();
+        await Assert.That(sut.ServiceState[Account.EntityLogicalName][result]).IsNotSameReferenceAs(entity);
     }
 
     [Test]
@@ -157,8 +157,8 @@ public class FakeOrganizationServiceTests
         var result = sut.Create(entity);
 
         await Assert.That(result).IsEqualTo(id);
-        await Assert.That(sut.InternalState.ContainsKey(Account.EntityLogicalName)).IsTrue();
-        await Assert.That(sut.InternalState[Account.EntityLogicalName].ContainsKey(id)).IsTrue();
+        await Assert.That(sut.ServiceState.ContainsKey(Account.EntityLogicalName)).IsTrue();
+        await Assert.That(sut.ServiceState[Account.EntityLogicalName].ContainsKey(id)).IsTrue();
     }
 
     [Test]
@@ -276,9 +276,9 @@ public class FakeOrganizationServiceTests
         var updatedEntity = new Account(id) { Name = nameof(Update_UpdatesEntityInStateDictionary), Description = "Changed"};
         sut.Update(updatedEntity);
 
-        await Assert.That(sut.InternalState[Account.EntityLogicalName].ContainsKey(id)).IsTrue();
-        await Assert.That(sut.InternalState[Account.EntityLogicalName][id].ToEntity<Account>().Description).IsEquivalentTo(updatedEntity.Description);
-        await Assert.That(sut.InternalState[Account.EntityLogicalName][id]).IsNotSameReferenceAs(updatedEntity);
+        await Assert.That(sut.ServiceState[Account.EntityLogicalName].ContainsKey(id)).IsTrue();
+        await Assert.That(sut.ServiceState[Account.EntityLogicalName][id].ToEntity<Account>().Description).IsEquivalentTo(updatedEntity.Description);
+        await Assert.That(sut.ServiceState[Account.EntityLogicalName][id]).IsNotSameReferenceAs(updatedEntity);
     }
 
     [Test]
@@ -289,7 +289,7 @@ public class FakeOrganizationServiceTests
         sut.Add(new Account(id) { Name = nameof(Delete_WithValidEntityNameAndId_RemovesRecord) });
         sut.Delete(Account.EntityLogicalName, id);
 
-        await Assert.That(sut.InternalState[Account.EntityLogicalName].ContainsKey(id)).IsFalse();
+        await Assert.That(sut.ServiceState[Account.EntityLogicalName].ContainsKey(id)).IsFalse();
     }
 
     [Test]
