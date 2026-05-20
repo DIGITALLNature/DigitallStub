@@ -8,7 +8,7 @@ namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
 class CountAggregate : FetchAggregate
 {
-    protected override object AggregateValues(IEnumerable<object> values)
+    protected override object AggregateValues(IEnumerable<object?> values)
     {
         return values.Count();
     }

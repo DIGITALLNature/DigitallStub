@@ -53,9 +53,9 @@ public class EntityTypeResolver
                     continue;
 
                 var attr = type.GetCustomAttribute<EntityLogicalNameAttribute>();
-                if (attr != null && !cache.ContainsKey(attr.LogicalName))
+                if (attr != null)
                 {
-                    cache[attr.LogicalName] = type;
+                    cache.TryAdd(attr.LogicalName, type);
                 }
             }
         }
@@ -71,9 +71,9 @@ public class EntityTypeResolver
             foreach (var pi in type.GetProperties())
             {
                 var attr = pi.GetCustomAttribute<AttributeLogicalNameAttribute>();
-                if (attr != null && !props.ContainsKey(attr.LogicalName))
+                if (attr != null)
                 {
-                    props[attr.LogicalName] = pi;
+                    props.TryAdd(attr.LogicalName, pi);
                 }
             }
             cache[logicalName] = props;

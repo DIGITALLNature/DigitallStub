@@ -75,7 +75,7 @@ public class PluginExecutionContextBuilder
     {
         var pluginExecutionContext = Mock.Of<IPluginExecutionContext7>();
 
-        pluginExecutionContext.MessageName.Returns(MessageName);
+        pluginExecutionContext.MessageName.Returns(MessageName!);
         pluginExecutionContext.Mode.Returns(Mode);
         pluginExecutionContext.Stage.Returns(Stage);
         pluginExecutionContext.InitiatingUserId.Returns(InitiatingUserId);
@@ -107,7 +107,7 @@ public class PluginExecutionContextBuilder
 
         // organization service
         var organizationServiceFactory = Mock.Of<IOrganizationServiceFactory>();
-        organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(OrganizationService);
+        organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(OrganizationService!);
 
         // service provider
         var serviceProvider = Mock.Of<IServiceProvider>();

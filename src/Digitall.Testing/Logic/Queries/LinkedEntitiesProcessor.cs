@@ -17,7 +17,7 @@ public class LinkedEntitiesProcessor
 {
         private readonly FakeOrganizationService _state;
         private readonly QueryProcessor _queryProcessor;
-        readonly Dictionary<string, int> _linkedEntities = new Dictionary<string, int>();
+        readonly Dictionary<string, int> _linkedEntities = new();
 
         public LinkedEntitiesProcessor(FakeOrganizationService state, QueryProcessor queryProcessor)
         {
@@ -78,7 +78,7 @@ public class LinkedEntitiesProcessor
                 throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { ErrorCode = (int)ErrorCodes.QueryBuilderNoAttribute, Message = errorMsg }, errorMsg);
             }
 
-            IQueryable<Entity> inner = null;
+            IQueryable<Entity>? inner = null;
             if (le.JoinOperator == JoinOperator.LeftOuter)
             {
                 //filters are applied in the inner query and then ignored during filter evaluation
@@ -122,9 +122,9 @@ public class LinkedEntitiesProcessor
                             outerKey => outerKey.KeySelector(linkFromAlias),
                             innerKey => innerKey.KeySelector(le.LinkToAttributeName),
                             (outerEl, innerElemsCol) => new { outerEl, innerElemsCol })
-                        .SelectMany(x => x.innerElemsCol.DefaultIfEmpty()
+                        .SelectMany(x => x.innerElemsCol.DefaultIfEmpty()!
                             , (x, y) => x.outerEl
-                                .JoinAttributes(y, new ColumnSet(true), leAlias));
+                                .JoinAttributes(y!, new ColumnSet(true), leAlias));
 
 
                     break;

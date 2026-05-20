@@ -6,23 +6,18 @@ using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
-class ComparableEntityReference : IComparable
+class ComparableEntityReference(EntityReference entityReference) : IComparable
 {
-    public EntityReference EntityReference { get; private set; }
+    public EntityReference EntityReference { get; } = entityReference;
 
-    public ComparableEntityReference(EntityReference entityReference)
-    {
-        EntityReference = entityReference;
-    }
-
-    int IComparable.CompareTo(object obj)
+    int IComparable.CompareTo(object? obj)
     {
         return Equals(obj) ? 0 : 1;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
-        EntityReference other;
+        EntityReference? other;
         if (obj is EntityReference entityRef)
         {
             other = entityRef;
@@ -40,6 +35,6 @@ class ComparableEntityReference : IComparable
 
     public override int GetHashCode()
     {
-        return (EntityReference.LogicalName == null ? 0 : EntityReference.LogicalName.GetHashCode()) ^ EntityReference.Id.GetHashCode();
+        return (EntityReference.LogicalName?.GetHashCode() ?? 0) ^ EntityReference.Id.GetHashCode();
     }
 }

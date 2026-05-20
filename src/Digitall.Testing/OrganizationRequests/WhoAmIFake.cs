@@ -49,7 +49,7 @@ public class WhoAmIFake: OrganizationRequestFake<WhoAmIRequest,WhoAmIResponse>
             var bu = state
                 .CreateQuery("businessunit")
                 .SingleOrDefault(b => b.Id == buId);
-            var orgRef = bu.GetAttributeValue<EntityReference>("organizationid");
+            var orgRef = bu?.GetAttributeValue<EntityReference>("organizationid");
             orgId = orgRef?.Id ?? Guid.Empty;
         }
 

@@ -241,7 +241,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         return Relationships.GetValueOrDefault(relationshipSchemaName);
     }
 
-    // <summary>
+    /// <summary>
     ///     Checks if the specified entity type is known.
     ///     An entity type is considered known if it exists in the metadata or if it is an early bound type.
     /// </summary>
@@ -311,13 +311,13 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             ThrowIfNotKnownEntityType(entityName);
         }
 
-        Entity record = null;
+        Entity? record = null;
         if (value == null || !value.TryGetValue(id, out record))
         {
             ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entityName}' With Id = {id:D} Does Not Exist");
         }
 
-        return record.ProjectAttributes(columnSet, this).CloneEntity();
+        return record!.ProjectAttributes(columnSet, this).CloneEntity();
     }
 
     public void Update(Entity entity)
@@ -332,12 +332,12 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             ThrowIfNotKnownEntityType(entity.LogicalName);
         }
 
-        if (value == null || !value.TryGetValue(entity.Id, out var record))
+        if (value == null || !value.TryGetValue(entity.Id, out _))
         {
             ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entity.LogicalName}' With Id = {entity.Id:D} Does Not Exist");
         }
 
-        value[entity.Id] = entity.CloneEntity();
+        value![entity.Id] = entity.CloneEntity();
     }
 
     public void Delete(string entityName, Guid id)
@@ -352,12 +352,12 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             ThrowIfNotKnownEntityType(entityName);
         }
 
-        if (value == null || !value.TryGetValue(id, out var record))
+        if (value == null || !value.TryGetValue(id, out _))
         {
             ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entityName}' With Id = {id:D} Does Not Exist");
         }
 
-        value.Remove(id);
+        value!.Remove(id);
     }
 
     public OrganizationResponse Execute(OrganizationRequest request)
@@ -488,12 +488,12 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             ThrowIfNotKnownEntityType(entityName);
         }
 
-        Entity record = value.Values.SingleOrDefault(row => keys.All(key => row.Attributes.ContainsKey(key.Key) && row.Attributes[key.Key] != null && row.Attributes[key.Key].Equals(key.Value)));
+        var record = value?.Values.SingleOrDefault(row => keys.All(key => row.Attributes.ContainsKey(key.Key) && row.Attributes[key.Key] != null && row.Attributes[key.Key].Equals(key.Value)));
         if (record == null)
         {
             ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entityName}' With Key = {string.Join(",", keys.Keys)} Does Not Exist");
         }
 
-        return record.ProjectAttributes(columnSet, this).CloneEntity();
+        return record!.ProjectAttributes(columnSet, this).CloneEntity();
     }
 }

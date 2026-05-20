@@ -36,17 +36,17 @@ internal class FetchProcessor(FakeOrganizationService state)
         ConditionOperator.InFiscalYear
     ];
 
-    public static string GetAssociatedEntityNameForConditionExpression(XElement el)
+    private static string? GetAssociatedEntityNameForConditionExpression(XElement el)
     {
-        while (el != null)
+        var parent = el.Parent;
+        while (parent != null)
         {
-            var parent = el.Parent;
             if (parent.Name.LocalName.Equals("entity") || parent.Name.LocalName.Equals("link-entity"))
             {
-                return parent.GetAttribute("name").Value;
+                return parent.GetAttribute("name")!.Value;
             }
 
-            el = parent;
+            parent = parent.Parent;
         }
 
         return null;
@@ -193,25 +193,25 @@ internal class FetchProcessor(FakeOrganizationService state)
         return filterExpression;
     }
 
-    public ConditionExpression ExtractConditionExpression(XElement elem)
+    private ConditionExpression ExtractConditionExpression(XElement elem)
     {
         var conditionEntityName = "";
 
-        var attributeName = elem.GetAttribute("attribute").Value;
+        var attributeName = elem.GetAttribute("attribute")!.Value;
         var op = ConditionOperator.Equal;
 
-        string value = null;
+        string? value = null;
         if (elem.GetAttribute("value") != null)
         {
-            value = elem.GetAttribute("value").Value;
+            value = elem.GetAttribute("value")!.Value;
         }
 
         if (elem.GetAttribute("entityname") != null)
         {
-            conditionEntityName = elem.GetAttribute("entityname").Value;
+            conditionEntityName = elem.GetAttribute("entityname")!.Value;
         }
 
-        switch (elem.GetAttribute("operator").Value)
+        switch (elem.GetAttribute("operator")!.Value)
         {
             case "eq":
                 op = ConditionOperator.Equal;
@@ -428,7 +428,7 @@ internal class FetchProcessor(FakeOrganizationService state)
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException(elem.GetAttribute("operator").Value);
+                throw new ArgumentOutOfRangeException(elem.GetAttribute("operator")!.Value);
         }
 
         //Process values
@@ -464,7 +464,7 @@ internal class FetchProcessor(FakeOrganizationService state)
         return new ConditionExpression(conditionEntityName, attributeName, op, values);
     }
 
-    public FilterExpression ExtractCriteria(XDocument xmlDocument) =>
+    public FilterExpression? ExtractCriteria(XDocument xmlDocument) =>
         xmlDocument.Elements() //fetch
             .Elements() //entity
             .Elements() //child nodes of entity
@@ -480,26 +480,26 @@ internal class FetchProcessor(FakeOrganizationService state)
             .Select(ExtractLinkLinkEntity)
             .ToList();
 
-    public LinkEntity ExtractLinkLinkEntity(XElement el)
+    private LinkEntity ExtractLinkLinkEntity(XElement el)
     {
         //Create this node
         var linkEntity = new LinkEntity
         {
-            LinkFromEntityName = el.Parent.GetAttribute("name").Value,
-            LinkFromAttributeName = el.GetAttribute("to").Value,
-            LinkToAttributeName = el.GetAttribute("from").Value,
-            LinkToEntityName = el.GetAttribute("name").Value,
+            LinkFromEntityName = el.Parent!.GetAttribute("name")!.Value,
+            LinkFromAttributeName = el.GetAttribute("to")!.Value,
+            LinkToAttributeName = el.GetAttribute("from")!.Value,
+            LinkToEntityName = el.GetAttribute("name")!.Value,
         };
 
         if (el.GetAttribute("alias") != null)
         {
-            linkEntity.EntityAlias = el.GetAttribute("alias").Value;
+            linkEntity.EntityAlias = el.GetAttribute("alias")!.Value;
         }
 
         //Join operator
         if (el.GetAttribute("link-type") != null)
         {
-            switch (el.GetAttribute("link-type").Value)
+            switch (el.GetAttribute("link-type")!.Value)
             {
                 case "outer":
                     linkEntity.JoinOperator = JoinOperator.LeftOuter;
@@ -542,21 +542,21 @@ internal class FetchProcessor(FakeOrganizationService state)
         }
 
         //Root node
-        if (!xmlDocument.Root.Name.LocalName.Equals("fetch", StringComparison.Ordinal))
+        if (!xmlDocument.Root!.Name.LocalName.Equals("fetch", StringComparison.Ordinal))
         {
             throw new Exception("Root node must be fetch");
         }
     }
 
-    private object GetConditionExpressionValueCast(string value, string entityName, string sAttributeName, ConditionOperator op)
+    private object GetConditionExpressionValueCast(string value, string? entityName, string sAttributeName, ConditionOperator op)
     {
-        if (state.IsKnownAttributeForType(entityName, sAttributeName, out var attributeType))
+        if (entityName != null && state.IsKnownAttributeForType(entityName, sAttributeName, out var attributeType))
         {
             try
             {
                 if (ValueNeedsConverting(op))
                 {
-                    return GetValueBasedOnType(attributeType.PropertyType, value);
+                    return GetValueBasedOnType(attributeType!.PropertyType, value);
                 }
 
                 return int.Parse(value);
@@ -581,27 +581,23 @@ internal class FetchProcessor(FakeOrganizationService state)
 
         var bIsNumeric = false;
         var bIsDateTime = false;
-        var dblValue = 0.0;
-        var decValue = 0.0m;
-        var intValue = 0;
 
-        if (double.TryParse(value, out dblValue))
+        if (double.TryParse(value, out _))
         {
             bIsNumeric = true;
         }
 
-        if (decimal.TryParse(value, out decValue))
+        if (decimal.TryParse(value, out _))
         {
             bIsNumeric = true;
         }
 
-        if (int.TryParse(value, out intValue))
+        if (int.TryParse(value, out _))
         {
             bIsNumeric = true;
         }
 
-        var dtValue = DateTime.MinValue;
-        if (DateTime.TryParse(value, out dtValue))
+        if (DateTime.TryParse(value, out _))
         {
             bIsDateTime = true;
         }

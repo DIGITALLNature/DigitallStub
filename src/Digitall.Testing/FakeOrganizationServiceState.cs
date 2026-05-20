@@ -24,7 +24,7 @@ public class FakeOrganizationServiceState
     private static List<Assembly> SearchProxyTypesAssembly()
     {
         var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-        return assemblies.Where(assembly => !assembly.FullName.StartsWith("Microsoft.Xrm.Sdk", StringComparison.Ordinal)) // Ignore SDK
+        return assemblies.Where(assembly => !assembly.FullName!.StartsWith("Microsoft.Xrm.Sdk", StringComparison.Ordinal)) // Ignore SDK
             .Where(assembly => assembly.GetCustomAttributes(typeof(ProxyTypesAssemblyAttribute), true).Length != 0).ToList();
     }
 }

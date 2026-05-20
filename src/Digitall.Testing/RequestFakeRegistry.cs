@@ -46,7 +46,7 @@ public class RequestFakeRegistry
         }
     }
 
-    public bool TryGetFake(Type requestType, out IOrganizationRequestFake fake)
+    public bool TryGetFake(Type requestType, out IOrganizationRequestFake? fake)
     {
         return _requestFakes.TryGetValue(requestType, out fake);
     }

@@ -8,8 +8,8 @@ namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
 class CountColumnAggregate : AliasedAggregate
 {
-    protected override object AggregateAliasedValues(IEnumerable<object> values)
+    protected override object AggregateAliasedValues(IEnumerable<object?> values)
     {
-        return values.Where(x => x != null).Count();
+        return values.Count(x => x != null);
     }
 }

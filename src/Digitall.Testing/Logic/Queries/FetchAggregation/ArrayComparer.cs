@@ -7,19 +7,20 @@ using System.Linq;
 
 namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
-class ArrayComparer : IEqualityComparer<IComparable[]>
+class ArrayComparer : IEqualityComparer<IComparable?[]>
 {
-    public bool Equals(IComparable[] x, IComparable[] y)
+    public bool Equals(IComparable?[]? x, IComparable?[]? y)
     {
+        if (x is null || y is null) return ReferenceEquals(x, y);
         return x.SequenceEqual(y);
     }
 
-    public int GetHashCode(IComparable[] obj)
+    public int GetHashCode(IComparable?[] obj)
     {
         var result = 0;
-        foreach (IComparable x in obj)
+        foreach (var x in obj)
         {
-            result ^= x == null ? 0 : x.GetHashCode();
+            result ^= x?.GetHashCode() ?? 0;
         }
         return result;
     }

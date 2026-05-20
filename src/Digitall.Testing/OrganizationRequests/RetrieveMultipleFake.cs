@@ -24,9 +24,9 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             var queryProcessor = new QueryProcessor(state);
 
             // Initialize variables
-            QueryExpression queryExpression;
-            PagingInfo pageInfo;
-            string entityName;
+            QueryExpression? queryExpression;
+            PagingInfo? pageInfo;
+            string? entityName;
             List<Entity> internalResult;
 
             // Check if the query is a QueryExpression
@@ -100,7 +100,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
 
             // Handle TotalRecordCount here
             var totalRecordCount = -1;
-            if (queryExpression?.PageInfo?.ReturnTotalRecordCount == true)
+            if (queryExpression is { PageInfo.ReturnTotalRecordCount: true })
             {
                 totalRecordCount = internalResult.Count;
             }
@@ -108,7 +108,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             // Handle paging
             var maxRetrieveCount = int.Parse(Environment.GetEnvironmentVariable("MaxRetrieveCount") ?? "5000");
             var pageSize = maxRetrieveCount;
-            pageInfo = queryExpression.PageInfo;
+            pageInfo = queryExpression?.PageInfo;
             var pageNumber = 1;
 
             // Calculate the start position and number of items to retrieve based on the page number and page size
@@ -138,7 +138,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
 
             var recordsToReturn = startPosition + numberToGet > internalResult.Count ? new List<Entity>() : internalResult.GetRange(startPosition, numberToGet);
 
-             recordsToReturn.ForEach(e => PatchDateFormat(e,state));
+             recordsToReturn.ForEach(e => PatchDateFormat(e, state));
              recordsToReturn.ForEach(FillFormattedValues);
 
             var response = new RetrieveMultipleResponse
@@ -242,7 +242,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             {
                 case Enum:
                     // Retrieve the enum type
-                    formattedValue = Enum.GetName(value.GetType(), value);
+                    formattedValue = Enum.GetName(value.GetType(), value)!;
                     result = true;
                     break;
                 case AliasedValue aliasedValue:

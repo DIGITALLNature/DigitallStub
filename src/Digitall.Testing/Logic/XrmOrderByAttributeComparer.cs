@@ -7,7 +7,7 @@ using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Testing.Logic;
 
-public class XrmOrderByAttributeComparer : IComparer<object>
+public class XrmOrderByAttributeComparer : IComparer<object?>
 {
     public int Compare(object? objectA, object? objectB)
     {
