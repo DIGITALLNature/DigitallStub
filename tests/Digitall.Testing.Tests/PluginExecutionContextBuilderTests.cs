@@ -260,12 +260,12 @@ public class PluginExecutionContextBuilderTests
     [Test]
     public Task ExistingTargetParameter_Should_ThrowOnBuild_WhenTargetIsAlsoConfigured()
     {
-        Action action = () => new PluginExecutionContextBuilder()
+        void Action() => new PluginExecutionContextBuilder()
             .WithInputParameter("Target", new Entity("contact", Guid.NewGuid()))
             .WithTarget(new Entity("account", Guid.NewGuid()))
             .BuildServiceProvider();
 
-        Assert.Throws<ArgumentException>(action);
+        Assert.Throws<ArgumentException>(Action);
         return Task.CompletedTask;
     }
 

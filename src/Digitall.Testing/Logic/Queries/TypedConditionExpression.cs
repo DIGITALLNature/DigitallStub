@@ -10,7 +10,7 @@ namespace Digitall.Testing.Logic.Queries;
 /// </summary>
 public class TypedConditionExpression(ConditionExpression c)
 {
-    public ConditionExpression CondExpression { get; set; } = c;
+    public ConditionExpression CondExpression { get; } = c;
     public Type? AttributeType { get; set; }
 
     /// <summary>

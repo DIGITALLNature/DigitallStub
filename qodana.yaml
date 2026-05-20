@@ -27,7 +27,7 @@ include:
 exclude:
   - name: All
     paths:
-      - tests/Digitall.Testing.Tests/Fixtures/Model
+      - tests
 
 #Execute shell command before Qodana execution (Applied in CI/CD pipeline)
 bootstrap: dotnet restore ./Digitall.Testing.slnx && dotnet build ./Digitall.Testing.slnx --configuration Debug

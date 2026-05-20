@@ -526,7 +526,7 @@ default:
             var rightHandSideExpression = Expression.Constant(ConvertToHashSetOfInt(conditionValue, false));
 
             expOrValues = Expression.Equal(
-                Expression.Call(leftHandSideExpression, typeof(HashSet<int>).GetMethod(nameof(HashSet<int>.SetEquals))!, rightHandSideExpression),
+                Expression.Call(leftHandSideExpression, typeof(HashSet<int>).GetMethod(nameof(HashSet<>.SetEquals))!, rightHandSideExpression),
                 Expression.Constant(true));
         }
 
@@ -631,7 +631,7 @@ default:
             var rightHandSideExpression = Expression.Constant(ConvertToHashSetOfInt(c.Values, false));
 
             expOrValues = Expression.Equal(
-                Expression.Call(leftHandSideExpression, typeof(HashSet<int>).GetMethod(nameof(HashSet<int>.SetEquals))!, rightHandSideExpression),
+                Expression.Call(leftHandSideExpression, typeof(HashSet<int>).GetMethod(nameof(HashSet<>.SetEquals))!, rightHandSideExpression),
                 Expression.Constant(true));
         }
         else

@@ -22,7 +22,6 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
 
             // Initialize variables
             QueryExpression queryExpression;
-            PagingInfo? pageInfo;
             string? entityName;
             List<Entity> internalResult;
 
@@ -105,7 +104,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             // Handle paging
             var maxRetrieveCount = int.Parse(Environment.GetEnvironmentVariable("MaxRetrieveCount") ?? "5000");
             var pageSize = maxRetrieveCount;
-            pageInfo = queryExpression.PageInfo;
+            var pageInfo = queryExpression.PageInfo;
             var pageNumber = 1;
 
             // Calculate the start position and number of items to retrieve based on the page number and page size
@@ -142,11 +141,15 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             {
                 Results = new ParameterCollection
                                  {
-                                    { "EntityCollection", new EntityCollection(recordsToReturn) { EntityName = entityName } }
+                                    { "EntityCollection", new EntityCollection(recordsToReturn)
+                                        {
+                                            EntityName = entityName,
+                                            MoreRecords = (internalResult.Count - pageSize * pageNumber) > 0,
+                                            TotalRecordCount = totalRecordCount
+                                        }
+                                    }
                                  },
             };
-            response.EntityCollection.MoreRecords = (internalResult.Count - pageSize * pageNumber) > 0;
-            response.EntityCollection.TotalRecordCount = totalRecordCount;
 
             if (response.EntityCollection.MoreRecords)
             {
