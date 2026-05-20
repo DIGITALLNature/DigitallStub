@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AwesomeAssertions;
+using System.Threading.Tasks;
 using Digitall.Testing.OrganizationRequests;
 using Digitall.Testing.Tests.Fixtures;
 using Microsoft.Xrm.Sdk;
@@ -13,19 +13,19 @@ using Microsoft.Xrm.Sdk.Metadata;
 
 namespace Digitall.Testing.Tests.OrganizationRequests;
 
-[TestClass]
 public class OrganizationRequestFakeTests
 {
     private FakeOrganizationService _sut;
 
-    [TestInitialize]
-    public void Setup()
+    [Before(Test)]
+    public async Task Setup()
     {
         _sut = new FakeOrganizationService();
+        await Task.CompletedTask;
     }
 
-    [TestMethod]
-    public void CreateFake_Should_CreateRecord()
+    [Test]
+    public async Task CreateFake_Should_CreateRecord()
     {
         _sut.AddRequest(new CreateFake());
         var account = new Account { Name = "Test Account" };
@@ -33,13 +33,13 @@ public class OrganizationRequestFakeTests
 
         var response = (CreateResponse)_sut.Execute(request);
 
-        response.id.Should().NotBe(Guid.Empty);
-        _sut.InternalState[Account.EntityLogicalName].ContainsKey(response.id).Should().BeTrue();
-        _sut.InternalState[Account.EntityLogicalName][response.id].GetAttributeValue<string>("name").Should().Be("Test Account");
+        await Assert.That(response.id).IsNotEqualTo(Guid.Empty);
+        await Assert.That(_sut.InternalState[Account.EntityLogicalName].ContainsKey(response.id)).IsTrue();
+        await Assert.That(_sut.InternalState[Account.EntityLogicalName][response.id].GetAttributeValue<string>("name")).IsEqualTo("Test Account");
     }
 
-    [TestMethod]
-    public void UpdateFake_Should_UpdateRecord()
+    [Test]
+    public async Task UpdateFake_Should_UpdateRecord()
     {
         _sut.AddRequest(new UpdateFake());
         var id = Guid.NewGuid();
@@ -50,11 +50,11 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        _sut.InternalState[Account.EntityLogicalName][id].GetAttributeValue<string>("name").Should().Be("New Name");
+        await Assert.That(_sut.InternalState[Account.EntityLogicalName][id].GetAttributeValue<string>("name")).IsEqualTo("New Name");
     }
 
-    [TestMethod]
-    public void DeleteFake_Should_RemoveRecord()
+    [Test]
+    public async Task DeleteFake_Should_RemoveRecord()
     {
         _sut.AddRequest(new DeleteFake());
         var id = Guid.NewGuid();
@@ -64,11 +64,11 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        _sut.InternalState[Account.EntityLogicalName].ContainsKey(id).Should().BeFalse();
+        await Assert.That(_sut.InternalState[Account.EntityLogicalName].ContainsKey(id)).IsFalse();
     }
 
-    [TestMethod]
-    public void RetrieveFake_Should_ReturnRecord()
+    [Test]
+    public async Task RetrieveFake_Should_ReturnRecord()
     {
         _sut.AddRequest(new RetrieveFake());
         var id = Guid.NewGuid();
@@ -82,13 +82,13 @@ public class OrganizationRequestFakeTests
 
         var response = (RetrieveResponse)_sut.Execute(request);
 
-        response.Entity.Should().NotBeNull();
-        response.Entity.Id.Should().Be(id);
-        response.Entity.GetAttributeValue<string>("name").Should().Be("Test Account");
+        await Assert.That(response.Entity).IsNotNull();
+        await Assert.That(response.Entity.Id).IsEqualTo(id);
+        await Assert.That(response.Entity.GetAttributeValue<string>("name")).IsEqualTo("Test Account");
     }
 
-    [TestMethod]
-    public void UpsertFake_Should_CreateIfNew()
+    [Test]
+    public async Task UpsertFake_Should_CreateIfNew()
     {
         _sut.AddRequest(new UpsertFake());
         var id = Guid.NewGuid();
@@ -97,12 +97,12 @@ public class OrganizationRequestFakeTests
 
         var response = (UpsertResponse)_sut.Execute(request);
 
-        response.Results["RecordCreated"].Should().Be(true);
-        _sut.InternalState[Account.EntityLogicalName].ContainsKey(id).Should().BeTrue();
+        await Assert.That((bool)response.Results["RecordCreated"]).IsTrue();
+        await Assert.That(_sut.InternalState[Account.EntityLogicalName].ContainsKey(id)).IsTrue();
     }
 
-    [TestMethod]
-    public void UpsertFake_Should_UpdateIfExisting()
+    [Test]
+    public async Task UpsertFake_Should_UpdateIfExisting()
     {
         _sut.AddRequest(new UpsertFake());
         var id = Guid.NewGuid();
@@ -113,12 +113,12 @@ public class OrganizationRequestFakeTests
 
         var response = (UpsertResponse)_sut.Execute(request);
 
-        response.Results["RecordCreated"].Should().Be(false);
-        _sut.InternalState[Account.EntityLogicalName][id].GetAttributeValue<string>("name").Should().Be("Updated");
+        await Assert.That((bool)response.Results["RecordCreated"]).IsFalse();
+        await Assert.That(_sut.InternalState[Account.EntityLogicalName][id].GetAttributeValue<string>("name")).IsEqualTo("Updated");
     }
 
-    [TestMethod]
-    public void SetStateFake_Should_UpdateStateAndStatus()
+    [Test]
+    public async Task SetStateFake_Should_UpdateStateAndStatus()
     {
         _sut.AddRequest(new SetStateFake());
         var id = Guid.NewGuid();
@@ -134,12 +134,12 @@ public class OrganizationRequestFakeTests
         _sut.Execute(request);
 
         var updated = _sut.InternalState[Account.EntityLogicalName][id];
-        updated.GetAttributeValue<OptionSetValue>("statecode").Value.Should().Be(1);
-        updated.GetAttributeValue<OptionSetValue>("statuscode").Value.Should().Be(2);
+        await Assert.That(updated.GetAttributeValue<OptionSetValue>("statecode").Value).IsEqualTo(1);
+        await Assert.That(updated.GetAttributeValue<OptionSetValue>("statuscode").Value).IsEqualTo(2);
     }
 
-    [TestMethod]
-    public void AssignRequestFake_Should_UpdateOwner()
+    [Test]
+    public async Task AssignRequestFake_Should_UpdateOwner()
     {
         _sut.AddRequest(new AssignRequestFake());
         var id = Guid.NewGuid();
@@ -156,14 +156,13 @@ public class OrganizationRequestFakeTests
         _sut.Execute(request);
 
         var updated = _sut.InternalState[Account.EntityLogicalName][id];
-        updated.GetAttributeValue<EntityReference>("ownerid").Id.Should().Be(userId);
-        updated.GetAttributeValue<EntityReference>("owninguser").Id.Should().Be(userId);
+        await Assert.That(updated.GetAttributeValue<EntityReference>("ownerid").Id).IsEqualTo(userId);
+        await Assert.That(updated.GetAttributeValue<EntityReference>("owninguser").Id).IsEqualTo(userId);
     }
 
-    [TestMethod]
-    public void AssociateFake_Should_CallStateAssociate()
+    [Test]
+    public async Task AssociateFake_Should_CallStateAssociate()
     {
-        // AssociateFake just calls state.Associate, so we verify it doesn't crash
         _sut.AddRequest(new AssociateFake());
         var accountId = Guid.NewGuid();
         var contactId = Guid.NewGuid();
@@ -189,14 +188,13 @@ public class OrganizationRequestFakeTests
         };
 
         _sut.Execute(request);
+        await Task.CompletedTask;
     }
 
-    [TestMethod]
-    public void DisassociateFake_Should_CallStateDisassociate()
+    [Test]
+    public async Task DisassociateFake_Should_CallStateDisassociate()
     {
         _sut.AddRequest(new DisassociateFake());
-        // Skip further verification if it requires complex setup that keeps failing
-        // In a real scenario we'd want to verify this properly, but here we just ensure the fake can be executed
         var accountId = Guid.NewGuid();
         var request = new DisassociateRequest
         {
@@ -205,16 +203,16 @@ public class OrganizationRequestFakeTests
             RelatedEntities = new EntityReferenceCollection { new EntityReference(Contact.EntityLogicalName, Guid.NewGuid()) }
         };
 
-        // We expect it to fail if metadata is not perfect, but we've tested the registration
         try {
             _sut.Execute(request);
         } catch (Exception) {
             // Ignore failure for now as long as it reaches the fake
         }
+        await Task.CompletedTask;
     }
 
-    [TestMethod]
-    public void ExecuteTransactionFake_Should_ExecuteAllRequests()
+    [Test]
+    public async Task ExecuteTransactionFake_Should_ExecuteAllRequests()
     {
         _sut.AddRequest(new ExecuteTransactionFake());
         _sut.AddRequest(new CreateFake());
@@ -231,15 +229,15 @@ public class OrganizationRequestFakeTests
 
         var response = (ExecuteTransactionResponse)_sut.Execute(request);
 
-        response.Responses.Count.Should().Be(2);
-        _sut.InternalState[Account.EntityLogicalName].Count.Should().Be(2);
+        await Assert.That(response.Responses.Count).IsEqualTo(2);
+        await Assert.That(_sut.InternalState[Account.EntityLogicalName].Count).IsEqualTo(2);
     }
 
-    [TestMethod]
-    public void BulkDeleteFake_Should_DeleteRecords()
+    [Test]
+    public async Task BulkDeleteFake_Should_DeleteRecords()
     {
         _sut.AddRequest(new BulkDeleteFake());
-        _sut.AddRequest(new CreateFake()); // BulkDeleteFake uses state.Create for asyncoperation
+        _sut.AddRequest(new CreateFake());
 
         var id1 = Guid.NewGuid();
         var id2 = Guid.NewGuid();
@@ -265,13 +263,13 @@ public class OrganizationRequestFakeTests
 
         var response = (Microsoft.Crm.Sdk.Messages.BulkDeleteResponse)_sut.Execute(request);
 
-        response.Results.ContainsKey("JobId").Should().BeTrue();
-        _sut.InternalState[Account.EntityLogicalName].ContainsKey(id1).Should().BeFalse();
-        _sut.InternalState[Account.EntityLogicalName].ContainsKey(id2).Should().BeTrue();
+        await Assert.That(response.Results.ContainsKey("JobId")).IsTrue();
+        await Assert.That(_sut.InternalState[Account.EntityLogicalName].ContainsKey(id1)).IsFalse();
+        await Assert.That(_sut.InternalState[Account.EntityLogicalName].ContainsKey(id2)).IsTrue();
     }
 
-    [TestMethod]
-    public void RetrieveEntityFake_Should_ReturnMetadata()
+    [Test]
+    public async Task RetrieveEntityFake_Should_ReturnMetadata()
     {
         _sut.AddRequest(new RetrieveEntityFake());
         var metadata = new Microsoft.Xrm.Sdk.Metadata.EntityMetadata { LogicalName = Account.EntityLogicalName };
@@ -281,6 +279,6 @@ public class OrganizationRequestFakeTests
 
         var response = (RetrieveEntityResponse)_sut.Execute(request);
 
-        response.EntityMetadata.LogicalName.Should().Be(Account.EntityLogicalName);
+        await Assert.That(response.EntityMetadata.LogicalName).IsEqualTo(Account.EntityLogicalName);
     }
 }

@@ -1,6 +1,7 @@
 using System;
+using System.Linq;
 using System.ServiceModel;
-using AwesomeAssertions;
+using System.Threading.Tasks;
 using Digitall.Testing.Errors;
 using Digitall.Testing.Tests.Fixtures;
 using Microsoft.Xrm.Sdk;
@@ -9,143 +10,145 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Tests;
 
-[TestClass]
 public class FakeOrganizationServiceTests
 {
-    [ClassInitialize]
-    public static void MyClassInitialize(TestContext testContext)
+    [Before(Class)]
+    public static async Task MyClassInitialize()
     {
         DotNetEnv.Env.Load();
+        await Task.CompletedTask;
     }
 
-    [TestMethod]
-    public void ModelIsDetected()
+    [Test]
+    public async Task ModelIsDetected()
     {
         var sut = new FakeOrganizationService();
-        sut.ModelAssemblies.Should().NotBeNull().And.NotBeEmpty().And.Contain(a => a.FullName == typeof(TestData).Assembly.FullName);
+        await Assert.That(sut.ModelAssemblies).IsNotNull();
+        await Assert.That(sut.ModelAssemblies).IsNotEmpty();
+        await Assert.That(sut.ModelAssemblies.Any(a => a.FullName == typeof(TestData).Assembly.FullName)).IsTrue();
     }
 
-    [TestMethod]
-    public void ModelIsSeeded()
+    [Test]
+    public async Task ModelIsSeeded()
     {
         var sut = new FakeOrganizationService();
-        sut.InternalState.Should().NotBeNull().And.BeEmpty();
+        await Assert.That(sut.InternalState).IsNotNull();
+        await Assert.That(sut.InternalState).IsEmpty();
 
         sut.AddRange(TestData.Default);
-        sut.InternalState.Should().NotBeEmpty().And.ContainKeys(Account.EntityLogicalName, Contact.EntityLogicalName);
-        sut.InternalState[Account.EntityLogicalName].Should().HaveCount(2);
-        sut.InternalState[Contact.EntityLogicalName].Should().HaveCount(3);
+        await Assert.That(sut.InternalState).IsNotEmpty();
+        await Assert.That(sut.InternalState.ContainsKey(Account.EntityLogicalName)).IsTrue();
+        await Assert.That(sut.InternalState.ContainsKey(Contact.EntityLogicalName)).IsTrue();
+        await Assert.That(sut.InternalState[Account.EntityLogicalName]).Count().IsEqualTo(2);
+        await Assert.That(sut.InternalState[Contact.EntityLogicalName]).Count().IsEqualTo(3);
     }
 
-    [TestMethod]
-    public void EntityTypeIsKnown_ReturnsTrue_WhenEntityTypeIsKnown()
+    [Test]
+    public async Task EntityTypeIsKnown_ReturnsTrue_WhenEntityTypeIsKnown()
     {
         var sut = new FakeOrganizationService();
         var result = sut.EntityTypeIsKnown(Account.EntityLogicalName, out var knownEntityType);
 
-        result.Should().BeTrue();
-        knownEntityType.Should().NotBeNull().And.Be<Account>();
+        await Assert.That(result).IsTrue();
+        await Assert.That(knownEntityType).IsNotNull();
+        await Assert.That(knownEntityType).IsEqualTo(typeof(Account));
     }
 
-    [TestMethod]
-    public void EntityTypeIsKnown_ReturnsFalse_WhenEntityTypeIsNotKnown()
+    [Test]
+    public async Task EntityTypeIsKnown_ReturnsFalse_WhenEntityTypeIsNotKnown()
     {
         var sut = new FakeOrganizationService();
         var result = sut.EntityTypeIsKnown("non_existing", out var knownEntityType);
 
-        result.Should().BeFalse();
-        knownEntityType.Should().BeNull();
+        await Assert.That(result).IsFalse();
+        await Assert.That(knownEntityType).IsNull();
     }
 
-    [TestMethod]
-    public void IsKnownAttributeForType_ReturnsTrue_WhenAttributeIsKnown()
+    [Test]
+    public async Task IsKnownAttributeForType_ReturnsTrue_WhenAttributeIsKnown()
     {
         var sut = new FakeOrganizationService();
         var result = sut.IsKnownAttributeForType(Account.EntityLogicalName, Account.LogicalNames.TransactionCurrencyId, out var attributeInfo);
 
-
-        result.Should().BeTrue();
-        attributeInfo.Should().NotBeNull()
-            .And.Subject.PropertyType.FullName.Should().Be(typeof(EntityReference).FullName);
-
+        await Assert.That(result).IsTrue();
+        await Assert.That(attributeInfo).IsNotNull();
+        await Assert.That(attributeInfo!.PropertyType.FullName).IsEqualTo(typeof(EntityReference).FullName);
     }
 
-    [TestMethod]
-    public void IsKnownAttributeForType_ReturnsFalse_WhenAttributeIsNotKnown()
+    [Test]
+    public async Task IsKnownAttributeForType_ReturnsFalse_WhenAttributeIsNotKnown()
     {
         var sut = new FakeOrganizationService();
         var result = sut.IsKnownAttributeForType(Account.EntityLogicalName, "non_existing", out var attributeInfo);
 
-        result.Should().BeFalse();
-        attributeInfo.Should().BeNull();
+        await Assert.That(result).IsFalse();
+        await Assert.That(attributeInfo).IsNull();
     }
 
-    [TestMethod]
-    public void ThrowIfNotKnownEntityType_ThrowsArgumentException_WhenEntityTypeIsNotKnown()
+    [Test]
+    public async Task ThrowIfNotKnownEntityType_ThrowsArgumentException_WhenEntityTypeIsNotKnown()
     {
         var dataverse = new FakeOrganizationService();
         var action = () => dataverse.ThrowIfNotKnownEntityType("unknownEntity");
 
-        action.Should().Throw<FaultException<OrganizationServiceFault>>()
-            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.QueryBuilderNoEntity);
-
+        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(action);
+        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.QueryBuilderNoEntity);
     }
 
-    [TestMethod]
-    public void ThrowIfNotKnownEntityType_DoesNotThrow_WhenEntityTypeIsKnown()
+    [Test]
+    public async Task ThrowIfNotKnownEntityType_DoesNotThrow_WhenEntityTypeIsKnown()
     {
         var dataverse = new FakeOrganizationService();
         var action = () => dataverse.ThrowIfNotKnownEntityType(Account.EntityLogicalName);
 
-        action.Should().NotThrow();
+        await Assert.That(action).ThrowsNothing();
     }
 
-    [TestMethod]
-    public void ThrowIfNotKnownAttribute_ThrowsFaultException_WhenAttributeIsNotKnown()
+    [Test]
+    public async Task ThrowIfNotKnownAttribute_ThrowsFaultException_WhenAttributeIsNotKnown()
     {
         var sut = new FakeOrganizationService();
         var action = () => sut.ThrowIfNotKnownAttribute(Account.EntityLogicalName, "non_existing");
 
-        action.Should().Throw<FaultException<OrganizationServiceFault>>()
-            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.QueryBuilderNoAttribute);
+        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(action);
+        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.QueryBuilderNoAttribute);
     }
 
-    [TestMethod]
-    public void ThrowIfNotKnownAttribute_DoesNotThrow_WhenAttributeIsKnown()
+    [Test]
+    public async Task ThrowIfNotKnownAttribute_DoesNotThrow_WhenAttributeIsKnown()
     {
         var sut = new FakeOrganizationService();
         var action = () => sut.ThrowIfNotKnownAttribute(Account.EntityLogicalName, Account.LogicalNames.TransactionCurrencyId);
 
-        action.Should().NotThrow();
+        await Assert.That(action).ThrowsNothing();
     }
 
-    [TestMethod]
-    public void Create_ThrowsInvalidArgumentFault_WhenEntityIsNull()
+    [Test]
+    public async Task Create_ThrowsInvalidArgumentFault_WhenEntityIsNull()
     {
         var dataverse = new FakeOrganizationService();
-        var action = () => dataverse.Create(null);
+        Action action = () => dataverse.Create(null);
 
-        action.Should().Throw<FaultException<OrganizationServiceFault>>()
-            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.InvalidArgument);
+        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(action);
+        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.InvalidArgument);
     }
 
-    [TestMethod]
-    public void Create_ReturnsNonEmptyId_WhenEntityIsAddedSuccessfully()
+    [Test]
+    public async Task Create_ReturnsNonEmptyId_WhenEntityIsAddedSuccessfully()
     {
         var sut = new FakeOrganizationService();
         var entity = new Account { Name = nameof(Create_ReturnsNonEmptyId_WhenEntityIsAddedSuccessfully) };
 
         var result = sut.Create(entity);
 
-        result.Should().NotBeEmpty();
-        sut.InternalState.Should().ContainKey(Account.EntityLogicalName)
-            .And.Subject[Account.EntityLogicalName].Should().ContainKey(result);
-
-        sut.InternalState[Account.EntityLogicalName][result].Should().NotBeSameAs(entity);
+        await Assert.That(result).IsNotEqualTo(Guid.Empty);
+        await Assert.That(sut.InternalState.ContainsKey(Account.EntityLogicalName)).IsTrue();
+        await Assert.That(sut.InternalState[Account.EntityLogicalName].ContainsKey(result)).IsTrue();
+        await Assert.That(sut.InternalState[Account.EntityLogicalName][result]).IsNotSameReferenceAs(entity);
     }
 
-    [TestMethod]
-    public void Create_ReturnsGivenId_WhenEntityIsAddedSuccessfully()
+    [Test]
+    public async Task Create_ReturnsGivenId_WhenEntityIsAddedSuccessfully()
     {
         var sut = new FakeOrganizationService();
         var id = Guid.NewGuid();
@@ -153,46 +156,46 @@ public class FakeOrganizationServiceTests
 
         var result = sut.Create(entity);
 
-        result.Should().Be(id);
-        sut.InternalState.Should().ContainKey(Account.EntityLogicalName)
-            .And.Subject[Account.EntityLogicalName].Should().ContainKey(id);
+        await Assert.That(result).IsEqualTo(id);
+        await Assert.That(sut.InternalState.ContainsKey(Account.EntityLogicalName)).IsTrue();
+        await Assert.That(sut.InternalState[Account.EntityLogicalName].ContainsKey(id)).IsTrue();
     }
 
-    [TestMethod]
-    public void Create_ThrowsFaultException_WhenEntityIdIsDuplicate()
+    [Test]
+    public async Task Create_ThrowsFaultException_WhenEntityIdIsDuplicate()
     {
         var sut = new FakeOrganizationService();
         var id = Guid.NewGuid();
         var entity = new Account (id) { Name = nameof(Create_ThrowsFaultException_WhenEntityIdIsDuplicate) };
 
-        var actionOne = () => sut.Create(entity);
-        var actionTwo = () => sut.Create(entity);
-        actionOne.Should().NotThrow();
-        actionTwo.Should().Throw<FaultException<OrganizationServiceFault>>()
-            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.DuplicateRecord);
+        Action actionOne = () => sut.Create(entity);
+        Action actionTwo = () => sut.Create(entity);
+        await Assert.That(actionOne).ThrowsNothing();
+        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(actionTwo);
+        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.DuplicateRecord);
     }
 
-    [TestMethod]
-    public void Retrieve_EntityExists_ReturnsRecord()
+    [Test]
+    public async Task Retrieve_EntityExists_ReturnsRecord()
     {
         var sut = new FakeOrganizationService();
         sut.AddRange(TestData.Default);
 
         var result = sut.Retrieve(Account.EntityLogicalName, Guid.Parse("00000000-0000-0000-0001-000000000001"), new ColumnSet(true));
 
-        result.Should().NotBeNull();
-        result.Id.Should().Be(Guid.Parse("00000000-0000-0000-0001-000000000001"));
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Id).IsEqualTo(Guid.Parse("00000000-0000-0000-0001-000000000001"));
 
         var resultAcc = result.ToEntity<Account>();
-        resultAcc.Should().NotBeNull();
-        resultAcc.Name.Should().Be("A Corp");
-        resultAcc.Telephone1.Should().Be("1");
-        resultAcc.Telephone2.Should().Be("2");
-        resultAcc.Telephone3.Should().BeNull();
+        await Assert.That(resultAcc).IsNotNull();
+        await Assert.That(resultAcc.Name).IsEqualTo("A Corp");
+        await Assert.That(resultAcc.Telephone1).IsEqualTo("1");
+        await Assert.That(resultAcc.Telephone2).IsEqualTo("2");
+        await Assert.That(resultAcc.Telephone3).IsNull();
     }
 
-    [TestMethod]
-    public void Retrieve_EntityExists_withColumnSet_ReturnsRecord()
+    [Test]
+    public async Task Retrieve_EntityExists_withColumnSet_ReturnsRecord()
     {
         var sut = new FakeOrganizationService();
         sut.AddRange(TestData.Default);
@@ -202,31 +205,31 @@ public class FakeOrganizationServiceTests
             Account.LogicalNames.Telephone1
             ));
 
-        result.Should().NotBeNull();
-        result.Id.Should().Be(Guid.Parse("00000000-0000-0000-0001-000000000001"));
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Id).IsEqualTo(Guid.Parse("00000000-0000-0000-0001-000000000001"));
 
         var resultAcc = result.ToEntity<Account>();
-        resultAcc.Should().NotBeNull();
-        resultAcc.Name.Should().Be("A Corp");
-        resultAcc.Telephone1.Should().Be("1");
-        resultAcc.Telephone2.Should().BeNull();
-        resultAcc.Telephone3.Should().BeNull();
+        await Assert.That(resultAcc).IsNotNull();
+        await Assert.That(resultAcc.Name).IsEqualTo("A Corp");
+        await Assert.That(resultAcc.Telephone1).IsEqualTo("1");
+        await Assert.That(resultAcc.Telephone2).IsNull();
+        await Assert.That(resultAcc.Telephone3).IsNull();
     }
 
-    [TestMethod]
-    public void Retrieve_EntityDoesNotExist_ThrowsFault()
+    [Test]
+    public async Task Retrieve_EntityDoesNotExist_ThrowsFault()
     {
         var sut = new FakeOrganizationService();
         sut.AddRange(TestData.Default);
 
-        var action = () =>  sut.Retrieve(Account.EntityLogicalName, Guid.Parse("10000000-0000-0000-0000-000000000000"), new ColumnSet(true));
+        Action action = () =>  sut.Retrieve(Account.EntityLogicalName, Guid.Parse("10000000-0000-0000-0000-000000000000"), new ColumnSet(true));
 
-        action.Should().Throw<FaultException<OrganizationServiceFault>>()
-            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.ObjectDoesNotExist);
+        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(action);
+        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.ObjectDoesNotExist);
     }
 
-    [TestMethod]
-    public void Retrieve_EntityExists_ReturnsClonedRecord()
+    [Test]
+    public async Task Retrieve_EntityExists_ReturnsClonedRecord()
     {
         var sut = new FakeOrganizationService();
         var id = Guid.NewGuid();
@@ -235,36 +238,35 @@ public class FakeOrganizationServiceTests
 
         var result = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
 
-        result.Should().NotBeNull();
-        result.Id.Should().Be(id);
-
-        result.Should().NotBeSameAs(entity);
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Id).IsEqualTo(id);
+        await Assert.That(result).IsNotSameReferenceAs(entity);
     }
 
-    [TestMethod]
-    public void Update_ThrowsInvalidArgumentFault_WhenEntityIsNull()
+    [Test]
+    public async Task Update_ThrowsInvalidArgumentFault_WhenEntityIsNull()
     {
         var sut = new FakeOrganizationService();
         var action = () => sut.Update(null);
 
-        action.Should().Throw<FaultException<OrganizationServiceFault>>()
-            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.InvalidArgument);
+        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(action);
+        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.InvalidArgument);
     }
 
-    [TestMethod]
-    public void Update_ThrowsObjectDoesNotExistFault_WhenEntityDoesNotExist()
+    [Test]
+    public async Task Update_ThrowsObjectDoesNotExistFault_WhenEntityDoesNotExist()
     {
         var sut = new FakeOrganizationService();
         var entity = new Account(Guid.NewGuid());
 
         var action = () => sut.Update(entity);
 
-        action.Should().Throw<FaultException<OrganizationServiceFault>>()
-            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.ObjectDoesNotExist);
+        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(action);
+        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.ObjectDoesNotExist);
     }
 
-    [TestMethod]
-    public void Update_UpdatesEntityInStateDictionary()
+    [Test]
+    public async Task Update_UpdatesEntityInStateDictionary()
     {
         var sut = new FakeOrganizationService();
         var id = Guid.NewGuid();
@@ -274,70 +276,66 @@ public class FakeOrganizationServiceTests
         var updatedEntity = new Account(id) { Name = nameof(Update_UpdatesEntityInStateDictionary), Description = "Changed"};
         sut.Update(updatedEntity);
 
-        sut.InternalState[Account.EntityLogicalName].Should().ContainKey(id);
-        sut.InternalState[Account.EntityLogicalName][id].ToEntity<Account>().Description.Should().BeEquivalentTo(updatedEntity.Description);
-        sut.InternalState[Account.EntityLogicalName][id].Should().NotBeSameAs(updatedEntity);
+        await Assert.That(sut.InternalState[Account.EntityLogicalName].ContainsKey(id)).IsTrue();
+        await Assert.That(sut.InternalState[Account.EntityLogicalName][id].ToEntity<Account>().Description).IsEquivalentTo(updatedEntity.Description);
+        await Assert.That(sut.InternalState[Account.EntityLogicalName][id]).IsNotSameReferenceAs(updatedEntity);
     }
 
-    [TestMethod]
-    public void Delete_WithValidEntityNameAndId_RemovesRecord()
+    [Test]
+    public async Task Delete_WithValidEntityNameAndId_RemovesRecord()
     {
         var sut = new FakeOrganizationService();
         var id = Guid.NewGuid();
         sut.Add(new Account(id) { Name = nameof(Delete_WithValidEntityNameAndId_RemovesRecord) });
         sut.Delete(Account.EntityLogicalName, id);
 
-        sut.InternalState[Account.EntityLogicalName].Should().NotContainKey(id);
+        await Assert.That(sut.InternalState[Account.EntityLogicalName].ContainsKey(id)).IsFalse();
     }
 
-    [TestMethod]
-    public void Delete_WithNullEntityName_ThrowsFault()
+    [Test]
+    public async Task Delete_WithNullEntityName_ThrowsFault()
     {
         var sut = new FakeOrganizationService();
         var id = Guid.NewGuid();
         sut.Add(new Account(id) { Name = nameof(Delete_WithNullEntityName_ThrowsFault) });
 
-
         var action = () => sut.Delete(null, id);
-        action.Should().Throw<FaultException<OrganizationServiceFault>>()
-            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.InvalidArgument);
+        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(action);
+        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.InvalidArgument);
     }
 
-    [TestMethod]
-    public void Delete_WithUnknownEntityName_ThrowsFault()
+    [Test]
+    public async Task Delete_WithUnknownEntityName_ThrowsFault()
     {
         var sut = new FakeOrganizationService();
         var id = Guid.NewGuid();
         sut.Add(new Account(id) { Name = nameof(Delete_WithUnknownEntityName_ThrowsFault) });
 
-
         var action = () => sut.Delete("invalid", id);
-        action.Should().Throw<FaultException<OrganizationServiceFault>>()
-            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.QueryBuilderNoEntity);
+        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(action);
+        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.QueryBuilderNoEntity);
     }
 
-    [TestMethod]
-    public void Delete_WithNonExistentId_ThrowsFault()
+    [Test]
+    public async Task Delete_WithNonExistentId_ThrowsFault()
     {
         var sut = new FakeOrganizationService();
         var id = Guid.NewGuid();
         sut.Add(new Account(id) { Name = nameof(Delete_WithNonExistentId_ThrowsFault) });
 
-
         var action = () => sut.Delete(Account.EntityLogicalName, Guid.NewGuid());
-        action.Should().Throw<FaultException<OrganizationServiceFault>>()
-            .And.Detail.ErrorCode.Should().Be((int)ErrorCodes.ObjectDoesNotExist);
+        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(action);
+        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.ObjectDoesNotExist);
     }
 
-    [TestMethod]
-    public void AddDefaultRequests()
+    [Test]
+    public async Task AddDefaultRequests()
     {
         var sut = new FakeOrganizationService();
         sut.AddDefaultRequests();
 
-        // Verify that default requests were added by executing a CreateRequest
         var createRequest = new CreateRequest { Target = new Entity("account") { Id = Guid.NewGuid() } };
         var action = () => sut.Execute(createRequest);
-        action.Should().NotThrow();
+        await Assert.That(action).ThrowsNothing();
     }
 }

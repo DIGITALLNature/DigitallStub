@@ -3,7 +3,7 @@
 
 using System;
 using System.Linq;
-using AwesomeAssertions;
+using System.Threading.Tasks;
 using Digitall.Testing.Logic.Queries;
 using Digitall.Testing.Tests.Fixtures;
 using DotNetEnv;
@@ -13,20 +13,20 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Tests.Logic;
 
-[TestClass]
 public class QueryTests
 {
-    [ClassInitialize]
-    public static void MyClassInitialize(TestContext testContext)
+    [Before(Class)]
+    public static async Task MyClassInitialize()
     {
         Environment.SetEnvironmentVariable("MaxRetrieveCount", "10");
         Env.Load();
+        await Task.CompletedTask;
     }
 
     #region equal
 
-    [TestMethod]
-    public void GenerateQuery_Equal_string()
+    [Test]
+    public async Task GenerateQuery_Equal_string()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.Equal, "A Corp");
@@ -36,15 +36,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_Equal_guid()
+    [Test]
+    public async Task GenerateQuery_Equal_guid()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.AccountId, ConditionOperator.Equal, Guid.Parse("00000000-0000-0000-0001-000000000001"));
@@ -54,15 +54,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_Equal_entityref()
+    [Test]
+    public async Task GenerateQuery_Equal_entityref()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.ParentAccountId, ConditionOperator.Equal, new EntityReference(Account.EntityLogicalName, Guid.Parse("00000000-0000-0000-0001-000000000001")));
@@ -72,15 +72,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_Equal_int()
+    [Test]
+    public async Task GenerateQuery_Equal_int()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Address1UTCOffset, ConditionOperator.Equal, -120);
@@ -90,16 +90,16 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
 
-    [TestMethod]
-    public void GenerateQuery_Equal_money()
+    [Test]
+    public async Task GenerateQuery_Equal_money()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.Equal, new Money(123));
@@ -109,15 +109,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_Equal_bool()
+    [Test]
+    public async Task GenerateQuery_Equal_bool()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketingOnly, ConditionOperator.Equal, true);
@@ -127,15 +127,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_Equal_DateTime()
+    [Test]
+    public async Task GenerateQuery_Equal_DateTime()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.Equal, new DateTime(2000,1,2));
@@ -145,15 +145,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_Equal_Optionsetvalue()
+    [Test]
+    public async Task GenerateQuery_Equal_Optionsetvalue()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.AccountCategoryCode, ConditionOperator.Equal, new OptionSetValue(Account.Options.AccountCategoryCode.PreferredCustomer));
@@ -163,15 +163,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_On()
+    [Test]
+    public async Task GenerateQuery_On()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.On, new DateTime(2000,1,2));
@@ -181,15 +181,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_Today()
+    [Test]
+    public async Task GenerateQuery_Today()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.Today);
@@ -199,15 +199,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_Yesterday()
+    [Test]
+    public async Task GenerateQuery_Yesterday()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.Yesterday);
@@ -217,15 +217,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_Tomorrow()
+    [Test]
+    public async Task GenerateQuery_Tomorrow()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.Tomorrow);
@@ -235,15 +235,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_EqualBusinessId()
+    [Test]
+    public async Task GenerateQuery_EqualBusinessId()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OwningBusinessUnit, ConditionOperator.EqualBusinessId);
@@ -255,14 +255,14 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
-    [TestMethod]
-    public void GenerateQuery_EqualUserId()
+    [Test]
+    public async Task GenerateQuery_EqualUserId()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OwnerId, ConditionOperator.EqualUserId);
@@ -274,18 +274,18 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().ContainSingle();
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
     #endregion
 
     #region not equal
-    [TestMethod]
-    public void GenerateQuery_NotEqual_String()
+    [Test]
+    public async Task GenerateQuery_NotEqual_String()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.NotEqual, "A Corp");
@@ -295,15 +295,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_NotEqual_Guid()
+    [Test]
+    public async Task GenerateQuery_NotEqual_Guid()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.AccountId, ConditionOperator.NotEqual, Guid.Parse("00000000-0000-0000-0001-000000000001"));
@@ -313,15 +313,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_NotEqual_EntityRef()
+    [Test]
+    public async Task GenerateQuery_NotEqual_EntityRef()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.ParentAccountId, ConditionOperator.NotEqual, new EntityReference(Account.EntityLogicalName, Guid.Parse("00000000-0000-0000-0001-000000000001")));
@@ -331,15 +331,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_NotEqual_Integer()
+    [Test]
+    public async Task GenerateQuery_NotEqual_Integer()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Address1UTCOffset, ConditionOperator.NotEqual, -120);
@@ -349,16 +349,16 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
 
-    [TestMethod]
-    public void GenerateQuery_NotEqual_Money()
+    [Test]
+    public async Task GenerateQuery_NotEqual_Money()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.NotEqual, new Money(123));
@@ -368,15 +368,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_NotEqual_Bool()
+    [Test]
+    public async Task GenerateQuery_NotEqual_Bool()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketingOnly, ConditionOperator.NotEqual, true);
@@ -386,15 +386,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_NotEqual_DateTime()
+    [Test]
+    public async Task GenerateQuery_NotEqual_DateTime()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.NotEqual, new DateTime(2000,1,2));
@@ -404,15 +404,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_NotEqual_Optionsetvalue()
+    [Test]
+    public async Task GenerateQuery_NotEqual_Optionsetvalue()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.AccountCategoryCode, ConditionOperator.NotEqual, new OptionSetValue(Account.Options.AccountCategoryCode.PreferredCustomer));
@@ -422,15 +422,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_NotOn()
+    [Test]
+    public async Task GenerateQuery_NotOn()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.NotOn, new DateTime(2000,1,2));
@@ -440,15 +440,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_NotEqualBusinessId()
+    [Test]
+    public async Task GenerateQuery_NotEqualBusinessId()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OwningBusinessUnit, ConditionOperator.NotEqualBusinessId);
@@ -460,14 +460,14 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
-    [TestMethod]
-    public void GenerateQuery_NotEqualUserId()
+    [Test]
+    public async Task GenerateQuery_NotEqualUserId()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OwnerId, ConditionOperator.NotEqualUserId);
@@ -479,18 +479,18 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
     #endregion
 
     #region like
 
-    [TestMethod]
-    public void GenerateQuery_Like_Left()
+    [Test]
+    public async Task GenerateQuery_Like_Left()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.Like, "%Corp");
@@ -500,15 +500,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(2);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(2);
     }
 
-    [TestMethod]
-    public void GenerateQuery_Like_Right()
+    [Test]
+    public async Task GenerateQuery_Like_Right()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.Like, "A C%");
@@ -518,15 +518,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_Beetween()
+    [Test]
+    public async Task GenerateQuery_Beetween()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.Like, "%Corp");
@@ -536,15 +536,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(2);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(2);
     }
 
-    [TestMethod]
-    public void GenerateQuery_BeginsWith()
+    [Test]
+    public async Task GenerateQuery_BeginsWith()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.BeginsWith, "A ");
@@ -554,15 +554,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_EndsWith()
+    [Test]
+    public async Task GenerateQuery_EndsWith()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.EndsWith, "Corp");
@@ -572,15 +572,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(2);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(2);
     }
 
-    [TestMethod]
-    public void GenerateQuery_Contains()
+    [Test]
+    public async Task GenerateQuery_Contains()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.Contains, "Corp");
@@ -590,18 +590,18 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(2);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(2);
     }
 
     #endregion
 
     #region not like
-    [TestMethod]
-    public void GenerateQuery_NotLike_Left()
+    [Test]
+    public async Task GenerateQuery_NotLike_Left()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.NotLike, "%Corp");
@@ -611,15 +611,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(0);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(0);
     }
 
-    [TestMethod]
-    public void GenerateQuery_NotLike_Right()
+    [Test]
+    public async Task GenerateQuery_NotLike_Right()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.NotLike, "A C%");
@@ -629,15 +629,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_NotLike_Beetween()
+    [Test]
+    public async Task GenerateQuery_NotLike_Beetween()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.NotLike, "%Corp");
@@ -647,15 +647,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(0);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(0);
     }
 
-    [TestMethod]
-    public void GenerateQuery_DoesNotBeginWith()
+    [Test]
+    public async Task GenerateQuery_DoesNotBeginWith()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.DoesNotBeginWith, "A ");
@@ -665,15 +665,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_DoesNotEndWith()
+    [Test]
+    public async Task GenerateQuery_DoesNotEndWith()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.DoesNotEndWith, "Corp");
@@ -683,15 +683,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(0);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(0);
     }
 
-    [TestMethod]
-    public void GenerateQuery_DoesNotContain()
+    [Test]
+    public async Task GenerateQuery_DoesNotContain()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.Name, ConditionOperator.DoesNotContain, "Corp");
@@ -701,17 +701,17 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(0);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(0);
     }
     #endregion
 
     #region null and not null
-    [TestMethod]
-    public void GenerateQuery_Null()
+    [Test]
+    public async Task GenerateQuery_Null()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.AccountCategoryCode, ConditionOperator.Null);
@@ -721,15 +721,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_NotNull()
+    [Test]
+    public async Task GenerateQuery_NotNull()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.AccountCategoryCode, ConditionOperator.NotNull);
@@ -739,19 +739,19 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
     #endregion
 
     #region greater than and less than
 
-    [TestMethod]
-    public void GenerateQuery_GreaterThan()
+    [Test]
+    public async Task GenerateQuery_GreaterThan()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.GreaterThan, new Money(320));
@@ -761,15 +761,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_GreaterEqual()
+    [Test]
+    public async Task GenerateQuery_GreaterEqual()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.GreaterEqual, new Money(321));
@@ -779,15 +779,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_LessThan()
+    [Test]
+    public async Task GenerateQuery_LessThan()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.LessThan, new Money(124));
@@ -797,15 +797,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void GenerateQuery_LessEqual()
+    [Test]
+    public async Task GenerateQuery_LessEqual()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.LessEqual, new Money(123));
@@ -815,19 +815,19 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
     #endregion
 
     #region Array Operations
 
-    [TestMethod]
-    public void GenerateQuery_In()
+    [Test]
+    public async Task GenerateQuery_In()
     {
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.MarketCap, ConditionOperator.In, new Money(123),new Money(321), new Money(111));
@@ -837,15 +837,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(2);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(2);
     }
 
-    [TestMethod]
-    public void GenerateQuery_ContainValues()
+    [Test]
+    public async Task GenerateQuery_ContainValues()
     {
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -856,15 +856,15 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(2);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(2);
     }
 
-    [TestMethod]
-    public void GenerateQuery_DoesNotContainValues()
+    [Test]
+    public async Task GenerateQuery_DoesNotContainValues()
     {
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -875,11 +875,11 @@ public class QueryTests
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        queryResult.Should().NotBeNull();
-        queryResult.Should().HaveCount(1);
+        await Assert.That(queryResult).IsNotNull();
+        await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
     #endregion

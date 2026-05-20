@@ -4,37 +4,37 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AwesomeAssertions;
+using System.Threading.Tasks;
 using Digitall.Testing.Tests.Fixtures;
 using DotNetEnv;
 using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Tests.OrganizationRequests;
 
-[TestClass]
 public class RetrieveMultipleTests
 {
-    [ClassInitialize]
-    public static void MyClassInitialize(TestContext testContext)
+    [Before(Class)]
+    public static async Task MyClassInitialize()
     {
         Environment.SetEnvironmentVariable("MaxRetrieveCount", "10");
         Env.Load();
+        await Task.CompletedTask;
     }
 
-    [TestMethod]
-    public void Stubs_Dispatch_Working()
+    [Test]
+    public async Task Stubs_Dispatch_Working()
     {
         var sut = new FakeOrganizationService();
 
         var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName));
 
-        result.Should().NotBeNull();
+        await Assert.That(result).IsNotNull();
     }
 
     #region QueryExpression
 
-    [TestMethod]
-    public void QueryExpression_Top()
+    [Test]
+    public async Task QueryExpression_Top()
     {
         var sut = new FakeOrganizationService();
 
@@ -44,12 +44,12 @@ public class RetrieveMultipleTests
         sut.AddRange(manyRecords);
 
         var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { TopCount = 5, ColumnSet = new ColumnSet(true) });
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(5);
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(5);
     }
 
-    [TestMethod]
-    public void QueryExpression_Paging()
+    [Test]
+    public async Task QueryExpression_Paging()
     {
         var sut = new FakeOrganizationService();
 
@@ -59,10 +59,10 @@ public class RetrieveMultipleTests
         sut.AddRange(manyRecords);
 
         var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true) });
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(10);
-        result.PagingCookie.Should().NotBeNull();
-        result.MoreRecords.Should().BeTrue();
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(10);
+        await Assert.That(result.PagingCookie).IsNotNull();
+        await Assert.That(result.MoreRecords).IsTrue();
 
         result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),PageInfo = new PagingInfo
         {
@@ -72,14 +72,14 @@ public class RetrieveMultipleTests
 
         });
 
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(9);
-        result.PagingCookie.Should().BeNull();
-        result.MoreRecords.Should().BeFalse();
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(9);
+        await Assert.That(result.PagingCookie).IsNull();
+        await Assert.That(result.MoreRecords).IsFalse();
     }
 
-    [TestMethod]
-    public void QueryExpression_EmptyPageOnPaging()
+    [Test]
+    public async Task QueryExpression_EmptyPageOnPaging()
     {
         var sut = new FakeOrganizationService();
 
@@ -89,10 +89,10 @@ public class RetrieveMultipleTests
         sut.AddRange(manyRecords);
 
         var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true) });
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(10);
-        result.PagingCookie.Should().NotBeNull();
-        result.MoreRecords.Should().BeTrue();
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(10);
+        await Assert.That(result.PagingCookie).IsNotNull();
+        await Assert.That(result.MoreRecords).IsTrue();
 
         result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),PageInfo = new PagingInfo
             {
@@ -102,15 +102,15 @@ public class RetrieveMultipleTests
 
         });
 
-        result.Should().NotBeNull();
-        result.Entities.Should().BeEmpty();
-        result.PagingCookie.Should().BeNull();
-        result.MoreRecords.Should().BeFalse();
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).IsEmpty();
+        await Assert.That(result.PagingCookie).IsNull();
+        await Assert.That(result.MoreRecords).IsFalse();
 
     }
 
-    [TestMethod]
-    public void QueryExpression_Destinct()
+    [Test]
+    public async Task QueryExpression_Destinct()
     {
         var sut = new FakeOrganizationService();
         sut.AddRange(TestData.Default);
@@ -127,8 +127,8 @@ public class RetrieveMultipleTests
             LinkEntities = { new LinkEntity(Account.EntityLogicalName, Contact.EntityLogicalName, Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId, JoinOperator.Inner) }}
         );
 
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(2);
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(2);
 
         var resultDestinct = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) {
             ColumnSet = new ColumnSet(Account.LogicalNames.Name),
@@ -144,12 +144,12 @@ public class RetrieveMultipleTests
             }
         );
 
-        resultDestinct.Should().NotBeNull();
-        resultDestinct.Entities.Should().HaveCount(1);
+        await Assert.That(resultDestinct).IsNotNull();
+        await Assert.That(resultDestinct.Entities).Count().IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void QueryExpression_Empty()
+    [Test]
+    public async Task QueryExpression_Empty()
     {
         var sut = new FakeOrganizationService();
 
@@ -159,13 +159,13 @@ public class RetrieveMultipleTests
         sut.AddRange(manyRecords);
 
         var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { TopCount = 5, ColumnSet = new ColumnSet(true) });
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(5);
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(5);
     }
 
 
-    [TestMethod]
-    public void QueryExpression_TotalRecords()
+    [Test]
+    public async Task QueryExpression_TotalRecords()
     {
         var sut = new FakeOrganizationService();
 
@@ -175,12 +175,12 @@ public class RetrieveMultipleTests
         sut.AddRange(manyRecords);
 
         var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { TopCount = 5, ColumnSet = new ColumnSet(true) });
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(5);
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(5);
     }
 
-    [TestMethod]
-    public void QueryExpression_Order()
+    [Test]
+    public async Task QueryExpression_Order()
     {
         var sut = new FakeOrganizationService();
 
@@ -191,20 +191,22 @@ public class RetrieveMultipleTests
 
         var resultDescending = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),
             Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Descending) } });
-        resultDescending.Should().NotBeNull();
-        resultDescending.Entities.Select(a => a.ToEntity<Account>()).Should().BeInDescendingOrder(x => x.ExchangeRate);
+        await Assert.That(resultDescending).IsNotNull();
+        var descItems = resultDescending.Entities.Select(a => a.ToEntity<Account>()).ToList();
+        await Assert.That(descItems.SequenceEqual(descItems.OrderByDescending(x => x.ExchangeRate))).IsTrue();
 
         var resultAscending = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),
             Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Ascending) } });
-        resultAscending.Should().NotBeNull();
-        resultAscending.Entities.Select(a => a.ToEntity<Account>()).Should().BeInAscendingOrder(x => x.ExchangeRate);
+        await Assert.That(resultAscending).IsNotNull();
+        var ascItems = resultAscending.Entities.Select(a => a.ToEntity<Account>()).ToList();
+        await Assert.That(ascItems.SequenceEqual(ascItems.OrderBy(x => x.ExchangeRate))).IsTrue();
     }
 
     #endregion
 
     #region QueryByAttribute
-   [TestMethod]
-    public void QueryByAttribute_Top()
+   [Test]
+    public async Task QueryByAttribute_Top()
     {
         var sut = new FakeOrganizationService();
 
@@ -214,12 +216,12 @@ public class RetrieveMultipleTests
         sut.AddRange(manyRecords);
 
         var result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { TopCount = 5, ColumnSet = new ColumnSet(true) });
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(5);
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(5);
     }
 
-    [TestMethod]
-    public void QueryByAttribute_Paging()
+    [Test]
+    public async Task QueryByAttribute_Paging()
     {
         var sut = new FakeOrganizationService();
 
@@ -229,10 +231,10 @@ public class RetrieveMultipleTests
         sut.AddRange(manyRecords);
 
         var result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true) });
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(10);
-        result.PagingCookie.Should().NotBeNull();
-        result.MoreRecords.Should().BeTrue();
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(10);
+        await Assert.That(result.PagingCookie).IsNotNull();
+        await Assert.That(result.MoreRecords).IsTrue();
 
         result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),PageInfo = new PagingInfo
         {
@@ -242,14 +244,14 @@ public class RetrieveMultipleTests
 
         });
 
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(9);
-        result.PagingCookie.Should().BeNull();
-        result.MoreRecords.Should().BeFalse();
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(9);
+        await Assert.That(result.PagingCookie).IsNull();
+        await Assert.That(result.MoreRecords).IsFalse();
     }
 
-    [TestMethod]
-    public void QueryByAttribute_EmptyPageOnPaging()
+    [Test]
+    public async Task QueryByAttribute_EmptyPageOnPaging()
     {
         var sut = new FakeOrganizationService();
 
@@ -259,10 +261,10 @@ public class RetrieveMultipleTests
         sut.AddRange(manyRecords);
 
         var result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true) });
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(10);
-        result.PagingCookie.Should().NotBeNull();
-        result.MoreRecords.Should().BeTrue();
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(10);
+        await Assert.That(result.PagingCookie).IsNotNull();
+        await Assert.That(result.MoreRecords).IsTrue();
 
         result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),PageInfo = new PagingInfo
             {
@@ -272,15 +274,15 @@ public class RetrieveMultipleTests
 
         });
 
-        result.Should().NotBeNull();
-        result.Entities.Should().BeEmpty();
-        result.PagingCookie.Should().BeNull();
-        result.MoreRecords.Should().BeFalse();
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).IsEmpty();
+        await Assert.That(result.PagingCookie).IsNull();
+        await Assert.That(result.MoreRecords).IsFalse();
 
     }
 
-    [TestMethod]
-    public void QueryByAttribute_Empty()
+    [Test]
+    public async Task QueryByAttribute_Empty()
     {
         var sut = new FakeOrganizationService();
 
@@ -290,13 +292,13 @@ public class RetrieveMultipleTests
         sut.AddRange(manyRecords);
 
         var result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { TopCount = 5, ColumnSet = new ColumnSet(true) });
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(5);
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(5);
     }
 
 
-    [TestMethod]
-    public void QueryByAttribute_TotalRecords()
+    [Test]
+    public async Task QueryByAttribute_TotalRecords()
     {
         var sut = new FakeOrganizationService();
 
@@ -306,12 +308,12 @@ public class RetrieveMultipleTests
         sut.AddRange(manyRecords);
 
         var result = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { TopCount = 5, ColumnSet = new ColumnSet(true) });
-        result.Should().NotBeNull();
-        result.Entities.Should().HaveCount(5);
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(5);
     }
 
-    [TestMethod]
-    public void QueryByAttribute_Order()
+    [Test]
+    public async Task QueryByAttribute_Order()
     {
         var sut = new FakeOrganizationService();
 
@@ -322,13 +324,15 @@ public class RetrieveMultipleTests
 
         var resultDescending = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),
             Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Descending) } });
-        resultDescending.Should().NotBeNull();
-        resultDescending.Entities.Select(a => a.ToEntity<Account>()).Should().BeInDescendingOrder(x => x.ExchangeRate);
+        await Assert.That(resultDescending).IsNotNull();
+        var descItems = resultDescending.Entities.Select(a => a.ToEntity<Account>()).ToList();
+        await Assert.That(descItems.SequenceEqual(descItems.OrderByDescending(x => x.ExchangeRate))).IsTrue();
 
         var resultAscending = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),
             Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Ascending) } });
-        resultAscending.Should().NotBeNull();
-        resultAscending.Entities.Select(a => a.ToEntity<Account>()).Should().BeInAscendingOrder(x => x.ExchangeRate);
+        await Assert.That(resultAscending).IsNotNull();
+        var ascItems = resultAscending.Entities.Select(a => a.ToEntity<Account>()).ToList();
+        await Assert.That(ascItems.SequenceEqual(ascItems.OrderBy(x => x.ExchangeRate))).IsTrue();
     }
     #endregion
 }

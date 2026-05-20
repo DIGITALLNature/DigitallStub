@@ -1,66 +1,63 @@
 using System;
-using AwesomeAssertions;
+using System.Threading.Tasks;
 using Digitall.Testing.Extensions;
 using Digitall.Testing.Tests.Fixtures;
 using Digitall.Testing.Tests.Fixtures.SamplePlugin;
 using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.PluginTelemetry;
 using Microsoft.Xrm.Sdk.Query;
-using NSubstitute;
+using TUnit.Mocks;
 
 namespace Digitall.Testing.Tests;
 
-[TestClass]
 public class PluginExecutionContextBuilderTests
 {
-    [TestMethod]
-    public void PluginTestContext_FromMinimalBuilder_Should_HaveEssentials()
+    [Test]
+    public async Task PluginTestContext_FromMinimalBuilder_Should_HaveEssentials()
     {
         var serviceProvider = new PluginExecutionContextBuilder().BuildServiceProvider();
 
-        serviceProvider.Should().NotBeNull();
+        await Assert.That(serviceProvider).IsNotNull();
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
-        pluginContext.Should().NotBeNull();
-        pluginContext.InputParameters.Should().NotBeNull();
-        pluginContext.InputParameters.Should().BeEmpty();
+        await Assert.That(pluginContext).IsNotNull();
+        await Assert.That(pluginContext!.InputParameters).IsNotNull();
+        await Assert.That(pluginContext.InputParameters).IsEmpty();
 
         var tracingService = serviceProvider.GetService(typeof(ITracingService)) as ITracingService;
-        tracingService.Should().NotBeNull();
+        await Assert.That(tracingService).IsNotNull();
 
         var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
-        organizationServiceFactory.Should().NotBeNull();
+        await Assert.That(organizationServiceFactory).IsNotNull();
 
-        var organizationService = organizationServiceFactory.CreateOrganizationService(null);
-        organizationService.Should().BeNull();
+        var organizationService = organizationServiceFactory!.CreateOrganizationService(null);
+        await Assert.That(organizationService).IsNull();
     }
 
-    [TestMethod]
-    public void PluginTestContext_FromDefaultBuilder_Should_HaveCommonServices()
+    [Test]
+    public async Task PluginTestContext_FromDefaultBuilder_Should_HaveCommonServices()
     {
         var serviceProvider = new FakePluginContextBuilder().BuildServiceProvider();
 
-        serviceProvider.Should().NotBeNull();
+        await Assert.That(serviceProvider).IsNotNull();
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
-
-        pluginContext.Should().NotBeNull();
-        pluginContext.InputParameters.Should().NotBeNull();
-        pluginContext.InputParameters.Should().BeEmpty();
+        await Assert.That(pluginContext).IsNotNull();
+        await Assert.That(pluginContext!.InputParameters).IsNotNull();
+        await Assert.That(pluginContext.InputParameters).IsEmpty();
 
         var tracingService = serviceProvider.GetService(typeof(ITracingService)) as ITracingService;
-        tracingService.Should().NotBeNull();
+        await Assert.That(tracingService).IsNotNull();
 
         var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
-        organizationServiceFactory.Should().NotBeNull();
+        await Assert.That(organizationServiceFactory).IsNotNull();
 
-        var organizationService = organizationServiceFactory.CreateOrganizationService(null);
-        organizationService.Should().NotBeNull();
+        var organizationService = organizationServiceFactory!.CreateOrganizationService(null);
+        await Assert.That(organizationService).IsNotNull();
     }
 
-    [TestMethod]
-    public void AddedData_Should_BeRetrieved()
+    [Test]
+    public async Task AddedData_Should_BeRetrieved()
     {
         var entity = new Entity("unittest", Guid.NewGuid());
 
@@ -69,18 +66,18 @@ public class PluginExecutionContextBuilderTests
             .BuildServiceProvider();
 
         var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
-        organizationServiceFactory.Should().NotBeNull();
+        await Assert.That(organizationServiceFactory).IsNotNull();
 
-        var organizationService = organizationServiceFactory.CreateOrganizationService(null);
-        organizationService.Should().NotBeNull();
+        var organizationService = organizationServiceFactory!.CreateOrganizationService(null);
+        await Assert.That(organizationService).IsNotNull();
 
-        var retrievedEntity = organizationService.Retrieve(entity.LogicalName, entity.Id, new ColumnSet(true));
-        retrievedEntity.Should().NotBeNull();
-        retrievedEntity.Should().BeEquivalentTo(entity);
+        var retrievedEntity = organizationService!.Retrieve(entity.LogicalName, entity.Id, new ColumnSet(true));
+        await Assert.That(retrievedEntity).IsNotNull();
+        await Assert.That(retrievedEntity).IsEquivalentTo(entity);
     }
 
-    [TestMethod]
-    public void SettingEntityTarget_Should_SetInputParameter_And_PluginPrimaryEntity()
+    [Test]
+    public async Task SettingEntityTarget_Should_SetInputParameter_And_PluginPrimaryEntity()
     {
         var target = new Entity("unittest", Guid.NewGuid());
         var serviceProvider = new PluginExecutionContextBuilder()
@@ -88,18 +85,18 @@ public class PluginExecutionContextBuilderTests
             .BuildServiceProvider();
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
-        pluginContext.Should().NotBeNull();
+        await Assert.That(pluginContext).IsNotNull();
 
-        pluginContext.InputParameters.Should().NotBeNull();
-        pluginContext.InputParameters.Should().ContainKey("Target");
-        pluginContext.InputParameters["Target"].Should().Be(target);
+        await Assert.That(pluginContext!.InputParameters).IsNotNull();
+        await Assert.That(pluginContext.InputParameters.ContainsKey("Target")).IsTrue();
+        await Assert.That(pluginContext.InputParameters["Target"]).IsEqualTo(target);
 
-        pluginContext.PrimaryEntityId.Should().Be(target.Id);
-        pluginContext.PrimaryEntityName.Should().Be(target.LogicalName);
+        await Assert.That(pluginContext.PrimaryEntityId).IsEqualTo(target.Id);
+        await Assert.That(pluginContext.PrimaryEntityName).IsEqualTo(target.LogicalName);
     }
 
-    [TestMethod]
-    public void SettingTargetReference_Should_SetInputParameter_And_PluginPrimaryEntity()
+    [Test]
+    public async Task SettingTargetReference_Should_SetInputParameter_And_PluginPrimaryEntity()
     {
         var target = new EntityReference("unittest", Guid.NewGuid());
         var serviceProvider = new PluginExecutionContextBuilder()
@@ -107,80 +104,81 @@ public class PluginExecutionContextBuilderTests
             .BuildServiceProvider();
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
-        pluginContext.Should().NotBeNull();
+        await Assert.That(pluginContext).IsNotNull();
 
-        pluginContext.InputParameters.Should().NotBeNull();
-        pluginContext.InputParameters.Should().ContainKey("Target");
-        pluginContext.InputParameters["Target"].Should().Be(target);
+        await Assert.That(pluginContext!.InputParameters).IsNotNull();
+        await Assert.That(pluginContext.InputParameters.ContainsKey("Target")).IsTrue();
+        await Assert.That(pluginContext.InputParameters["Target"]).IsEqualTo(target);
 
-        pluginContext.PrimaryEntityId.Should().Be(target.Id);
-        pluginContext.PrimaryEntityName.Should().Be(target.LogicalName);
+        await Assert.That(pluginContext.PrimaryEntityId).IsEqualTo(target.Id);
+        await Assert.That(pluginContext.PrimaryEntityName).IsEqualTo(target.LogicalName);
     }
 
-    [TestMethod]
-    [DataRow(SdkMessageNames.Create)]
-    [DataRow(SdkMessageNames.Update)]
-    [DataRow(SdkMessageNames.Associate)]
-    [DataRow("custom")]
-    public void SettingRequestType_Should_SetPluginMessageName(string messageName)
+    [Test]
+    [Arguments(SdkMessageNames.Create)]
+    [Arguments(SdkMessageNames.Update)]
+    [Arguments(SdkMessageNames.Associate)]
+    [Arguments("custom")]
+    public async Task SettingRequestType_Should_SetPluginMessageName(string messageName)
     {
         var serviceProvider = new PluginExecutionContextBuilder()
             .WithMessageName(messageName)
             .BuildServiceProvider();
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
-        pluginContext.Should().NotBeNull();
-        pluginContext.MessageName.Should().Be(messageName);
+        await Assert.That(pluginContext).IsNotNull();
+        await Assert.That(pluginContext!.MessageName).IsEqualTo(messageName);
     }
 
-    [TestMethod]
-    public void SettingTracingService_Should_OverwriteDefault()
+    [Test]
+    public async Task SettingTracingService_Should_OverwriteDefault()
     {
-        var tracingService = Substitute.For<ITracingService>();
+        var tracingService = Mock.Of<ITracingService>().Object;
         var serviceProvider = new PluginExecutionContextBuilder(tracingService)
             .BuildServiceProvider();
 
         var tracingServiceFromContext = serviceProvider.GetService(typeof(ITracingService));
-        tracingServiceFromContext.Should().NotBeNull();
-        tracingServiceFromContext.Should().Be(tracingService);
+        await Assert.That(tracingServiceFromContext).IsNotNull();
+        await Assert.That(tracingServiceFromContext).IsEqualTo(tracingService);
     }
 
-    [TestMethod]
-    [DataRow(typeof(IPluginExecutionContext))]
-    [DataRow(typeof(IPluginExecutionContext2))]
-    [DataRow(typeof(IPluginExecutionContext3))]
-    [DataRow(typeof(IPluginExecutionContext4))]
-    [DataRow(typeof(IPluginExecutionContext5))]
-    [DataRow(typeof(IPluginExecutionContext6))]
-    [DataRow(typeof(IPluginExecutionContext7))]
-    public void PluginTestContext_FromMinimalBuilder_Should_HaveAllCurrentIPluginExecutionContextFlavors(Type iPluginExecutionContextType)
+    [Test]
+    [Arguments(typeof(IPluginExecutionContext))]
+    [Arguments(typeof(IPluginExecutionContext2))]
+    [Arguments(typeof(IPluginExecutionContext3))]
+    [Arguments(typeof(IPluginExecutionContext4))]
+    [Arguments(typeof(IPluginExecutionContext5))]
+    [Arguments(typeof(IPluginExecutionContext6))]
+    [Arguments(typeof(IPluginExecutionContext7))]
+    public async Task PluginTestContext_FromMinimalBuilder_Should_HaveAllCurrentIPluginExecutionContextFlavors(Type iPluginExecutionContextType)
     {
         var serviceProvider = new PluginExecutionContextBuilder().BuildServiceProvider();
 
-        serviceProvider.Should().NotBeNull();
+        await Assert.That(serviceProvider).IsNotNull();
 
         var pluginContextPlain = serviceProvider.GetService(iPluginExecutionContextType) as IPluginExecutionContext;
-        pluginContextPlain.Should().NotBeNull();
+        await Assert.That(pluginContextPlain).IsNotNull();
 
         var pluginContext = serviceProvider.GetService(iPluginExecutionContextType);
-        pluginContext.Should().NotBeNull().And.BeAssignableTo(iPluginExecutionContextType);
+        await Assert.That(pluginContext).IsNotNull();
+        await Assert.That(iPluginExecutionContextType.IsAssignableFrom(pluginContext!.GetType())).IsTrue();
     }
 
-    [TestMethod]
-    public void TestPlugin_Durchstich()
+    [Test]
+    public async Task TestPlugin_Durchstich()
     {
-        var tracingService = Substitute.For<ITracingService>();
-        var serviceProvider = new PluginExecutionContextBuilder(tracingService)
+        var tracingServiceMock = Mock.Of<ITracingService>();
+        var serviceProvider = new PluginExecutionContextBuilder(tracingServiceMock.Object)
             .BuildServiceProvider();
 
         var plugin = new TestPlugin();
         plugin.Execute(serviceProvider);
 
-        tracingService.Received().Trace("TestPlugin: Execute");
+        tracingServiceMock.Trace("TestPlugin: Execute", Arg.Any<object[]>()).WasCalled();
     }
 
-    [TestMethod]
-    public void SettingModeStageAndIds_Should_SetPluginExecutionContextFields()
+    [Test]
+    public async Task SettingModeStageAndIds_Should_SetPluginExecutionContextFields()
     {
         var initiatingUserId = Guid.NewGuid();
         var correlationId = Guid.NewGuid();
@@ -197,16 +195,16 @@ public class PluginExecutionContextBuilderTests
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
 
-        pluginContext.Should().NotBeNull();
-        pluginContext.Mode.Should().Be(1);
-        pluginContext.Stage.Should().Be(40);
-        pluginContext.InitiatingUserId.Should().Be(initiatingUserId);
-        pluginContext.CorrelationId.Should().Be(correlationId);
-        pluginContext.MessageName.Should().Be(SdkMessageNames.Update);
+        await Assert.That(pluginContext).IsNotNull();
+        await Assert.That(pluginContext!.Mode).IsEqualTo(1);
+        await Assert.That(pluginContext.Stage).IsEqualTo(40);
+        await Assert.That(pluginContext.InitiatingUserId).IsEqualTo(initiatingUserId);
+        await Assert.That(pluginContext.CorrelationId).IsEqualTo(correlationId);
+        await Assert.That(pluginContext.MessageName).IsEqualTo(SdkMessageNames.Update);
     }
 
-    [TestMethod]
-    public void WithInputOutputSharedAndImages_Should_ExposeConfiguredCollections()
+    [Test]
+    public async Task WithInputOutputSharedAndImages_Should_ExposeConfiguredCollections()
     {
         var input = new ParameterCollection { ["in"] = 1 };
         var output = new ParameterCollection { ["out"] = 2 };
@@ -225,55 +223,55 @@ public class PluginExecutionContextBuilderTests
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         var pluginContext7 = serviceProvider.GetService(typeof(IPluginExecutionContext7)) as IPluginExecutionContext7;
 
-        pluginContext.Should().NotBeNull();
-        pluginContext7.Should().NotBeNull();
-        pluginContext.InputParameters.Should().BeSameAs(input);
-        pluginContext.OutputParameters.Should().BeSameAs(output);
-        pluginContext.SharedVariables.Should().BeSameAs(shared);
-        pluginContext.PreEntityImages.Should().BeSameAs(preImages);
-        pluginContext.PostEntityImages.Should().BeSameAs(postImages);
-        pluginContext7.PreEntityImagesCollection.Should().ContainSingle();
-        pluginContext7.PostEntityImagesCollection.Should().ContainSingle();
+        await Assert.That(pluginContext).IsNotNull();
+        await Assert.That(pluginContext7).IsNotNull();
+        await Assert.That(pluginContext!.InputParameters).IsSameReferenceAs(input);
+        await Assert.That(pluginContext.OutputParameters).IsSameReferenceAs(output);
+        await Assert.That(pluginContext.SharedVariables).IsSameReferenceAs(shared);
+        await Assert.That(pluginContext.PreEntityImages).IsSameReferenceAs(preImages);
+        await Assert.That(pluginContext.PostEntityImages).IsSameReferenceAs(postImages);
+        await Assert.That(pluginContext7!.PreEntityImagesCollection).HasCount().EqualTo(1);
+        await Assert.That(pluginContext7.PostEntityImagesCollection).HasCount().EqualTo(1);
     }
 
-    [TestMethod]
-    public void OrganizationServiceFactory_Should_ReturnConfiguredService_ForAnyUser()
+    [Test]
+    public async Task OrganizationServiceFactory_Should_ReturnConfiguredService_ForAnyUser()
     {
-        var organizationService = Substitute.For<IOrganizationService>();
+        var organizationService = Mock.Of<IOrganizationService>().Object;
         var serviceProvider = new PluginExecutionContextBuilder(organizationService).BuildServiceProvider();
 
         var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
 
-        organizationServiceFactory.Should().NotBeNull();
-        organizationServiceFactory.CreateOrganizationService(Guid.NewGuid()).Should().Be(organizationService);
-        organizationServiceFactory.CreateOrganizationService(null).Should().Be(organizationService);
+        await Assert.That(organizationServiceFactory).IsNotNull();
+        await Assert.That(organizationServiceFactory!.CreateOrganizationService(Guid.NewGuid())).IsEqualTo(organizationService);
+        await Assert.That(organizationServiceFactory.CreateOrganizationService(null)).IsEqualTo(organizationService);
     }
 
-    [TestMethod]
-    public void LoggerConstructor_Should_RegisterILogger()
+    [Test]
+    public async Task LoggerConstructor_Should_RegisterILogger()
     {
-        var logger = Substitute.For<ILogger>();
+        var logger = Mock.Of<ILogger>().Object;
         var serviceProvider = new PluginExecutionContextBuilder(logger).BuildServiceProvider();
 
         var loggerFromContext = serviceProvider.GetService(typeof(ILogger));
 
-        loggerFromContext.Should().NotBeNull();
-        loggerFromContext.Should().Be(logger);
+        await Assert.That(loggerFromContext).IsNotNull();
+        await Assert.That(loggerFromContext).IsEqualTo(logger);
     }
 
-    [TestMethod]
-    public void ExistingTargetParameter_Should_ThrowOnBuild_WhenTargetIsAlsoConfigured()
+    [Test]
+    public async Task ExistingTargetParameter_Should_ThrowOnBuild_WhenTargetIsAlsoConfigured()
     {
-        var action = () => new PluginExecutionContextBuilder()
+        Action action = () => new PluginExecutionContextBuilder()
             .WithInputParameter("Target", new Entity("contact", Guid.NewGuid()))
             .WithTarget(new Entity("account", Guid.NewGuid()))
             .BuildServiceProvider();
 
-        action.Should().Throw<ArgumentException>();
+        Assert.Throws<ArgumentException>(action);
     }
 
-    [TestMethod]
-    public void InvalidUserIdEnvVar_Should_DefaultToEmptyGuid()
+    [Test]
+    public async Task InvalidUserIdEnvVar_Should_DefaultToEmptyGuid()
     {
         var originalUserId = Environment.GetEnvironmentVariable("UserId");
 
@@ -284,8 +282,8 @@ public class PluginExecutionContextBuilderTests
             var serviceProvider = new PluginExecutionContextBuilder().BuildServiceProvider();
             var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
 
-            pluginContext.Should().NotBeNull();
-            pluginContext.UserId.Should().Be(Guid.Empty);
+            await Assert.That(pluginContext).IsNotNull();
+            await Assert.That(pluginContext!.UserId).IsEqualTo(Guid.Empty);
         }
         finally
         {

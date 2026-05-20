@@ -6,7 +6,7 @@ using System.Linq;
 using Digitall.Testing.Model;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.PluginTelemetry;
-using NSubstitute;
+using TUnit.Mocks;
 
 namespace Digitall.Testing;
 
@@ -70,12 +70,12 @@ public class PluginExecutionContextBuilder
     public int Depth { get; set; } = 1;
 
     public IOrganizationService? OrganizationService { get; set; }
-    public ITracingService TracingService { get; set; } = Substitute.For<ITracingService>();
-    public ILogger Logger { get; set; } = Substitute.For<ILogger>();
+    public ITracingService TracingService { get; set; } = Mock.Of<ITracingService>().Object;
+    public ILogger Logger { get; set; } = Mock.Of<ILogger>().Object;
 
     public IServiceProvider BuildServiceProvider()
     {
-        var pluginExecutionContext = Substitute.For<IPluginExecutionContext7>();
+        var pluginExecutionContext = Mock.Of<IPluginExecutionContext7>();
 
         pluginExecutionContext.MessageName.Returns(MessageName);
         pluginExecutionContext.Mode.Returns(Mode);
@@ -104,28 +104,27 @@ public class PluginExecutionContextBuilder
         {
             pluginExecutionContext.PrimaryEntityId.Returns(Target.Id);
             pluginExecutionContext.PrimaryEntityName.Returns(Target.LogicalName);
-            pluginExecutionContext.InputParameters.Add("Target", Target.Value);
+            InputParameters.Add("Target", Target.Value);
         }
 
         // organization service
-        var organizationServiceFactory = Substitute.For<IOrganizationServiceFactory>();
+        var organizationServiceFactory = Mock.Of<IOrganizationServiceFactory>();
         organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(OrganizationService);
-        organizationServiceFactory.CreateOrganizationService(null).Returns(OrganizationService);
 
         // service provider
-        var serviceProvider = Substitute.For<IServiceProvider>();
+        var serviceProvider = Mock.Of<IServiceProvider>();
 
-        serviceProvider.GetService(typeof(IPluginExecutionContext)).Returns(pluginExecutionContext);
-        serviceProvider.GetService(typeof(IPluginExecutionContext2)).Returns(pluginExecutionContext);
-        serviceProvider.GetService(typeof(IPluginExecutionContext3)).Returns(pluginExecutionContext);
-        serviceProvider.GetService(typeof(IPluginExecutionContext4)).Returns(pluginExecutionContext);
-        serviceProvider.GetService(typeof(IPluginExecutionContext5)).Returns(pluginExecutionContext);
-        serviceProvider.GetService(typeof(IPluginExecutionContext6)).Returns(pluginExecutionContext);
-        serviceProvider.GetService(typeof(IPluginExecutionContext7)).Returns(pluginExecutionContext);
-        serviceProvider.GetService(typeof(IOrganizationServiceFactory)).Returns(organizationServiceFactory);
+        serviceProvider.GetService(typeof(IPluginExecutionContext)).Returns(pluginExecutionContext.Object);
+        serviceProvider.GetService(typeof(IPluginExecutionContext2)).Returns(pluginExecutionContext.Object);
+        serviceProvider.GetService(typeof(IPluginExecutionContext3)).Returns(pluginExecutionContext.Object);
+        serviceProvider.GetService(typeof(IPluginExecutionContext4)).Returns(pluginExecutionContext.Object);
+        serviceProvider.GetService(typeof(IPluginExecutionContext5)).Returns(pluginExecutionContext.Object);
+        serviceProvider.GetService(typeof(IPluginExecutionContext6)).Returns(pluginExecutionContext.Object);
+        serviceProvider.GetService(typeof(IPluginExecutionContext7)).Returns(pluginExecutionContext.Object);
+        serviceProvider.GetService(typeof(IOrganizationServiceFactory)).Returns(organizationServiceFactory.Object);
         serviceProvider.GetService(typeof(ITracingService)).Returns(TracingService);
         serviceProvider.GetService(typeof(ILogger)).Returns(Logger);
 
-        return serviceProvider;
+        return serviceProvider.Object;
     }
 }

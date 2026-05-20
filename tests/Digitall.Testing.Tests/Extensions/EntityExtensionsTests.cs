@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AwesomeAssertions;
+using System.Threading.Tasks;
 using Digitall.Testing.Extensions;
 using Digitall.Testing.Tests.Fixtures;
 using Microsoft.Xrm.Sdk;
@@ -12,45 +12,44 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Tests.Extensions;
 
-[TestClass]
 public class EntityExtensionsTests
 {
     private readonly FakeOrganizationService _state = new();
 
-    [TestMethod]
-    public void KeySelector_Should_ReturnId_When_AttributeIsPrimaryKey()
+    [Test]
+    public async Task KeySelector_Should_ReturnId_When_AttributeIsPrimaryKey()
     {
         var id = Guid.NewGuid();
         var entity = new Entity("account", id);
 
         var result = entity.KeySelector("accountid");
 
-        result.Should().Be(id);
+        await Assert.That(result).IsEqualTo(id);
     }
 
-    [TestMethod]
-    public void KeySelector_Should_ReturnEmptyGuid_When_AttributeDoesNotExist()
+    [Test]
+    public async Task KeySelector_Should_ReturnEmptyGuid_When_AttributeDoesNotExist()
     {
         var entity = new Entity("account", Guid.NewGuid());
 
         var result = entity.KeySelector("nonexistent");
 
-        result.Should().Be(Guid.Empty);
+        await Assert.That(result).IsEqualTo(Guid.Empty);
     }
 
-    [TestMethod]
-    public void KeySelector_Should_HandleAliasedValue()
+    [Test]
+    public async Task KeySelector_Should_HandleAliasedValue()
     {
         var entity = new Entity("account");
         entity["alias.name"] = new AliasedValue("account", "name", "John Doe");
 
         var result = entity.KeySelector("alias.name");
 
-        result.Should().Be("John Doe");
+        await Assert.That(result).IsEqualTo("John Doe");
     }
 
-    [TestMethod]
-    public void KeySelector_Should_HandleEntityReference()
+    [Test]
+    public async Task KeySelector_Should_HandleEntityReference()
     {
         var refId = Guid.NewGuid();
         var entity = new Entity("account");
@@ -58,33 +57,33 @@ public class EntityExtensionsTests
 
         var result = entity.KeySelector("parentaccountid");
 
-        result.Should().Be(refId);
+        await Assert.That(result).IsEqualTo(refId);
     }
 
-    [TestMethod]
-    public void KeySelector_Should_HandleOptionSetValue()
+    [Test]
+    public async Task KeySelector_Should_HandleOptionSetValue()
     {
         var entity = new Entity("account");
         entity["statuscode"] = new OptionSetValue(1);
 
         var result = entity.KeySelector("statuscode");
 
-        result.Should().Be(1);
+        await Assert.That(result).IsEqualTo(1);
     }
 
-    [TestMethod]
-    public void KeySelector_Should_HandleMoney()
+    [Test]
+    public async Task KeySelector_Should_HandleMoney()
     {
         var entity = new Entity("account");
         entity["creditlimit"] = new Money(1000m);
 
         var result = entity.KeySelector("creditlimit");
 
-        result.Should().Be(1000m);
+        await Assert.That(result).IsEqualTo(1000m);
     }
 
-    [TestMethod]
-    public void ProjectAttributes_WithColumnSet_Should_ProjectRequestedAttributes()
+    [Test]
+    public async Task ProjectAttributes_WithColumnSet_Should_ProjectRequestedAttributes()
     {
         var entity = new Entity("account", Guid.NewGuid());
         entity["name"] = "Account 1";
@@ -95,14 +94,14 @@ public class EntityExtensionsTests
 
         var projected = entity.ProjectAttributes(columnSet, _state);
 
-        projected.Attributes.Count.Should().Be(2);
-        projected.Attributes.Should().ContainKey("name");
-        projected.Attributes.Should().ContainKey("telephone1");
-        projected.Attributes.Should().NotContainKey("websiteurl");
+        await Assert.That(projected.Attributes.Count).IsEqualTo(2);
+        await Assert.That(projected.Attributes.ContainsKey("name")).IsTrue();
+        await Assert.That(projected.Attributes.ContainsKey("telephone1")).IsTrue();
+        await Assert.That(projected.Attributes.ContainsKey("websiteurl")).IsFalse();
     }
 
-    [TestMethod]
-    public void ProjectAttributes_WithAllColumns_Should_ReturnAllNonNullAttributes()
+    [Test]
+    public async Task ProjectAttributes_WithAllColumns_Should_ReturnAllNonNullAttributes()
     {
         var entity = new Entity("account", Guid.NewGuid());
         entity["name"] = "Account 1";
@@ -112,13 +111,13 @@ public class EntityExtensionsTests
 
         var projected = entity.ProjectAttributes(columnSet, _state);
 
-        projected.Attributes.Count.Should().Be(1);
-        projected.Attributes.Should().ContainKey("name");
-        projected.Attributes.Should().NotContainKey("telephone1");
+        await Assert.That(projected.Attributes.Count).IsEqualTo(1);
+        await Assert.That(projected.Attributes.ContainsKey("name")).IsTrue();
+        await Assert.That(projected.Attributes.ContainsKey("telephone1")).IsFalse();
     }
 
-    [TestMethod]
-    public void ProjectAttributes_WithQueryExpression_Should_HandleLinkEntities()
+    [Test]
+    public async Task ProjectAttributes_WithQueryExpression_Should_HandleLinkEntities()
     {
         var account = new Entity("account", Guid.NewGuid());
         account["name"] = "Account 1";
@@ -132,12 +131,12 @@ public class EntityExtensionsTests
 
         var projected = account.ProjectAttributes(qe, _state);
 
-        projected.Attributes.Should().ContainKey("name");
-        projected.Attributes.Should().ContainKey("contact.fullname");
+        await Assert.That(projected.Attributes.ContainsKey("name")).IsTrue();
+        await Assert.That(projected.Attributes.ContainsKey("contact.fullname")).IsTrue();
     }
 
-    [TestMethod]
-    public void CloneEntity_Should_CreateDeepCopy()
+    [Test]
+    public async Task CloneEntity_Should_CreateDeepCopy()
     {
         var entity = new Entity("account", Guid.NewGuid());
         entity["name"] = "Account 1";
@@ -145,15 +144,15 @@ public class EntityExtensionsTests
 
         var cloned = entity.CloneEntity();
 
-        cloned.Should().NotBeSameAs(entity);
-        cloned.Id.Should().Be(entity.Id);
-        cloned["name"].Should().Be(entity["name"]);
-        cloned["ref"].Should().NotBeSameAs(entity["ref"]);
-        ((EntityReference)cloned["ref"]).Id.Should().Be(((EntityReference)entity["ref"]).Id);
+        await Assert.That(cloned).IsNotSameReferenceAs(entity);
+        await Assert.That(cloned.Id).IsEqualTo(entity.Id);
+        await Assert.That(cloned["name"]).IsEqualTo(entity["name"]);
+        await Assert.That(cloned["ref"]).IsNotSameReferenceAs(entity["ref"]);
+        await Assert.That(((EntityReference)cloned["ref"]).Id).IsEqualTo(((EntityReference)entity["ref"]).Id);
     }
 
-    [TestMethod]
-    public void JoinAttributes_Should_AddAliasedValues()
+    [Test]
+    public async Task JoinAttributes_Should_AddAliasedValues()
     {
         var mainEntity = new Entity("account", Guid.NewGuid());
         var otherEntity = new Entity("contact", Guid.NewGuid());
@@ -161,10 +160,10 @@ public class EntityExtensionsTests
 
         mainEntity.JoinAttributes(otherEntity, new ColumnSet("firstname"), "c");
 
-        mainEntity.Attributes.Should().ContainKey("c.firstname");
+        await Assert.That(mainEntity.Attributes.ContainsKey("c.firstname")).IsTrue();
         var aliased = (AliasedValue)mainEntity["c.firstname"];
-        aliased.EntityLogicalName.Should().Be("contact");
-        aliased.AttributeLogicalName.Should().Be("firstname");
-        aliased.Value.Should().Be("John");
+        await Assert.That(aliased.EntityLogicalName).IsEqualTo("contact");
+        await Assert.That(aliased.AttributeLogicalName).IsEqualTo("firstname");
+        await Assert.That(aliased.Value).IsEqualTo("John");
     }
 }

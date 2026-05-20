@@ -2,62 +2,61 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System;
-using AwesomeAssertions;
+using System.Threading.Tasks;
 using Digitall.Testing.Extensions;
 using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Testing.Tests.Extensions;
 
-[TestClass]
 public class BuilderExtensionsTests
 {
-    [TestMethod]
-    public void PluginExecutionContextBuilderExtensions_WithTarget_ShouldSetTarget()
+    [Test]
+    public async Task PluginExecutionContextBuilderExtensions_WithTarget_ShouldSetTarget()
     {
         var target = new Entity("account", Guid.NewGuid());
         var builder = new PluginExecutionContextBuilder();
 
         builder.WithTarget(target);
 
-        builder.Target.Should().NotBeNull();
-        builder.Target.Value.Should().Be(target);
+        await Assert.That(builder.Target).IsNotNull();
+        await Assert.That(builder.Target.Value).IsEqualTo(target);
     }
 
-    [TestMethod]
-    public void PluginExecutionContextBuilderExtensions_WithPreEntityImage_ShouldAddImage()
+    [Test]
+    public async Task PluginExecutionContextBuilderExtensions_WithPreEntityImage_ShouldAddImage()
     {
         var image = new Entity("account", Guid.NewGuid());
         var builder = new PluginExecutionContextBuilder();
 
         builder.WithPreEntityImage(image, "MyImage");
 
-        builder.PreEntityImages.Should().ContainKey("MyImage");
-        builder.PreEntityImages["MyImage"].Should().Be(image);
+        await Assert.That(builder.PreEntityImages.ContainsKey("MyImage")).IsTrue();
+        await Assert.That(builder.PreEntityImages["MyImage"]).IsEqualTo(image);
     }
 
-    [TestMethod]
-    public void PluginExecutionContextBuilderExtensions_WithInputParameter_ShouldAddParameter()
+    [Test]
+    public async Task PluginExecutionContextBuilderExtensions_WithInputParameter_ShouldAddParameter()
     {
         var builder = new PluginExecutionContextBuilder();
 
         builder.WithInputParameter("MyParam", "MyValue");
 
-        builder.InputParameters.Should().ContainKey("MyParam");
-        builder.InputParameters["MyParam"].Should().Be("MyValue");
+        await Assert.That(builder.InputParameters.ContainsKey("MyParam")).IsTrue();
+        await Assert.That(builder.InputParameters["MyParam"]).IsEqualTo("MyValue");
     }
 
-    [TestMethod]
-    public void PluginExecutionContextBuilderExtensions_WithMessageName_ShouldSetMessageName()
+    [Test]
+    public async Task PluginExecutionContextBuilderExtensions_WithMessageName_ShouldSetMessageName()
     {
         var builder = new PluginExecutionContextBuilder();
 
         builder.WithMessageName("Update");
 
-        builder.MessageName.Should().Be("Update");
+        await Assert.That(builder.MessageName).IsEqualTo("Update");
     }
 
-    [TestMethod]
-    public void FakeDataverseBuilderExtensions_AddData_ShouldAddRecords()
+    [Test]
+    public async Task FakeDataverseBuilderExtensions_AddData_ShouldAddRecords()
     {
         var entity = new Entity("account", Guid.NewGuid());
         var builder = new FakeDataverseBuilder();
@@ -65,18 +64,18 @@ public class BuilderExtensionsTests
         builder.AddData(entity);
 
         var service = builder.GetOrganizationService();
-        service.InternalState["account"].Should().ContainKey(entity.Id);
+        await Assert.That(service.InternalState["account"].ContainsKey(entity.Id)).IsTrue();
     }
 
-    [TestMethod]
-    public void FakeDataverseBuilderExtensions_AddConfig_ShouldAddEnvironmentVariables()
+    [Test]
+    public async Task FakeDataverseBuilderExtensions_AddConfig_ShouldAddEnvironmentVariables()
     {
         var builder = new FakeDataverseBuilder();
 
         builder.AddConfig("my_key", "default_val", "override_val");
 
         var service = builder.GetOrganizationService();
-        service.InternalState.Should().ContainKey("environmentvariabledefinition");
-        service.InternalState.Should().ContainKey("environmentvariablevalue");
+        await Assert.That(service.InternalState.ContainsKey("environmentvariabledefinition")).IsTrue();
+        await Assert.That(service.InternalState.ContainsKey("environmentvariablevalue")).IsTrue();
     }
 }
