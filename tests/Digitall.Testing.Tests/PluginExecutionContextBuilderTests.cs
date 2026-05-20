@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using Digitall.Testing.Extensions;
 using Digitall.Testing.Tests.Fixtures;
 using Digitall.Testing.Tests.Fixtures.SamplePlugin;

@@ -2,7 +2,6 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Time.Testing;
 
 namespace Digitall.Testing.Tests;
