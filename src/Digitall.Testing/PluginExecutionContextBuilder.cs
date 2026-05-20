@@ -67,12 +67,12 @@ public class PluginExecutionContextBuilder
     public int Depth { get; set; } = 1;
 
     public IOrganizationService? OrganizationService { get; set; }
-    public ITracingService TracingService { get; set; } = Mock.Of<ITracingService>().Object;
-    public ILogger Logger { get; set; } = Mock.Of<ILogger>().Object;
+    public ITracingService TracingService { get; set; } = ITracingService.Mock();
+    public ILogger Logger { get; set; } = ILogger.Mock();
 
     public IServiceProvider BuildServiceProvider()
     {
-        var pluginExecutionContext = Mock.Of<IPluginExecutionContext7>();
+        var pluginExecutionContext = IPluginExecutionContext7.Mock();
 
         pluginExecutionContext.MessageName.Returns(MessageName!);
         pluginExecutionContext.Mode.Returns(Mode);
@@ -105,23 +105,23 @@ public class PluginExecutionContextBuilder
         }
 
         // organization service
-        var organizationServiceFactory = Mock.Of<IOrganizationServiceFactory>();
+        var organizationServiceFactory = IOrganizationServiceFactory.Mock();
         organizationServiceFactory.CreateOrganizationService(Arg.Any<Guid?>()).Returns(OrganizationService!);
 
         // service provider
-        var serviceProvider = Mock.Of<IServiceProvider>();
+        var serviceProvider = IServiceProvider.Mock();
 
-        serviceProvider.GetService(typeof(IPluginExecutionContext)).Returns(pluginExecutionContext.Object);
-        serviceProvider.GetService(typeof(IPluginExecutionContext2)).Returns(pluginExecutionContext.Object);
-        serviceProvider.GetService(typeof(IPluginExecutionContext3)).Returns(pluginExecutionContext.Object);
-        serviceProvider.GetService(typeof(IPluginExecutionContext4)).Returns(pluginExecutionContext.Object);
-        serviceProvider.GetService(typeof(IPluginExecutionContext5)).Returns(pluginExecutionContext.Object);
-        serviceProvider.GetService(typeof(IPluginExecutionContext6)).Returns(pluginExecutionContext.Object);
-        serviceProvider.GetService(typeof(IPluginExecutionContext7)).Returns(pluginExecutionContext.Object);
-        serviceProvider.GetService(typeof(IOrganizationServiceFactory)).Returns(organizationServiceFactory.Object);
+        serviceProvider.GetService(typeof(IPluginExecutionContext)).Returns((object)pluginExecutionContext);
+        serviceProvider.GetService(typeof(IPluginExecutionContext2)).Returns((object)pluginExecutionContext);
+        serviceProvider.GetService(typeof(IPluginExecutionContext3)).Returns((object)pluginExecutionContext);
+        serviceProvider.GetService(typeof(IPluginExecutionContext4)).Returns((object)pluginExecutionContext);
+        serviceProvider.GetService(typeof(IPluginExecutionContext5)).Returns((object)pluginExecutionContext);
+        serviceProvider.GetService(typeof(IPluginExecutionContext6)).Returns((object)pluginExecutionContext);
+        serviceProvider.GetService(typeof(IPluginExecutionContext7)).Returns((object)pluginExecutionContext);
+        serviceProvider.GetService(typeof(IOrganizationServiceFactory)).Returns((object)organizationServiceFactory);
         serviceProvider.GetService(typeof(ITracingService)).Returns(TracingService);
         serviceProvider.GetService(typeof(ILogger)).Returns(Logger);
 
-        return serviceProvider.Object;
+        return serviceProvider;
     }
 }
