@@ -42,8 +42,8 @@ public class PluginExecutionContextBuilder
     }
 
     public string? MessageName { get; set; }
-    public int Mode { get; init; }
-    public int Stage { get; init; }
+    public int Mode { get; set; }
+    public int Stage { get; set; }
     public Target? Target { get; set; }
     public ParameterCollection InputParameters { get; set; } = [];
     public ParameterCollection OutputParameters { get; set; } = [];
