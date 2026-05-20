@@ -2,8 +2,6 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;

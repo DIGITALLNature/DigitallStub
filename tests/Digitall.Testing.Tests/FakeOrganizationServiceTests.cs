@@ -1,7 +1,4 @@
-using System;
-using System.Linq;
 using System.ServiceModel;
-using System.Threading.Tasks;
 using Digitall.Testing.Errors;
 using Digitall.Testing.Tests.Fixtures;
 using Microsoft.Xrm.Sdk;
