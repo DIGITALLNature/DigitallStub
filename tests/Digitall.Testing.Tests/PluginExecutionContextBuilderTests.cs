@@ -6,7 +6,6 @@ using Digitall.Testing.Tests.Fixtures.SamplePlugin;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.PluginTelemetry;
 using Microsoft.Xrm.Sdk.Query;
-using TUnit.Mocks;
 
 namespace Digitall.Testing.Tests;
 

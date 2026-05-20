@@ -2,8 +2,6 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Digitall.Testing.OrganizationRequests;
 using Digitall.Testing.Tests.Fixtures;
@@ -184,7 +182,7 @@ public class OrganizationRequestFakeTests
         {
             Target = new EntityReference(Account.EntityLogicalName, accountId),
             Relationship = new Relationship("account_contacts"),
-            RelatedEntities = new EntityReferenceCollection { new EntityReference(Contact.EntityLogicalName, contactId) }
+            RelatedEntities = [new EntityReference(Contact.EntityLogicalName, contactId)]
         };
 
         _sut.Execute(request);
@@ -200,7 +198,7 @@ public class OrganizationRequestFakeTests
         {
             Target = new EntityReference(Account.EntityLogicalName, accountId),
             Relationship = new Relationship("account_contacts"),
-            RelatedEntities = new EntityReferenceCollection { new EntityReference(Contact.EntityLogicalName, Guid.NewGuid()) }
+            RelatedEntities = [new EntityReference(Contact.EntityLogicalName, Guid.NewGuid())]
         };
 
         try {
@@ -219,11 +217,10 @@ public class OrganizationRequestFakeTests
 
         var request = new ExecuteTransactionRequest
         {
-            Requests = new OrganizationRequestCollection
-            {
+            Requests = [
                 new CreateRequest { Target = new Account { Name = "Acc 1" } },
                 new CreateRequest { Target = new Account { Name = "Acc 2" } }
-            },
+            ],
             ReturnResponses = true
         };
 
@@ -247,7 +244,7 @@ public class OrganizationRequestFakeTests
         var request = new Microsoft.Crm.Sdk.Messages.BulkDeleteRequest
         {
             JobName = "Bulk Delete Test",
-            QuerySet = new[] {
+            QuerySet = [
                 new Microsoft.Xrm.Sdk.Query.QueryExpression(Account.EntityLogicalName) {
                     Criteria = new Microsoft.Xrm.Sdk.Query.FilterExpression {
                         Conditions = {
@@ -255,9 +252,9 @@ public class OrganizationRequestFakeTests
                         }
                     }
                 }
-            },
-            ToRecipients = new Guid[] { },
-            CCRecipients = new Guid[] { },
+            ],
+            ToRecipients = [],
+            CCRecipients = [],
             SendEmailNotification = false
         };
 

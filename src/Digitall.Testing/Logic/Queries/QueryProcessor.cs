@@ -247,7 +247,7 @@ public class QueryProcessor
                     if (g.Key[rule] != null)
                     {
                         object value = g.Key[rule];
-                        ent[groups[rule].OutputAlias] = new AliasedValue(null, groups[rule].Attribute, (value as ComparableEntityReference)?.entityReference ?? value);
+                        ent[groups[rule].OutputAlias] = new AliasedValue(null, groups[rule].Attribute, (value as ComparableEntityReference)?.EntityReference ?? value);
                     }
                 }
 
@@ -289,38 +289,35 @@ public class QueryProcessor
         private static IQueryable<Entity> OrderQuery(QueryExpression qe, IQueryable<Entity> query)
         {
             //Sort results
-            if (qe.Orders != null)
+            if (qe.Orders is { Count: > 0 })
             {
-                if (qe.Orders.Count > 0)
-                {
-                    IOrderedQueryable<Entity> orderedQuery = null;
+                IOrderedQueryable<Entity> orderedQuery;
 
-                    var order = qe.Orders[0];
-                    if (order.OrderType == OrderType.Ascending)
+                var order = qe.Orders[0];
+                if (order.OrderType == OrderType.Ascending)
+                {
+                    orderedQuery = query.OrderBy(e => e.Attributes.ContainsKey(order.AttributeName) ? e[order.AttributeName] : null, new XrmOrderByAttributeComparer());
+                }
+                else
+                {
+                    orderedQuery = query.OrderByDescending(e => e.Attributes.ContainsKey(order.AttributeName) ? e[order.AttributeName] : null, new XrmOrderByAttributeComparer());
+                }
+
+                //Subsequent orders should use ThenBy and ThenByDescending
+                for (var i = 1; i < qe.Orders.Count; i++)
+                {
+                    var thenOrder = qe.Orders[i];
+                    if (thenOrder.OrderType == OrderType.Ascending)
                     {
-                        orderedQuery = query.OrderBy(e => e.Attributes.ContainsKey(order.AttributeName) ? e[order.AttributeName] : null, new XrmOrderByAttributeComparer());
+                        orderedQuery = orderedQuery.ThenBy(e => e.Attributes.ContainsKey(thenOrder.AttributeName) ? e[thenOrder.AttributeName] : null, new XrmOrderByAttributeComparer());
                     }
                     else
                     {
-                        orderedQuery = query.OrderByDescending(e => e.Attributes.ContainsKey(order.AttributeName) ? e[order.AttributeName] : null, new XrmOrderByAttributeComparer());
+                        orderedQuery = orderedQuery.ThenByDescending(e => e[thenOrder.AttributeName], new XrmOrderByAttributeComparer());
                     }
-
-                    //Subsequent orders should use ThenBy and ThenByDescending
-                    for (var i = 1; i < qe.Orders.Count; i++)
-                    {
-                        var thenOrder = qe.Orders[i];
-                        if (thenOrder.OrderType == OrderType.Ascending)
-                        {
-                            orderedQuery = orderedQuery.ThenBy(e => e.Attributes.ContainsKey(thenOrder.AttributeName) ? e[thenOrder.AttributeName] : null, new XrmOrderByAttributeComparer());
-                        }
-                        else
-                        {
-                            orderedQuery = orderedQuery.ThenByDescending(e => e[thenOrder.AttributeName], new XrmOrderByAttributeComparer());
-                        }
-                    }
-
-                    query = orderedQuery;
                 }
+
+                query = orderedQuery;
             }
 
             return query;

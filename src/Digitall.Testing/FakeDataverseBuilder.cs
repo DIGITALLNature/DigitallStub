@@ -3,7 +3,6 @@
 
 using System;
 using Microsoft.PowerPlatform.Dataverse.Client;
-using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Testing;
 

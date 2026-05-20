@@ -8,11 +8,11 @@ namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
 class ComparableEntityReference : IComparable
 {
-    public EntityReference entityReference { get; private set; }
+    public EntityReference EntityReference { get; private set; }
 
     public ComparableEntityReference(EntityReference entityReference)
     {
-        this.entityReference = entityReference;
+        EntityReference = entityReference;
     }
 
     int IComparable.CompareTo(object obj)
@@ -23,23 +23,23 @@ class ComparableEntityReference : IComparable
     public override bool Equals(object obj)
     {
         EntityReference other;
-        if (obj is EntityReference)
+        if (obj is EntityReference entityRef)
         {
-            other = obj as EntityReference;
+            other = entityRef;
         }
-        else if (obj is ComparableEntityReference)
+        else if (obj is ComparableEntityReference comparableRef)
         {
-            other = (obj as ComparableEntityReference).entityReference;
+            other = comparableRef.EntityReference;
         }
         else
         {
             return false;
         }
-        return entityReference.Id == other.Id && entityReference.LogicalName == other.LogicalName;
+        return EntityReference.Id == other.Id && EntityReference.LogicalName == other.LogicalName;
     }
 
     public override int GetHashCode()
     {
-        return (entityReference.LogicalName == null ? 0 : entityReference.LogicalName.GetHashCode()) ^ entityReference.Id.GetHashCode();
+        return (EntityReference.LogicalName == null ? 0 : EntityReference.LogicalName.GetHashCode()) ^ EntityReference.Id.GetHashCode();
     }
 }

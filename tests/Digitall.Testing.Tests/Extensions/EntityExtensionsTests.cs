@@ -2,8 +2,6 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Digitall.Testing.Extensions;
 using Digitall.Testing.Tests.Fixtures;
@@ -40,8 +38,7 @@ public class EntityExtensionsTests
     [Test]
     public async Task KeySelector_Should_HandleAliasedValue()
     {
-        var entity = new Entity("account");
-        entity["alias.name"] = new AliasedValue("account", "name", "John Doe");
+        var entity = new Entity("account") { ["alias.name"] = new AliasedValue("account", "name", "John Doe") };
 
         var result = entity.KeySelector("alias.name");
 
@@ -52,8 +49,7 @@ public class EntityExtensionsTests
     public async Task KeySelector_Should_HandleEntityReference()
     {
         var refId = Guid.NewGuid();
-        var entity = new Entity("account");
-        entity["parentaccountid"] = new EntityReference("account", refId);
+        var entity = new Entity("account") { ["parentaccountid"] = new EntityReference("account", refId) };
 
         var result = entity.KeySelector("parentaccountid");
 
@@ -63,8 +59,7 @@ public class EntityExtensionsTests
     [Test]
     public async Task KeySelector_Should_HandleOptionSetValue()
     {
-        var entity = new Entity("account");
-        entity["statuscode"] = new OptionSetValue(1);
+        var entity = new Entity("account") { ["statuscode"] = new OptionSetValue(1) };
 
         var result = entity.KeySelector("statuscode");
 
@@ -74,8 +69,7 @@ public class EntityExtensionsTests
     [Test]
     public async Task KeySelector_Should_HandleMoney()
     {
-        var entity = new Entity("account");
-        entity["creditlimit"] = new Money(1000m);
+        var entity = new Entity("account") { ["creditlimit"] = new Money(1000m) };
 
         var result = entity.KeySelector("creditlimit");
 
@@ -85,10 +79,7 @@ public class EntityExtensionsTests
     [Test]
     public async Task ProjectAttributes_WithColumnSet_Should_ProjectRequestedAttributes()
     {
-        var entity = new Entity("account", Guid.NewGuid());
-        entity["name"] = "Account 1";
-        entity["telephone1"] = "123456";
-        entity["websiteurl"] = "http://example.com";
+        var entity = new Entity("account", Guid.NewGuid()) { ["name"] = "Account 1", ["telephone1"] = "123456", ["websiteurl"] = "http://example.com" };
 
         var columnSet = new ColumnSet("name", "telephone1");
 
@@ -103,9 +94,7 @@ public class EntityExtensionsTests
     [Test]
     public async Task ProjectAttributes_WithAllColumns_Should_ReturnAllNonNullAttributes()
     {
-        var entity = new Entity("account", Guid.NewGuid());
-        entity["name"] = "Account 1";
-        entity["telephone1"] = null;
+        var entity = new Entity("account", Guid.NewGuid()) { ["name"] = "Account 1", ["telephone1"] = null };
 
         var columnSet = new ColumnSet(true);
 
@@ -119,12 +108,9 @@ public class EntityExtensionsTests
     [Test]
     public async Task ProjectAttributes_WithQueryExpression_Should_HandleLinkEntities()
     {
-        var account = new Entity("account", Guid.NewGuid());
-        account["name"] = "Account 1";
-        account["contact.fullname"] = new AliasedValue("contact", "fullname", "John Smith");
+        var account = new Entity("account", Guid.NewGuid()) { ["name"] = "Account 1", ["contact.fullname"] = new AliasedValue("contact", "fullname", "John Smith") };
 
-        var qe = new QueryExpression("account");
-        qe.ColumnSet = new ColumnSet("name");
+        var qe = new QueryExpression("account") { ColumnSet = new ColumnSet("name") };
         var le = qe.AddLink("contact", "accountid", "parentcustomerid");
         le.EntityAlias = "contact";
         le.Columns = new ColumnSet("fullname");
@@ -138,9 +124,7 @@ public class EntityExtensionsTests
     [Test]
     public async Task CloneEntity_Should_CreateDeepCopy()
     {
-        var entity = new Entity("account", Guid.NewGuid());
-        entity["name"] = "Account 1";
-        entity["ref"] = new EntityReference("contact", Guid.NewGuid());
+        var entity = new Entity("account", Guid.NewGuid()) { ["name"] = "Account 1", ["ref"] = new EntityReference("contact", Guid.NewGuid()) };
 
         var cloned = entity.CloneEntity();
 
@@ -155,8 +139,7 @@ public class EntityExtensionsTests
     public async Task JoinAttributes_Should_AddAliasedValues()
     {
         var mainEntity = new Entity("account", Guid.NewGuid());
-        var otherEntity = new Entity("contact", Guid.NewGuid());
-        otherEntity["firstname"] = "John";
+        var otherEntity = new Entity("contact", Guid.NewGuid()) { ["firstname"] = "John" };
 
         mainEntity.JoinAttributes(otherEntity, new ColumnSet("firstname"), "c");
 

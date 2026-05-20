@@ -16,7 +16,7 @@ class ArrayComparer : IEqualityComparer<IComparable[]>
 
     public int GetHashCode(IComparable[] obj)
     {
-        int result = 0;
+        var result = 0;
         foreach (IComparable x in obj)
         {
             result ^= x == null ? 0 : x.GetHashCode();

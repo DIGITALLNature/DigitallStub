@@ -42,7 +42,7 @@ public static class ConditionParser
         }
         else if (input is string[] strings)
         {
-            set.UnionWith(strings.Select(s => int.Parse(s)));
+            set.UnionWith(strings.Select(int.Parse));
         }
         else if (input is DataCollection<object> collection)
         {
@@ -60,7 +60,7 @@ public static class ConditionParser
             }
             else if (collection.Count == 1 && collection[0] is string[] sArray)
             {
-                set.UnionWith(sArray.Select(s => int.Parse(s)));
+                set.UnionWith(sArray.Select(int.Parse));
             }
             else
             {
@@ -103,7 +103,7 @@ public static class ConditionParser
         }
 
         Expression containsAttributeExpression = Expression.Call(attributesProperty, typeof(AttributeCollection).GetMethod(nameof(AttributeCollection.ContainsKey) ,
-                new[] { typeof(string) }), Expression.Constant(attributeName)
+                [typeof(string)]), Expression.Constant(attributeName)
         );
 
         Expression getAttributeValueExpr = Expression.Property(
@@ -114,7 +114,7 @@ public static class ConditionParser
 
         var getNonBasicValueExpr = getAttributeValueExpr;
 
-        Expression operatorExpression = null;
+        Expression operatorExpression;
 
         switch (condition.CondExpression.Operator)
         {
@@ -296,9 +296,9 @@ default:
 
     private static Expression GetCaseInsensitiveExpression(Expression e) =>
         Expression.Call(e,
-            typeof(string).GetMethod("ToLowerInvariant", new Type[] { }));
+            typeof(string).GetMethod("ToLowerInvariant", Type.EmptyTypes));
 
-    private static Expression GetCompareToExpression<T>(Expression left, Expression right) => Expression.Call(left, typeof(T).GetMethod("CompareTo", new[] { typeof(string) }), right);
+    private static Expression GetCompareToExpression<T>(Expression left, Expression right) => Expression.Call(left, typeof(T).GetMethod("CompareTo", [typeof(string)]), right);
 
 
     private static object GetSingleConditionValue(TypedConditionExpression c)
@@ -311,9 +311,8 @@ default:
 
         var conditionValue = c.CondExpression.Values.Single();
 
-        if (!(conditionValue is string) && conditionValue is IEnumerable)
+        if (conditionValue is not string && conditionValue is IEnumerable conditionValueEnumerable)
         {
-            var conditionValueEnumerable = conditionValue as IEnumerable;
             var count = 0;
 
             foreach (var obj in conditionValueEnumerable)
@@ -354,9 +353,7 @@ default:
     {
         var c = tc.CondExpression;
 
-        object value1, value2;
-        value1 = c.Values[0];
-        value2 = c.Values[1];
+        object value1 = c.Values[0], value2 = c.Values[1];
 
         //Between the range...
         var exp = Expression.And(
@@ -452,8 +449,7 @@ default:
 
         //Append a ´%´at the end of each condition value
         var computedCondition = new ConditionExpression(c.AttributeName, c.Operator, c.Values.Select(x => "%" + x + "%").ToList());
-        var computedTypedCondition = new TypedConditionExpression(computedCondition);
-        computedTypedCondition.AttributeType = tc.AttributeType;
+        var computedTypedCondition = new TypedConditionExpression(computedCondition) { AttributeType = tc.AttributeType };
 
         return TranslateConditionExpressionLike(computedTypedCondition, getAttributeValueExpr, containsAttributeExpr);
     }
@@ -479,8 +475,7 @@ default:
 
         //Append a ´%´at the end of each condition value
         var computedCondition = new ConditionExpression(c.AttributeName, c.Operator, c.Values.Select(x => "%" + x).ToList());
-        var typedComputedCondition = new TypedConditionExpression(computedCondition);
-        typedComputedCondition.AttributeType = tc.AttributeType;
+        var typedComputedCondition = new TypedConditionExpression(computedCondition) { AttributeType = tc.AttributeType };
 
         return TranslateConditionExpressionLike(typedComputedCondition, getAttributeValueExpr, containsAttributeExpr);
     }
@@ -786,7 +781,7 @@ default:
         foreach (var value in c.Values)
         {
             var strValue = value.ToString();
-            var sMethod = "";
+            string sMethod;
 
             if (strValue.EndsWith(sLikeOperator) && strValue.StartsWith(sLikeOperator))
             {
@@ -805,7 +800,7 @@ default:
 
             expOrValues = Expression.Or(expOrValues, Expression.Call(
                 convertedValueToStrAndToLower,
-                typeof(string).GetMethod(sMethod, new[] { typeof(string) }),
+                typeof(string).GetMethod(sMethod, [typeof(string)]),
                 Expression.Constant(value.ToString().ToLowerInvariant()
                     .Replace("%", "")) //Linq2CRM adds the percentage value to be executed as a LIKE operator, here we are replacing it to just use the appropiate method
             ));
@@ -869,9 +864,7 @@ default:
     {
         var c = tc.CondExpression;
 
-        var valueToAdd = 0;
-
-        if (!int.TryParse(c.Values[0].ToString(), out valueToAdd))
+        if (!int.TryParse(c.Values[0].ToString(), out var valueToAdd))
         {
             throw new Exception(c.Operator + " requires an integer value in the ConditionExpression.");
         }
@@ -935,22 +928,18 @@ default:
         //Special case => datetime is sent as a string
         if (value is string stringValue)
         {
-            int iValue;
-
-            DateTime dtDateTimeConversion;
-            Guid id;
             if (attributeType.IsDateTime() //Only convert to DateTime if the attribute's type was DateTime
-                && DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out dtDateTimeConversion))
+                && DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dtDateTimeConversion))
             {
                 return Expression.Constant(dtDateTimeConversion, typeof(DateTime));
             }
 
-            if (attributeType.IsOptionSet() && int.TryParse(value.ToString(), out iValue))
+            if (attributeType.IsOptionSet() && int.TryParse(value.ToString(), out var iValue))
             {
                 return Expression.Constant(iValue, typeof(int));
             }
 
-            if ((attributeType == typeof(EntityReference) || attributeType == typeof(Guid)) && Guid.TryParse((string)value, out id))
+            if ((attributeType == typeof(EntityReference) || attributeType == typeof(Guid)) && Guid.TryParse((string)value, out var id))
             {
                 return Expression.Constant(id);
             }
@@ -986,8 +975,7 @@ default:
         //Special case => datetime is sent as a string
         if (value is string)
         {
-            DateTime dtDateTimeConversion;
-            if (DateTime.TryParse(value.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out dtDateTimeConversion))
+            if (DateTime.TryParse(value.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out _))
             {
                 return typeof(DateTime);
             }
@@ -1004,8 +992,7 @@ default:
         //Special case => datetime is sent as a string
         if (value is string stringValue)
         {
-            DateTime dtDateTimeConversion;
-            if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out dtDateTimeConversion))
+            if (DateTime.TryParse(stringValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dtDateTimeConversion))
             {
                 return Expression.Constant(dtDateTimeConversion, typeof(DateTime));
             }
@@ -1143,14 +1130,12 @@ default:
     {
         var defaultStringExpression = GetCaseInsensitiveExpression(GetAppropiateCastExpressionDefault(input, value));
 
-        DateTime dtDateTimeConversion;
-        if (DateTime.TryParse(value.ToString(), out dtDateTimeConversion))
+        if (DateTime.TryParse(value.ToString(), out _))
         {
             return Expression.Convert(input, typeof(DateTime));
         }
 
-        int iValue;
-        if (int.TryParse(value.ToString(), out iValue))
+        if (int.TryParse(value.ToString(), out _))
         {
             return Expression.Condition(Expression.TypeIs(input, typeof(OptionSetValue)),
                 GetToStringExpression<int>(GetAppropiateCastExpressionBasedOnInt(input)),
@@ -1165,8 +1150,7 @@ default:
     {
         var defaultStringExpression = GetCaseInsensitiveExpression(GetAppropiateCastExpressionDefault(input, value));
 
-        int iValue;
-        if (attributeType.IsOptionSet() && int.TryParse(value.ToString(), out iValue))
+        if (attributeType.IsOptionSet() && int.TryParse(value.ToString(), out _))
         {
             return Expression.Condition(Expression.TypeIs(input, typeof(OptionSetValue)),
                 GetToStringExpression<int>(GetAppropiateCastExpressionBasedOnInt(input)),
@@ -1177,12 +1161,11 @@ default:
         return defaultStringExpression;
     }
 
-    private static Expression GetToStringExpression<T>(Expression e) => Expression.Call(e, typeof(T).GetMethod("ToString", new Type[] { }));
+    private static Expression GetToStringExpression<T>(Expression e) => Expression.Call(e, typeof(T).GetMethod("ToString", Type.EmptyTypes));
 
     private static Expression GetAppropiateCastExpressionBasedOnDateTime(Expression input, object value)
     {
         // Convert to DateTime if string
-        DateTime _;
         if (value is DateTime || (value is string && DateTime.TryParse(value.ToString(), out _)))
         {
             return Expression.Convert(input, typeof(DateTime));
@@ -1210,8 +1193,7 @@ default:
 
     private static Expression GetAppropiateCastExpressionBasedOnEntityReference(Expression input, object value)
     {
-        Guid guid;
-        if (value is string && !Guid.TryParse((string)value, out guid))
+        if (value is string strValue && !Guid.TryParse(strValue, out _))
         {
             var getNameFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)),
                 typeof(EntityReference).GetMethod("get_Name"));

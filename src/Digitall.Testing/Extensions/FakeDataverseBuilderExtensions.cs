@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Serialization;
 using Digitall.Testing.OrganizationRequests;
 using Microsoft.Xrm.Sdk;

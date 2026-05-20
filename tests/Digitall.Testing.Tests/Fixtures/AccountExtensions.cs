@@ -16,9 +16,9 @@ public partial class Account
         }
         set
         {
-            OnPropertyChanging(nameof(AccountCategoryCodeMultiple));
+            OnPropertyChanging();
             SetAttributeValue("new_accountcategorycodemultiple", value);
-            OnPropertyChanged(nameof(AccountCategoryCodeMultiple));
+            OnPropertyChanged();
         }
     }
 }
