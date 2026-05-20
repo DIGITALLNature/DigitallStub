@@ -18,14 +18,12 @@ public static class TypeExtensions
 
         public bool IsOptionSetValueCollection()
         {
-            var nullableType = Nullable.GetUnderlyingType(t);
             return t == typeof(OptionSetValueCollection);
         }
 
         public bool IsDateTime()
         {
-            var nullableType = Nullable.GetUnderlyingType(t);
-            return t == typeof(DateTime) || nullableType != null && nullableType == typeof(DateTime);
+            return t == typeof(DateTime) || Nullable.GetUnderlyingType(t) == typeof(DateTime);
         }
 
         public bool IsNullableEnum()
