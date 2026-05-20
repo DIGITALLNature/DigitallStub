@@ -20,9 +20,9 @@ public class FakeOrganizationServiceTests
     public async Task ModelIsDetected()
     {
         var sut = new FakeOrganizationService();
-        await Assert.That(sut.ModelAssemblies).IsNotNull();
-        await Assert.That(sut.ModelAssemblies).IsNotEmpty();
-        await Assert.That(sut.ModelAssemblies.Any(a => a.FullName == typeof(TestData).Assembly.FullName)).IsTrue();
+        await Assert.That(sut.State.ModelAssemblies).IsNotNull();
+        await Assert.That(sut.State.ModelAssemblies).IsNotEmpty();
+        await Assert.That(sut.State.ModelAssemblies.Any(a => a.FullName == typeof(TestData).Assembly.FullName)).IsTrue();
     }
 
     [Test]
@@ -67,7 +67,7 @@ public class FakeOrganizationServiceTests
 
         await Assert.That(result).IsTrue();
         await Assert.That(attributeInfo).IsNotNull();
-        await Assert.That(attributeInfo!.PropertyType.FullName).IsEqualTo(typeof(EntityReference).FullName);
+        await Assert.That(attributeInfo.PropertyType.FullName).IsEqualTo(typeof(EntityReference).FullName);
     }
 
     [Test]

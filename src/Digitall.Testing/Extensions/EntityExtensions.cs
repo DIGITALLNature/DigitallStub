@@ -1,7 +1,6 @@
 // Copyright (c) DIGITALL Nature.All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
-using Force.DeepCloner;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
@@ -13,7 +12,7 @@ public static class EntityExtensions
     {
         public object KeySelector(string sAttributeName)
         {
-            if (sAttributeName.Contains("."))
+            if (sAttributeName.Contains('.'))
             {
                 //Do not lowercase the alias prefix
                 var splitted = sAttributeName.Split('.');
@@ -27,7 +26,7 @@ public static class EntityExtensions
             if (!entity.Attributes.ContainsKey(sAttributeName))
             {
                 //Check if it is the primary key
-                if (sAttributeName.Contains("id") && entity.LogicalName.ToLower().Equals(sAttributeName.Substring(0, sAttributeName.Length - 2)))
+                if (sAttributeName.Contains("id") && entity.LogicalName.ToLower().Equals(sAttributeName[..^2]))
                 {
                     return entity.Id;
                 }
@@ -37,22 +36,13 @@ public static class EntityExtensions
 
             var keyValue = entity[sAttributeName] is AliasedValue av ? av.Value : entity[sAttributeName];
 
-            if (keyValue is EntityReference entityReference)
+            return keyValue switch
             {
-                return entityReference.Id;
-            }
-
-            if (keyValue is OptionSetValue optionSetValue)
-            {
-                return optionSetValue.Value;
-            }
-
-            if (keyValue is Money money)
-            {
-                return money.Value;
-            }
-
-            return keyValue;
+                EntityReference entityReference => entityReference.Id,
+                OptionSetValue optionSetValue => optionSetValue.Value,
+                Money money => money.Value,
+                _ => keyValue
+            };
         }
 
         public Entity ProjectAttributes(ColumnSet qs, FakeOrganizationService state)

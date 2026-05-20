@@ -35,7 +35,8 @@ public class XDocumentExtensionsTests
 
         var columnSet = doc.ToColumnSet();
 
-        await Assert.That(columnSet!.Columns.Contains("name")).IsTrue();
+        await Assert.That(columnSet).IsNotNull();
+        await Assert.That(columnSet.Columns.Contains("name")).IsTrue();
         await Assert.That(columnSet.Columns.Contains("accountid")).IsTrue();
         await Assert.That(columnSet.AllColumns).IsFalse();
     }
@@ -48,7 +49,8 @@ public class XDocumentExtensionsTests
 
         var columnSet = doc.ToColumnSet();
 
-        await Assert.That(columnSet!.AllColumns).IsTrue();
+        await Assert.That(columnSet).IsNotNull();
+        await Assert.That(columnSet.AllColumns).IsTrue();
     }
 
     [Test]

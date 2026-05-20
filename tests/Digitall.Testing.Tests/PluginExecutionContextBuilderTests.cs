@@ -18,7 +18,7 @@ public class PluginExecutionContextBuilderTests
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         await Assert.That(pluginContext).IsNotNull();
-        await Assert.That(pluginContext!.InputParameters).IsNotNull();
+        await Assert.That(pluginContext.InputParameters).IsNotNull();
         await Assert.That(pluginContext.InputParameters).IsEmpty();
 
         var tracingService = serviceProvider.GetService(typeof(ITracingService)) as ITracingService;
@@ -27,7 +27,7 @@ public class PluginExecutionContextBuilderTests
         var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
         await Assert.That(organizationServiceFactory).IsNotNull();
 
-        var organizationService = organizationServiceFactory!.CreateOrganizationService(null);
+        var organizationService = organizationServiceFactory.CreateOrganizationService(null);
         await Assert.That(organizationService).IsNull();
     }
 
@@ -40,7 +40,7 @@ public class PluginExecutionContextBuilderTests
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         await Assert.That(pluginContext).IsNotNull();
-        await Assert.That(pluginContext!.InputParameters).IsNotNull();
+        await Assert.That(pluginContext.InputParameters).IsNotNull();
         await Assert.That(pluginContext.InputParameters).IsEmpty();
 
         var tracingService = serviceProvider.GetService(typeof(ITracingService)) as ITracingService;
@@ -49,7 +49,7 @@ public class PluginExecutionContextBuilderTests
         var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
         await Assert.That(organizationServiceFactory).IsNotNull();
 
-        var organizationService = organizationServiceFactory!.CreateOrganizationService(null);
+        var organizationService = organizationServiceFactory.CreateOrganizationService(null);
         await Assert.That(organizationService).IsNotNull();
     }
 
@@ -65,10 +65,10 @@ public class PluginExecutionContextBuilderTests
         var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
         await Assert.That(organizationServiceFactory).IsNotNull();
 
-        var organizationService = organizationServiceFactory!.CreateOrganizationService(null);
+        var organizationService = organizationServiceFactory.CreateOrganizationService(null);
         await Assert.That(organizationService).IsNotNull();
 
-        var retrievedEntity = organizationService!.Retrieve(entity.LogicalName, entity.Id, new ColumnSet(true));
+        var retrievedEntity = organizationService.Retrieve(entity.LogicalName, entity.Id, new ColumnSet(true));
         await Assert.That(retrievedEntity).IsNotNull();
         await Assert.That(retrievedEntity).IsEquivalentTo(entity);
     }
@@ -84,7 +84,7 @@ public class PluginExecutionContextBuilderTests
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         await Assert.That(pluginContext).IsNotNull();
 
-        await Assert.That(pluginContext!.InputParameters).IsNotNull();
+        await Assert.That(pluginContext.InputParameters).IsNotNull();
         await Assert.That(pluginContext.InputParameters.ContainsKey("Target")).IsTrue();
         await Assert.That(pluginContext.InputParameters["Target"]).IsEqualTo(target);
 
@@ -103,7 +103,7 @@ public class PluginExecutionContextBuilderTests
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         await Assert.That(pluginContext).IsNotNull();
 
-        await Assert.That(pluginContext!.InputParameters).IsNotNull();
+        await Assert.That(pluginContext.InputParameters).IsNotNull();
         await Assert.That(pluginContext.InputParameters.ContainsKey("Target")).IsTrue();
         await Assert.That(pluginContext.InputParameters["Target"]).IsEqualTo(target);
 
@@ -124,7 +124,7 @@ public class PluginExecutionContextBuilderTests
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         await Assert.That(pluginContext).IsNotNull();
-        await Assert.That(pluginContext!.MessageName).IsEqualTo(messageName);
+        await Assert.That(pluginContext.MessageName).IsEqualTo(messageName);
     }
 
     [Test]
@@ -158,7 +158,7 @@ public class PluginExecutionContextBuilderTests
 
         var pluginContext = serviceProvider.GetService(iPluginExecutionContextType);
         await Assert.That(pluginContext).IsNotNull();
-        await Assert.That(pluginContext!.GetType().IsAssignableTo(iPluginExecutionContextType)).IsTrue();
+        await Assert.That(pluginContext.GetType().IsAssignableTo(iPluginExecutionContextType)).IsTrue();
     }
 
     [Test]
@@ -171,7 +171,7 @@ public class PluginExecutionContextBuilderTests
         var plugin = new TestPlugin();
         plugin.Execute(serviceProvider);
 
-        tracingServiceMock.Trace("TestPlugin: Execute", Arg.Any<object[]>()).WasCalled();
+        tracingServiceMock.Trace("TestPlugin: Execute", Any<object[]>()).WasCalled();
         return Task.CompletedTask;
     }
 
@@ -194,7 +194,7 @@ public class PluginExecutionContextBuilderTests
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
 
         await Assert.That(pluginContext).IsNotNull();
-        await Assert.That(pluginContext!.Mode).IsEqualTo(1);
+        await Assert.That(pluginContext.Mode).IsEqualTo(1);
         await Assert.That(pluginContext.Stage).IsEqualTo(40);
         await Assert.That(pluginContext.InitiatingUserId).IsEqualTo(initiatingUserId);
         await Assert.That(pluginContext.CorrelationId).IsEqualTo(correlationId);
@@ -223,13 +223,13 @@ public class PluginExecutionContextBuilderTests
 
         await Assert.That(pluginContext).IsNotNull();
         await Assert.That(pluginContext7).IsNotNull();
-        await Assert.That(pluginContext!.InputParameters).IsSameReferenceAs(input);
+        await Assert.That(pluginContext.InputParameters).IsSameReferenceAs(input);
         await Assert.That(pluginContext.OutputParameters).IsSameReferenceAs(output);
         await Assert.That(pluginContext.SharedVariables).IsSameReferenceAs(shared);
         await Assert.That(pluginContext.PreEntityImages).IsSameReferenceAs(preImages);
         await Assert.That(pluginContext.PostEntityImages).IsSameReferenceAs(postImages);
-        await Assert.That(pluginContext7!.PreEntityImagesCollection).HasCount().EqualTo(1);
-        await Assert.That(pluginContext7.PostEntityImagesCollection).HasCount().EqualTo(1);
+        await Assert.That(pluginContext7.PreEntityImagesCollection).Count().IsEqualTo(1);
+        await Assert.That(pluginContext7.PostEntityImagesCollection).Count().IsEqualTo(1);
     }
 
     [Test]
@@ -241,7 +241,7 @@ public class PluginExecutionContextBuilderTests
         var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
 
         await Assert.That(organizationServiceFactory).IsNotNull();
-        await Assert.That(organizationServiceFactory!.CreateOrganizationService(Guid.NewGuid())).IsEqualTo((IOrganizationService)organizationService);
+        await Assert.That(organizationServiceFactory.CreateOrganizationService(Guid.NewGuid())).IsEqualTo((IOrganizationService)organizationService);
         await Assert.That(organizationServiceFactory.CreateOrganizationService(null)).IsEqualTo((IOrganizationService)organizationService);
     }
 
@@ -282,7 +282,7 @@ public class PluginExecutionContextBuilderTests
             var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
 
             await Assert.That(pluginContext).IsNotNull();
-            await Assert.That(pluginContext!.UserId).IsEqualTo(Guid.Empty);
+            await Assert.That(pluginContext.UserId).IsEqualTo(Guid.Empty);
         }
         finally
         {

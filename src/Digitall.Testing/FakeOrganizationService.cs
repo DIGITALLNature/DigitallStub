@@ -97,7 +97,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     public void AddMetadata(EntityMetadata entityMetadata)
     {
-        EntityMetadata.Add(entityMetadata.LogicalName, entityMetadata);
+        State.EntityMetadata.Add(entityMetadata.LogicalName, entityMetadata);
 
         var relationships = new List<RelationshipMetadataBase>();
         if (entityMetadata.ManyToManyRelationships != null)
@@ -136,7 +136,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     public void AddRelationship(RelationshipMetadataBase relationship)
     {
-        Relationships[relationship.SchemaName] = relationship;
+        State.Relationships[relationship.SchemaName] = relationship;
     }
 
     public void AddRelationships(IEnumerable<RelationshipMetadataBase> relationships)
@@ -241,7 +241,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     private RelationshipMetadataBase? GetRelationship(string relationshipSchemaName)
     {
-        return Relationships.GetValueOrDefault(relationshipSchemaName);
+        return State.Relationships.GetValueOrDefault(relationshipSchemaName);
     }
 
     /// <summary>

@@ -8,7 +8,7 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Logic.Queries;
 
-public class ExpressionProcessor(FakeOrganizationService state)
+public class ExpressionProcessor(FakeOrganizationService organizationService)
 {
     public IQueryable<Entity> FilterQuery(QueryExpression queryExpression, IQueryable<Entity> query)
     {
@@ -145,17 +145,17 @@ public class ExpressionProcessor(FakeOrganizationService state)
         if (linkedEntity.LinkCriteria != null)
         {
             // Get the attribute metadata for the linked entity
-            var attributeMetadata = state.EntityMetadata.TryGetValue(linkedEntity.LinkToEntityName, out var value) ? value.Attributes : null;
+            var attributeMetadata = organizationService.State.EntityMetadata.TryGetValue(linkedEntity.LinkToEntityName, out var value) ? value.Attributes : null;
 
             // Process each condition in the link criteria
             foreach (var ce in linkedEntity.LinkCriteria.Conditions)
             {
                 // Check if the attribute is not known for the type and ends with "name"
-                if (!state.IsKnownAttributeForType(linkedEntity.LinkToEntityName, ce.AttributeName, out _) && ce.AttributeName.EndsWith("name", StringComparison.Ordinal))
+                if (!organizationService.IsKnownAttributeForType(linkedEntity.LinkToEntityName, ce.AttributeName, out _) && ce.AttributeName.EndsWith("name", StringComparison.Ordinal))
                 {
                     // Special case for referencing the name of an EntityReference
                     var slicedAttributeName = ce.AttributeName.Substring(0, ce.AttributeName.Length - 4);
-                    if (state.IsKnownAttributeForType(linkedEntity.LinkToEntityName, slicedAttributeName, out var attributeInfo) && attributeInfo!.PropertyType == typeof(EntityReference))
+                    if (organizationService.IsKnownAttributeForType(linkedEntity.LinkToEntityName, slicedAttributeName, out var attributeInfo) && attributeInfo!.PropertyType == typeof(EntityReference))
                     {
                         // Update the attribute name to avoid conflicts with the naming pattern
                         ce.AttributeName = slicedAttributeName;
@@ -221,7 +221,7 @@ public class ExpressionProcessor(FakeOrganizationService state)
             var sAttributeName = c.AttributeName;
 
             //Find the attribute type if using early bound entities
-            if (state.ModelAssemblies.Count != 0)
+            if (organizationService.State.ModelAssemblies.Count != 0)
             {
                 if (c.EntityName != null)
                 {
@@ -239,7 +239,7 @@ public class ExpressionProcessor(FakeOrganizationService state)
 
 
 
-                if (state.IsKnownAttributeForType(cEntityName, sAttributeName, out var propertyInfo))
+                if (organizationService.IsKnownAttributeForType(cEntityName, sAttributeName, out var propertyInfo))
                 {
                     typedExpression.AttributeType = propertyInfo!.PropertyType;
 
@@ -248,7 +248,7 @@ public class ExpressionProcessor(FakeOrganizationService state)
                     {
                         var realAttributeName = c.AttributeName.Substring(0, c.AttributeName.Length - 4);
 
-                        if (state.IsKnownAttributeForType(cEntityName, realAttributeName, out var attributeInfo))
+                        if (organizationService.IsKnownAttributeForType(cEntityName, realAttributeName, out var attributeInfo))
                         {
                             if (attributeInfo!.PropertyType == typeof(EntityReference))
                             {
@@ -263,7 +263,7 @@ public class ExpressionProcessor(FakeOrganizationService state)
             EnsureSupportedTypedExpression(typedExpression);
 
             //Build a binary expression
-            binaryExpression = logicalOperator == LogicalOperator.And ? Expression.And(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, state, typedExpression, entity)) : Expression.Or(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, state, typedExpression, entity));
+            binaryExpression = logicalOperator == LogicalOperator.And ? Expression.And(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, organizationService, typedExpression, entity)) : Expression.Or(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, organizationService, typedExpression, entity));
         }
 
         return binaryExpression;

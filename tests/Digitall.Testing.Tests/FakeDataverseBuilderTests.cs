@@ -81,11 +81,11 @@ public class FakeDataverseBuilderTests
             LogicalName = "account"
         };
 
-        typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.ManyToManyRelationships))!
+        typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.ManyToManyRelationships))?
             .SetValue(accountMetadata, Array.Empty<ManyToManyRelationshipMetadata>());
-        typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.OneToManyRelationships))!
+        typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.OneToManyRelationships))?
             .SetValue(accountMetadata, Array.Empty<OneToManyRelationshipMetadata>());
-        typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.ManyToOneRelationships))!
+        typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.ManyToOneRelationships))?
             .SetValue(accountMetadata, Array.Empty<OneToManyRelationshipMetadata>());
 
         var relationship = new OneToManyRelationshipMetadata { SchemaName = "dg_account_contact" };
@@ -95,7 +95,7 @@ public class FakeDataverseBuilderTests
             .AddRelationships(relationship)
             .GetOrganizationService();
 
-        await Assert.That(service.EntityMetadata.ContainsKey("account")).IsTrue();
-        await Assert.That(service.Relationships.ContainsKey("dg_account_contact")).IsTrue();
+        await Assert.That(service.State.EntityMetadata.ContainsKey("account")).IsTrue();
+        await Assert.That(service.State.Relationships.ContainsKey("dg_account_contact")).IsTrue();
     }
 }
