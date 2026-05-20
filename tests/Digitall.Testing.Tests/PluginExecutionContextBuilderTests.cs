@@ -270,6 +270,32 @@ public class PluginExecutionContextBuilderTests
     }
 
     [Test]
+    public async Task Mode_Should_BeSettableAfterConstruction()
+    {
+        var builder = new PluginExecutionContextBuilder();
+        builder.Mode = 1;
+
+        var serviceProvider = builder.BuildServiceProvider();
+        var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
+
+        await Assert.That(pluginContext).IsNotNull();
+        await Assert.That(pluginContext!.Mode).IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task Stage_Should_BeSettableAfterConstruction()
+    {
+        var builder = new PluginExecutionContextBuilder();
+        builder.Stage = 40;
+
+        var serviceProvider = builder.BuildServiceProvider();
+        var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
+
+        await Assert.That(pluginContext).IsNotNull();
+        await Assert.That(pluginContext!.Stage).IsEqualTo(40);
+    }
+
+    [Test]
     public async Task InvalidUserIdEnvVar_Should_DefaultToEmptyGuid()
     {
         var originalUserId = Environment.GetEnvironmentVariable("UserId");
