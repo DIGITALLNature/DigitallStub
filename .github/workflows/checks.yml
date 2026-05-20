@@ -39,5 +39,5 @@ jobs:
         uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: TestReport
+          name: TestReport-${{ matrix.os }}
           path: '**/*-report.html'
