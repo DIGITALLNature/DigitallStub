@@ -3,8 +3,8 @@
         "prepare": "husky install"
     },
     "devDependencies": {
-        "@commitlint/cli": "^20.5.2",
-        "@commitlint/config-conventional": "^20.5.0",
+        "@commitlint/cli": "^21.0.1",
+        "@commitlint/config-conventional": "^21.0.1",
         "@droidsolutions-oss/semantic-release-nuget": "^2.0.1",
         "@droidsolutions-oss/semantic-release-update-file": "^1.4.0",
         "@semantic-release/changelog": "^6.0.3",
