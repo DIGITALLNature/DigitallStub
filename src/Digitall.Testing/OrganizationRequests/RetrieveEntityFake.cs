@@ -1,7 +1,7 @@
 // Copyright (c) DIGITALL Nature. All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
-using System.Diagnostics;
+using System;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -12,7 +12,7 @@ public class RetrieveEntityFake : OrganizationRequestFake<RetrieveEntityRequest,
 {
     public override RetrieveEntityResponse Execute(RetrieveEntityRequest organizationRequest, FakeOrganizationService state)
     {
-        Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
+        ArgumentNullException.ThrowIfNull(organizationRequest);
 
         var entityMetadata = state.EntityMetadata[organizationRequest.LogicalName];
 

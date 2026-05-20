@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.Xrm.Sdk.Query;
@@ -20,7 +19,7 @@ public static class XDocumentExtensions
 
         public ColumnSet? ToColumnSet()
         {
-            Debug.Assert(xDocument != null, nameof(xDocument) + " != null");
+            ArgumentNullException.ThrowIfNull(xDocument);
             return xDocument?.Elements() //fetch
                 .Elements().FirstOrDefault()?.ToColumnSet();
         }

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Xml.Linq;
 using Digitall.Testing.Extensions;
@@ -19,7 +18,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
     {
         public override RetrieveMultipleResponse Execute(RetrieveMultipleRequest organizationRequest, FakeOrganizationService state)
         {
-            Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
+            ArgumentNullException.ThrowIfNull(organizationRequest);
 
             // Create a new QueryProcessor with the given state
             var queryProcessor = new QueryProcessor(state);

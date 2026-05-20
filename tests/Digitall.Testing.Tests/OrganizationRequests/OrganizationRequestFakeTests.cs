@@ -34,8 +34,8 @@ public class OrganizationRequestFakeTests
         var response = (CreateResponse)_sut.Execute(request);
 
         await Assert.That(response.id).IsNotEqualTo(Guid.Empty);
-        await Assert.That(_sut.InternalState[Account.EntityLogicalName].ContainsKey(response.id)).IsTrue();
-        await Assert.That(_sut.InternalState[Account.EntityLogicalName][response.id].GetAttributeValue<string>("name")).IsEqualTo("Test Account");
+        await Assert.That(_sut.ServiceState[Account.EntityLogicalName].ContainsKey(response.id)).IsTrue();
+        await Assert.That(_sut.ServiceState[Account.EntityLogicalName][response.id].GetAttributeValue<string>("name")).IsEqualTo("Test Account");
     }
 
     [Test]
@@ -50,7 +50,7 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        await Assert.That(_sut.InternalState[Account.EntityLogicalName][id].GetAttributeValue<string>("name")).IsEqualTo("New Name");
+        await Assert.That(_sut.ServiceState[Account.EntityLogicalName][id].GetAttributeValue<string>("name")).IsEqualTo("New Name");
     }
 
     [Test]
@@ -64,7 +64,7 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        await Assert.That(_sut.InternalState[Account.EntityLogicalName].ContainsKey(id)).IsFalse();
+        await Assert.That(_sut.ServiceState[Account.EntityLogicalName].ContainsKey(id)).IsFalse();
     }
 
     [Test]
@@ -98,7 +98,7 @@ public class OrganizationRequestFakeTests
         var response = (UpsertResponse)_sut.Execute(request);
 
         await Assert.That((bool)response.Results["RecordCreated"]).IsTrue();
-        await Assert.That(_sut.InternalState[Account.EntityLogicalName].ContainsKey(id)).IsTrue();
+        await Assert.That(_sut.ServiceState[Account.EntityLogicalName].ContainsKey(id)).IsTrue();
     }
 
     [Test]
@@ -114,7 +114,7 @@ public class OrganizationRequestFakeTests
         var response = (UpsertResponse)_sut.Execute(request);
 
         await Assert.That((bool)response.Results["RecordCreated"]).IsFalse();
-        await Assert.That(_sut.InternalState[Account.EntityLogicalName][id].GetAttributeValue<string>("name")).IsEqualTo("Updated");
+        await Assert.That(_sut.ServiceState[Account.EntityLogicalName][id].GetAttributeValue<string>("name")).IsEqualTo("Updated");
     }
 
     [Test]
@@ -133,7 +133,7 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        var updated = _sut.InternalState[Account.EntityLogicalName][id];
+        var updated = _sut.ServiceState[Account.EntityLogicalName][id];
         await Assert.That(updated.GetAttributeValue<OptionSetValue>("statecode").Value).IsEqualTo(1);
         await Assert.That(updated.GetAttributeValue<OptionSetValue>("statuscode").Value).IsEqualTo(2);
     }
@@ -155,7 +155,7 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        var updated = _sut.InternalState[Account.EntityLogicalName][id];
+        var updated = _sut.ServiceState[Account.EntityLogicalName][id];
         await Assert.That(updated.GetAttributeValue<EntityReference>("ownerid").Id).IsEqualTo(userId);
         await Assert.That(updated.GetAttributeValue<EntityReference>("owninguser").Id).IsEqualTo(userId);
     }
@@ -230,7 +230,7 @@ public class OrganizationRequestFakeTests
         var response = (ExecuteTransactionResponse)_sut.Execute(request);
 
         await Assert.That(response.Responses.Count).IsEqualTo(2);
-        await Assert.That(_sut.InternalState[Account.EntityLogicalName].Count).IsEqualTo(2);
+        await Assert.That(_sut.ServiceState[Account.EntityLogicalName].Count).IsEqualTo(2);
     }
 
     [Test]
@@ -264,8 +264,8 @@ public class OrganizationRequestFakeTests
         var response = (Microsoft.Crm.Sdk.Messages.BulkDeleteResponse)_sut.Execute(request);
 
         await Assert.That(response.Results.ContainsKey("JobId")).IsTrue();
-        await Assert.That(_sut.InternalState[Account.EntityLogicalName].ContainsKey(id1)).IsFalse();
-        await Assert.That(_sut.InternalState[Account.EntityLogicalName].ContainsKey(id2)).IsTrue();
+        await Assert.That(_sut.ServiceState[Account.EntityLogicalName].ContainsKey(id1)).IsFalse();
+        await Assert.That(_sut.ServiceState[Account.EntityLogicalName].ContainsKey(id2)).IsTrue();
     }
 
     [Test]

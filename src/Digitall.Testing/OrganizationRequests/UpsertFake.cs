@@ -1,7 +1,7 @@
 // Copyright (c) DIGITALL Nature. All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
-using System.Diagnostics;
+using System;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 
@@ -11,8 +11,8 @@ public class UpsertFake : OrganizationRequestFake<UpsertRequest, UpsertResponse>
 {
     public override UpsertResponse Execute(UpsertRequest organizationRequest, FakeOrganizationService state)
     {
-        Debug.Assert(state != null, nameof(state) + " != null");
-        Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(organizationRequest);
 
         var entityLogicalName = organizationRequest.Target.LogicalName;
         var entityId = organizationRequest.Target.Id;

@@ -2,7 +2,6 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Digitall.Testing.Errors;
 using Microsoft.Xrm.Sdk;
@@ -15,8 +14,8 @@ public class RetrieveFake : OrganizationRequestFake<RetrieveRequest, RetrieveRes
 {
     public override RetrieveResponse Execute(RetrieveRequest organizationRequest, FakeOrganizationService state)
     {
-        Debug.Assert(state != null, nameof(state) + " != null");
-        Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(organizationRequest);
 
         Entity record;
         if (organizationRequest.Target.Id == Guid.Empty && organizationRequest.Target.KeyAttributes.Count > 0)

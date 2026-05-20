@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.ServiceModel;
@@ -58,9 +57,6 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     }
 
     internal Dictionary<string, Dictionary<Guid, Entity>> ServiceState => State.Entities;
-
-    [Obsolete("Use ServiceState or State.Entities instead. This property is kept for backward compatibility with tests but might be removed in the future.")]
-    internal Dictionary<string, Dictionary<Guid, Entity>> InternalState => ServiceState;
 
     internal Dictionary<Type, IOrganizationRequestFake> OrganizationRequestFakes { get; } = new();
 
@@ -232,14 +228,9 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     public void AddRange(IEnumerable<Entity> entities) => entities.ToList().ForEach(Add);
 
-    private RelationshipMetadataBase GetRelationship(string relationshipSchemaName)
+    private RelationshipMetadataBase? GetRelationship(string relationshipSchemaName)
     {
-        if (Relationships.ContainsKey(relationshipSchemaName))
-        {
-            return Relationships[relationshipSchemaName];
-        }
-
-        return null;
+        return Relationships.TryGetValue(relationshipSchemaName, out var value) ? value : null;
     }
 
     // <summary>
@@ -411,7 +402,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     public OrganizationResponse Execute(OrganizationRequest request)
     {
-        Debug.Assert(request != null, nameof(request) + " != null");
+        ArgumentNullException.ThrowIfNull(request);
 
         if (OrganizationRequestFakes.TryGetValue(request.GetType(), out var fake))
         {

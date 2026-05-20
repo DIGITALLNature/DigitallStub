@@ -1,7 +1,7 @@
 // Copyright (c) DIGITALL Nature. All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
-using System.Diagnostics;
+using System;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 
@@ -11,8 +11,8 @@ public class SetStateFake : OrganizationRequestFake<SetStateRequest, SetStateRes
 {
     public override SetStateResponse Execute(SetStateRequest organizationRequest, FakeOrganizationService state)
     { 
-        Debug.Assert(state != null, nameof(state) + " != null");
-        Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(organizationRequest);
 
         var entityName = organizationRequest.EntityMoniker.LogicalName;
         var entityId = organizationRequest.EntityMoniker.Id;

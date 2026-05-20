@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Digitall.Testing.Errors;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
@@ -14,8 +13,8 @@ public class AssignRequestFake : OrganizationRequestFake<AssignRequest, AssignRe
 {
     public override AssignResponse Execute(AssignRequest organizationRequest, FakeOrganizationService state)
     {
-        Debug.Assert(state != null, nameof(state) + " != null");
-        Debug.Assert(organizationRequest != null, nameof(organizationRequest) + " != null");
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(organizationRequest);
 
 
         var target = organizationRequest.Target;
