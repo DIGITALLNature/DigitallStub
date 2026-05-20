@@ -33,7 +33,7 @@ jobs:
         run: dotnet build --no-restore
 
       - name: Run Tests
-        run: dotnet test -- --output Detailed
+        run: dotnet test --output Detailed
 
       - name: Upload HTML Test Report
         uses: actions/upload-artifact@v7
