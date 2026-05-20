@@ -11,10 +11,10 @@ using Digitall.Testing.Errors;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
-namespace Digitall.Testing.Logic.Queries
+namespace Digitall.Testing.Logic.Queries;
+
+public class LinkedEntitiesProcessor
 {
-    public class LinkedEntitiesProcessor
-    {
         private readonly FakeOrganizationService _state;
         private readonly QueryProcessor _queryProcessor;
         readonly Dictionary<string, int> _linkedEntities = new Dictionary<string, int>();
@@ -152,4 +152,3 @@ namespace Digitall.Testing.Logic.Queries
         }
 
     }
-}

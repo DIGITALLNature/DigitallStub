@@ -38,8 +38,7 @@ public static class EntityExtensions
                 return Guid.Empty; //Atrribute is null or doesn´t exists so it can´t be joined
             }
 
-            AliasedValue? aliasedValue;
-            var keyValue = (aliasedValue = entity[sAttributeName] as AliasedValue) != null ? aliasedValue.Value : entity[sAttributeName];
+            var keyValue = entity[sAttributeName] is AliasedValue av ? av.Value : entity[sAttributeName];
 
             if (keyValue is EntityReference entityReference)
             {

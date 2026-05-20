@@ -11,10 +11,10 @@ using Digitall.Testing.Logic.Queries.FetchAggregation;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
-namespace Digitall.Testing.Logic.Queries
+namespace Digitall.Testing.Logic.Queries;
+
+public class QueryProcessor
 {
-    public class QueryProcessor
-    {
         private readonly FakeOrganizationService _state;
         readonly LinkedEntitiesProcessor _linkedEntitiesProcessor;
         readonly ExpressionProcessor _expressionProcessor;
@@ -358,4 +358,3 @@ namespace Digitall.Testing.Logic.Queries
             return result.ToList();
         }
     }
-}

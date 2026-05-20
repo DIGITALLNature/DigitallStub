@@ -149,7 +149,10 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
         foreach (var request in requests)
         {
-            AddRequestIfNecessary((Activator.CreateInstance(request) as IOrganizationRequestFake)!);
+            if (Activator.CreateInstance(request) is IOrganizationRequestFake fake)
+            {
+                AddRequestIfNecessary(fake);
+            }
         }
     }
 

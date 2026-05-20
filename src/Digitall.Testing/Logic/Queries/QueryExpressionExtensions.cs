@@ -5,26 +5,24 @@ using System;
 using System.Linq;
 using Microsoft.Xrm.Sdk.Query;
 
-namespace Digitall.Testing.Logic.Queries
+namespace Digitall.Testing.Logic.Queries;
+
+public static class QueryExpressionExtensions
 {
-    public static class QueryExpressionExtensions
+    public static string GetEntityNameFromAlias(this QueryExpression queryExpression, string alias)
     {
-        public static string GetEntityNameFromAlias(this QueryExpression queryExpression, string alias)
+        if (alias == null)
+            return queryExpression.EntityName;
+
+        var linkedEntity = queryExpression.LinkEntities
+            .FirstOrDefault(le => le.EntityAlias != null && le.EntityAlias.Equals(alias, StringComparison.Ordinal));
+
+        if (linkedEntity != null)
         {
-            if (alias == null)
-                return queryExpression.EntityName;
-
-            var linkedEntity = queryExpression.LinkEntities
-                .FirstOrDefault(le => le.EntityAlias != null && le.EntityAlias.Equals(alias, StringComparison.Ordinal));
-
-            if (linkedEntity != null)
-            {
-                return linkedEntity.LinkToEntityName;
-            }
-
-            //If the alias wasn't found, it means it  could be any of the EntityNames
-            return alias;
+            return linkedEntity.LinkToEntityName;
         }
 
+        //If the alias wasn't found, it means it  could be any of the EntityNames
+        return alias;
     }
 }
