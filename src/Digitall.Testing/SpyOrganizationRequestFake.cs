@@ -1,0 +1,25 @@
+// Copyright (c) DIGITALL Nature. All rights reserved
+// DIGITALL Nature licenses this file to you under the Microsoft Public License.
+
+using Digitall.Testing.OrganizationRequests;
+using Microsoft.Xrm.Sdk;
+
+namespace Digitall.Testing;
+
+/// <summary>
+/// A trackable concrete implementation of OrganizationRequestFake that records all Execute calls
+/// and allows configuring the return value via a factory function.
+/// </summary>
+public sealed class SpyOrganizationRequestFake<TReq, TRes>(Func<TReq, FakeOrganizationService, TRes>? handler = null) : OrganizationRequestFake<TReq, TRes>
+    where TReq : OrganizationRequest
+    where TRes : OrganizationResponse, new()
+{
+    /// <summary>All requests captured by Execute calls.</summary>
+    public List<TReq> ReceivedRequests { get; } = [];
+
+    public override TRes Execute(TReq request, FakeOrganizationService organizationService)
+    {
+        ReceivedRequests.Add(request);
+        return handler?.Invoke(request, organizationService) ?? new TRes();
+    }
+}
