@@ -9,15 +9,15 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v6
 
     - name: Restore DotNet
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
         dotnet-version: 10.x
         cache: true
@@ -30,5 +30,11 @@ jobs:
       run: dotnet build --no-restore
 
     - name: Run Tests
-      run: dotnet run --project tests/Digitall.Testing.Tests --no-build --framework net10.0 -- --report-trx --report-trx-filename test-results.trx
+      run: dotnet test -- --output Detailed
 
+    - name: Upload HTML Test Report
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: TestReport
+        path: '**/*-report.html'
