@@ -4,7 +4,7 @@
     "rollForward": "latestMajor",
     "allowPrerelease": false
   },
-  "testRunner": {
-    "default": "Microsoft.Testing.Platform"
+  "test": {
+    "runner": "Microsoft.Testing.Platform"
   }
 }
