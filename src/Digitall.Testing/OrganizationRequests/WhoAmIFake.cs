@@ -10,7 +10,7 @@ public class WhoAmIFake: OrganizationRequestFake<WhoAmIRequest,WhoAmIResponse>
 {
     public override WhoAmIResponse Execute(WhoAmIRequest organizationRequest, FakeOrganizationService state)
     {
-        var userId = Guid.Parse(Environment.GetEnvironmentVariable("UserId") ?? Guid.Empty.ToString());
+        var userId = Guid.TryParse(Environment.GetEnvironmentVariable("UserId"), out var parsedUserId) ? parsedUserId : Guid.Empty;
 
         var results = new ParameterCollection {
             { "UserId", userId }
@@ -37,7 +37,7 @@ public class WhoAmIFake: OrganizationRequestFake<WhoAmIRequest,WhoAmIResponse>
 
     private static Guid GetBusinessUnitId(Entity user) {
         var buRef = user.GetAttributeValue<EntityReference>("businessunitid");
-        var buId = buRef?.Id ?? Guid.Parse(Environment.GetEnvironmentVariable("BusinessUnitId") ?? Guid.Empty.ToString());
+        var buId = buRef?.Id ?? (Guid.TryParse(Environment.GetEnvironmentVariable("BusinessUnitId"), out var parsedBuId) ? parsedBuId : Guid.Empty);
         return buId;
     }
 
