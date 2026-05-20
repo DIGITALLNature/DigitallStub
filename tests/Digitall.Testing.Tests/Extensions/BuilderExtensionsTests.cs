@@ -3,6 +3,7 @@
 
 using Digitall.Testing.Extensions;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Tests.Extensions;
 
@@ -62,7 +63,8 @@ public class BuilderExtensionsTests
         builder.AddData(entity);
 
         var service = builder.GetOrganizationService();
-        await Assert.That(service.ServiceState["account"].ContainsKey(entity.Id)).IsTrue();
+        var retrieved = service.Retrieve("account", entity.Id, new ColumnSet(true));
+        await Assert.That(retrieved).IsNotNull();
     }
 
     [Test]
@@ -73,7 +75,9 @@ public class BuilderExtensionsTests
         builder.AddConfig("my_key", "default_val", "override_val");
 
         var service = builder.GetOrganizationService();
-        await Assert.That(service.ServiceState.ContainsKey("environmentvariabledefinition")).IsTrue();
-        await Assert.That(service.ServiceState.ContainsKey("environmentvariablevalue")).IsTrue();
+        var definitions = service.CreateQuery<Entity>("environmentvariabledefinition").ToList();
+        var values = service.CreateQuery<Entity>("environmentvariablevalue").ToList();
+        await Assert.That(definitions).IsNotEmpty();
+        await Assert.That(values).IsNotEmpty();
     }
 }

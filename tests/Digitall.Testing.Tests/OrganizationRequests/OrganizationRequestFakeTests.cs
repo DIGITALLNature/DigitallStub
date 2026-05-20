@@ -1,11 +1,13 @@
 // Copyright (c) DIGITALL Nature. All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
+using System.ServiceModel;
 using Digitall.Testing.OrganizationRequests;
 using Digitall.Testing.Tests.Fixtures;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Tests.OrganizationRequests;
 
@@ -30,8 +32,8 @@ public class OrganizationRequestFakeTests
         var response = (CreateResponse)_sut.Execute(request);
 
         await Assert.That(response.id).IsNotEqualTo(Guid.Empty);
-        await Assert.That(_sut.ServiceState[Account.EntityLogicalName].ContainsKey(response.id)).IsTrue();
-        await Assert.That(_sut.ServiceState[Account.EntityLogicalName][response.id].GetAttributeValue<string>("name")).IsEqualTo("Test Account");
+        var retrieved = _sut.Retrieve(Account.EntityLogicalName, response.id, new ColumnSet(true));
+        await Assert.That(retrieved.GetAttributeValue<string>("name")).IsEqualTo("Test Account");
     }
 
     [Test]
@@ -46,7 +48,8 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        await Assert.That(_sut.ServiceState[Account.EntityLogicalName][id].GetAttributeValue<string>("name")).IsEqualTo("New Name");
+        var retrieved = _sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(retrieved.GetAttributeValue<string>("name")).IsEqualTo("New Name");
     }
 
     [Test]
@@ -60,7 +63,8 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        await Assert.That(_sut.ServiceState[Account.EntityLogicalName].ContainsKey(id)).IsFalse();
+        void Action() => _sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        Assert.Throws<FaultException<OrganizationServiceFault>>(Action);
     }
 
     [Test]
@@ -94,7 +98,8 @@ public class OrganizationRequestFakeTests
         var response = (UpsertResponse)_sut.Execute(request);
 
         await Assert.That((bool)response.Results["RecordCreated"]).IsTrue();
-        await Assert.That(_sut.ServiceState[Account.EntityLogicalName].ContainsKey(id)).IsTrue();
+        var retrieved = _sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(retrieved).IsNotNull();
     }
 
     [Test]
@@ -110,7 +115,8 @@ public class OrganizationRequestFakeTests
         var response = (UpsertResponse)_sut.Execute(request);
 
         await Assert.That((bool)response.Results["RecordCreated"]).IsFalse();
-        await Assert.That(_sut.ServiceState[Account.EntityLogicalName][id].GetAttributeValue<string>("name")).IsEqualTo("Updated");
+        var retrieved = _sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(retrieved.GetAttributeValue<string>("name")).IsEqualTo("Updated");
     }
 
     [Test]
@@ -129,7 +135,7 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        var updated = _sut.ServiceState[Account.EntityLogicalName][id];
+        var updated = _sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
         await Assert.That(updated.GetAttributeValue<OptionSetValue>("statecode").Value).IsEqualTo(1);
         await Assert.That(updated.GetAttributeValue<OptionSetValue>("statuscode").Value).IsEqualTo(2);
     }
@@ -151,7 +157,7 @@ public class OrganizationRequestFakeTests
 
         _sut.Execute(request);
 
-        var updated = _sut.ServiceState[Account.EntityLogicalName][id];
+        var updated = _sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
         await Assert.That(updated.GetAttributeValue<EntityReference>("ownerid").Id).IsEqualTo(userId);
         await Assert.That(updated.GetAttributeValue<EntityReference>("owninguser").Id).IsEqualTo(userId);
     }
@@ -225,7 +231,8 @@ public class OrganizationRequestFakeTests
         var response = (ExecuteTransactionResponse)_sut.Execute(request);
 
         await Assert.That(response.Responses.Count).IsEqualTo(2);
-        await Assert.That(_sut.ServiceState[Account.EntityLogicalName].Count).IsEqualTo(2);
+        var accounts = _sut.RetrieveMultiple(new Microsoft.Xrm.Sdk.Query.QueryExpression(Account.EntityLogicalName) { ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet(true) });
+        await Assert.That(accounts.Entities).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -259,8 +266,12 @@ public class OrganizationRequestFakeTests
         var response = (Microsoft.Crm.Sdk.Messages.BulkDeleteResponse)_sut.Execute(request);
 
         await Assert.That(response.Results.ContainsKey("JobId")).IsTrue();
-        await Assert.That(_sut.ServiceState[Account.EntityLogicalName].ContainsKey(id1)).IsFalse();
-        await Assert.That(_sut.ServiceState[Account.EntityLogicalName].ContainsKey(id2)).IsTrue();
+
+        void RetrieveDeleted() => _sut.Retrieve(Account.EntityLogicalName, id1, new Microsoft.Xrm.Sdk.Query.ColumnSet(true));
+        Assert.Throws<FaultException<OrganizationServiceFault>>(RetrieveDeleted);
+
+        var kept = _sut.Retrieve(Account.EntityLogicalName, id2, new Microsoft.Xrm.Sdk.Query.ColumnSet(true));
+        await Assert.That(kept).IsNotNull();
     }
 
     [Test]
