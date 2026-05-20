@@ -12,19 +12,10 @@ namespace Digitall.Testing;
 /// <summary>
 /// Resolves entity types and attribute metadata from model assemblies with caching.
 /// </summary>
-public class EntityTypeResolver
+public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<string, EntityMetadata> entityMetadata)
 {
-    private readonly List<Assembly> _modelAssemblies;
-    private readonly Dictionary<string, EntityMetadata> _entityMetadata;
-
     private Dictionary<string, Type>? _entityTypeCache;
     private Dictionary<string, Dictionary<string, PropertyInfo>>? _attributeCache;
-
-    public EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<string, EntityMetadata> entityMetadata)
-    {
-        _modelAssemblies = modelAssemblies;
-        _entityMetadata = entityMetadata;
-    }
 
     /// <summary>
     /// Invalidates the internal caches. Call when ModelAssemblies changes.
@@ -42,7 +33,7 @@ public class EntityTypeResolver
     private Dictionary<string, Type> BuildEntityTypeCache()
     {
         var cache = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
-        foreach (var assembly in _modelAssemblies)
+        foreach (var assembly in modelAssemblies)
         {
             foreach (var type in assembly.GetTypes())
             {
@@ -117,7 +108,7 @@ public class EntityTypeResolver
     {
         if (!IsKnownAttributeForType(entityLogicalName, attributeLogicalName, out _))
         {
-            if (!_entityMetadata.TryGetValue(entityLogicalName, out var entityMetadata) || entityMetadata.Attributes.All(a => a.LogicalName != attributeLogicalName))
+            if (!entityMetadata.TryGetValue(entityLogicalName, out var metadata) || metadata.Attributes.All(a => a.LogicalName != attributeLogicalName))
             {
                 ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoAttribute, $"The attribute {attributeLogicalName} does not exist on this entity.");
             }

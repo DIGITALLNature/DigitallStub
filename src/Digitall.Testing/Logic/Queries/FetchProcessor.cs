@@ -195,7 +195,7 @@ internal class FetchProcessor(FakeOrganizationService state)
         var conditionEntityName = "";
 
         var attributeName = elem.GetAttribute("attribute")!.Value;
-        var op = ConditionOperator.Equal;
+        ConditionOperator op;
 
         string? value = null;
         if (elem.GetAttribute("value") != null)

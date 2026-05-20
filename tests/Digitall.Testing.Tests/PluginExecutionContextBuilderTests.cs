@@ -158,11 +158,11 @@ public class PluginExecutionContextBuilderTests
 
         var pluginContext = serviceProvider.GetService(iPluginExecutionContextType);
         await Assert.That(pluginContext).IsNotNull();
-        await Assert.That(iPluginExecutionContextType.IsAssignableFrom(pluginContext!.GetType())).IsTrue();
+        await Assert.That(pluginContext!.GetType().IsAssignableTo(iPluginExecutionContextType)).IsTrue();
     }
 
     [Test]
-    public async Task TestPlugin_Durchstich()
+    public Task TestPlugin_Durchstich()
     {
         var tracingServiceMock = Mock.Of<ITracingService>();
         var serviceProvider = new PluginExecutionContextBuilder((ITracingService)tracingServiceMock)
@@ -172,6 +172,7 @@ public class PluginExecutionContextBuilderTests
         plugin.Execute(serviceProvider);
 
         tracingServiceMock.Trace("TestPlugin: Execute", Arg.Any<object[]>()).WasCalled();
+        return Task.CompletedTask;
     }
 
     [Test]
@@ -257,7 +258,7 @@ public class PluginExecutionContextBuilderTests
     }
 
     [Test]
-    public async Task ExistingTargetParameter_Should_ThrowOnBuild_WhenTargetIsAlsoConfigured()
+    public Task ExistingTargetParameter_Should_ThrowOnBuild_WhenTargetIsAlsoConfigured()
     {
         Action action = () => new PluginExecutionContextBuilder()
             .WithInputParameter("Target", new Entity("contact", Guid.NewGuid()))
@@ -265,6 +266,7 @@ public class PluginExecutionContextBuilderTests
             .BuildServiceProvider();
 
         Assert.Throws<ArgumentException>(action);
+        return Task.CompletedTask;
     }
 
     [Test]

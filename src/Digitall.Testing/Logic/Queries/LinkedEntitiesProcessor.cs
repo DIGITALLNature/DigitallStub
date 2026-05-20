@@ -10,17 +10,9 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Logic.Queries;
 
-public class LinkedEntitiesProcessor
+public class LinkedEntitiesProcessor(FakeOrganizationService state, QueryProcessor queryProcessor)
 {
-        private readonly FakeOrganizationService _state;
-        private readonly QueryProcessor _queryProcessor;
         readonly Dictionary<string, int> _linkedEntities = new();
-
-        public LinkedEntitiesProcessor(FakeOrganizationService state, QueryProcessor queryProcessor)
-        {
-            _state = state;
-            _queryProcessor = queryProcessor;
-        }
 
         public IQueryable<Entity> FilterQuery(QueryExpression qe, IQueryable<Entity> query)
         {
@@ -66,16 +58,16 @@ public class LinkedEntitiesProcessor
             }
 
             var leAlias = string.IsNullOrWhiteSpace(le.EntityAlias) ? le.LinkToEntityName : le.EntityAlias;
-            _state.ThrowIfNotKnownEntityType(le.LinkFromEntityName != linkFromAlias ? le.LinkFromEntityName : linkFromEntity);
-            _state.ThrowIfNotKnownEntityType(le.LinkToEntityName);
+            state.ThrowIfNotKnownEntityType(le.LinkFromEntityName != linkFromAlias ? le.LinkFromEntityName : linkFromEntity);
+            state.ThrowIfNotKnownEntityType(le.LinkToEntityName);
 
-            if (!_state.IsKnownAttributeForType(le.LinkToEntityName, le.LinkToAttributeName, out _))
+            if (!state.IsKnownAttributeForType(le.LinkToEntityName, le.LinkToAttributeName, out _))
             {
                 var errorMsg = $"The attribute {le.LinkToAttributeName} does not exist on this entity.";
                 throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { ErrorCode = (int)ErrorCodes.QueryBuilderNoAttribute, Message = errorMsg }, errorMsg);
             }
 
-            IQueryable<Entity>? inner = null;
+            IQueryable<Entity> inner;
             if (le.JoinOperator == JoinOperator.LeftOuter)
             {
                 //filters are applied in the inner query and then ignored during filter evaluation
@@ -86,13 +78,12 @@ public class LinkedEntitiesProcessor
                     ColumnSet = new ColumnSet(true)
                 };
 
-                var outerQuery = _queryProcessor.ExecuteQueryExpression(outerQueryExpression);
-                inner = outerQuery;
+                inner = queryProcessor.ExecuteQueryExpression(outerQueryExpression);
             }
             else
             {
                 //Filters are applied after joins
-                inner = _state.CreateQuery<Entity>(le.LinkToEntityName);
+                inner = state.CreateQuery<Entity>(le.LinkToEntityName);
             }
 
             if (string.IsNullOrWhiteSpace(linkFromAlias))
@@ -119,7 +110,7 @@ public class LinkedEntitiesProcessor
                             outerKey => outerKey.KeySelector(linkFromAlias),
                             innerKey => innerKey.KeySelector(le.LinkToAttributeName),
                             (outerEl, innerElemsCol) => new { outerEl, innerElemsCol })
-                        .SelectMany(x => x.innerElemsCol.DefaultIfEmpty()!
+                        .SelectMany(x => x.innerElemsCol.DefaultIfEmpty()
                             , (x, y) => x.outerEl
                                 .JoinAttributes(y!, new ColumnSet(true), leAlias));
 

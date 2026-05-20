@@ -46,7 +46,7 @@ namespace Digitall.Testing.Extensions;
         }
     }
 
-    public enum FiscalPeriod : int
+    public enum FiscalPeriod
     {
         Annually = 2000,
         SemiAnnually = 2001,

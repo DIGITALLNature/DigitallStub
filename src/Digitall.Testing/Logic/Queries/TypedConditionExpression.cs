@@ -16,5 +16,5 @@ public class TypedConditionExpression(ConditionExpression c)
     /// <summary>
     /// True if the condition came from a left outer join, in which case should be applied only if not null
     /// </summary>
-    public bool IsOuter { get; set; }
+    public bool IsOuter { get; init; }
 }
