@@ -3,7 +3,7 @@
 
 namespace Digitall.Testing.Errors;
 
-public enum ErrorCodes : int
+public enum ErrorCodes
 {
 
     /// <summary>

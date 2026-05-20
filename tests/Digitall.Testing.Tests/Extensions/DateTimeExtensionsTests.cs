@@ -7,7 +7,7 @@ namespace Digitall.Testing.Tests.Extensions;
 
 public class DateTimeExtensionsTests
 {
-    private static readonly DateTime s_testDate = new DateTime(2024, 3, 11); // Monday
+    private static readonly DateTime s_testDate = new(2024, 3, 11); // Monday
 
     [Test]
     public async Task ToDayOfWeek_Should_ReturnCorrectDate()

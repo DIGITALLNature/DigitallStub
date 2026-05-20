@@ -52,11 +52,11 @@ public static class ConditionParser
             {
                 set.UnionWith(collection.Select(o => int.Parse((o as string)!)));
             }
-            else if (collection.Count == 1 && collection[0] is int[] iArray)
+            else if (collection is [int[] iArray])
             {
                 set.UnionWith(iArray);
             }
-            else if (collection.Count == 1 && collection[0] is string[] sArray)
+            else if (collection is [string[] sArray])
             {
                 set.UnionWith(sArray.Select(int.Parse));
             }
@@ -933,12 +933,12 @@ default:
                 return Expression.Constant(dtDateTimeConversion, typeof(DateTime));
             }
 
-            if (attributeType.IsOptionSet() && int.TryParse(value.ToString(), out var iValue))
+            if (attributeType.IsOptionSet() && int.TryParse(stringValue, out var iValue))
             {
                 return Expression.Constant(iValue, typeof(int));
             }
 
-            if ((attributeType == typeof(EntityReference) || attributeType == typeof(Guid)) && Guid.TryParse((string)value, out var id))
+            if ((attributeType == typeof(EntityReference) || attributeType == typeof(Guid)) && Guid.TryParse(stringValue, out var id))
             {
                 return Expression.Constant(id);
             }

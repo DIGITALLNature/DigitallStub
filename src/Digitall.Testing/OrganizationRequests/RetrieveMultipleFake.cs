@@ -21,7 +21,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             var queryProcessor = new QueryProcessor(state);
 
             // Initialize variables
-            QueryExpression? queryExpression;
+            QueryExpression queryExpression;
             PagingInfo? pageInfo;
             string? entityName;
             List<Entity> internalResult;
@@ -105,7 +105,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             // Handle paging
             var maxRetrieveCount = int.Parse(Environment.GetEnvironmentVariable("MaxRetrieveCount") ?? "5000");
             var pageSize = maxRetrieveCount;
-            pageInfo = queryExpression?.PageInfo;
+            pageInfo = queryExpression.PageInfo;
             var pageNumber = 1;
 
             // Calculate the start position and number of items to retrieve based on the page number and page size
@@ -142,10 +142,9 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             {
                 Results = new ParameterCollection
                                  {
-                                    { "EntityCollection", new EntityCollection(recordsToReturn) }
+                                    { "EntityCollection", new EntityCollection(recordsToReturn) { EntityName = entityName } }
                                  },
             };
-            response.EntityCollection.EntityName = entityName;
             response.EntityCollection.MoreRecords = (internalResult.Count - pageSize * pageNumber) > 0;
             response.EntityCollection.TotalRecordCount = totalRecordCount;
 
@@ -191,7 +190,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
         {
             var output = new List<Entity>();
 
-            foreach (var entity in entities.Where(entity => !output.Exists(i => i.LogicalName == entity.LogicalName && i.Attributes.SequenceEqual(entity.Attributes))))
+            foreach (var entity in entities.Where(entity => !output.Exists(i => i.LogicalName == entity.LogicalName && i.Attributes.Count == entity.Attributes.Count && i.Attributes.All(a => entity.Attributes.TryGetValue(a.Key, out var val) && Equals(a.Value, val)))))
             {
                 output.Add(entity);
             }

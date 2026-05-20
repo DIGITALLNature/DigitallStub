@@ -243,7 +243,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     ///     An entity type is considered known if it exists in the metadata or if it is an early bound type.
     /// </summary>
     /// <param name="logicalname">The logical name of the entity.</param>
-    /// <param name="EntityType">The Type of the entity if it is known, otherwise null.</param>
+    /// <param name="entityType">The Type of the entity if it is known, otherwise null.</param>
     /// <returns>True if the entity type is known, otherwise false.</returns>
     public bool EntityTypeIsKnown(string logicalname, out Type? entityType)
         => TypeResolver.EntityTypeIsKnown(logicalname, out entityType);
@@ -314,7 +314,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entityName}' With Id = {id:D} Does Not Exist");
         }
 
-        return record!.ProjectAttributes(columnSet, this).CloneEntity();
+        return record.ProjectAttributes(columnSet, this).CloneEntity();
     }
 
     public void Update(Entity entity)
@@ -334,7 +334,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entity.LogicalName}' With Id = {entity.Id:D} Does Not Exist");
         }
 
-        value![entity.Id] = entity.CloneEntity();
+        value[entity.Id] = entity.CloneEntity();
     }
 
     public void Delete(string entityName, Guid id)
@@ -354,7 +354,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entityName}' With Id = {id:D} Does Not Exist");
         }
 
-        value!.Remove(id);
+        value.Remove(id);
     }
 
     public OrganizationResponse Execute(OrganizationRequest request)
@@ -491,6 +491,6 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entityName}' With Key = {string.Join(",", keys.Keys)} Does Not Exist");
         }
 
-        return record!.ProjectAttributes(columnSet, this).CloneEntity();
+        return record.ProjectAttributes(columnSet, this).CloneEntity();
     }
 }

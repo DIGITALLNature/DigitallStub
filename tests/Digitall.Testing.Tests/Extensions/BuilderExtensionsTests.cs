@@ -17,7 +17,7 @@ public class BuilderExtensionsTests
         builder.WithTarget(target);
 
         await Assert.That(builder.Target).IsNotNull();
-        await Assert.That(builder.Target.Value).IsEqualTo(target);
+        await Assert.That(builder.Target!.Value).IsEqualTo(target);
     }
 
     [Test]

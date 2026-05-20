@@ -287,10 +287,8 @@ public class QueryProcessor
             //Sort results
             if (qe.Orders is { Count: > 0 })
             {
-                IOrderedQueryable<Entity> orderedQuery;
-
                 var order = qe.Orders[0];
-                orderedQuery = order.OrderType == OrderType.Ascending
+                var orderedQuery = order.OrderType == OrderType.Ascending
                     ? query.OrderBy(e => e.Attributes.ContainsKey(order.AttributeName) ? e[order.AttributeName] : null, new XrmOrderByAttributeComparer())
                     : query.OrderByDescending(e => e.Attributes.ContainsKey(order.AttributeName) ? e[order.AttributeName] : null, new XrmOrderByAttributeComparer());
 
