@@ -53,10 +53,10 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         set => State.Relationships = value;
     }
 
-    internal Dictionary<string, Dictionary<Guid, Entity>> ServiceState => State.Entities;
+    private Dictionary<string, Dictionary<Guid, Entity>> ServiceState => State.Entities;
 
     private EntityTypeResolver? _typeResolver;
-    internal EntityTypeResolver TypeResolver => _typeResolver ??= new EntityTypeResolver(State.ModelAssemblies, State.EntityMetadata);
+    private EntityTypeResolver TypeResolver => _typeResolver ??= new EntityTypeResolver(State.ModelAssemblies, State.EntityMetadata);
 
     /// <summary>
     /// Invalidates the type resolver cache. Call after modifying ModelAssemblies or EntityMetadata.
@@ -66,7 +66,13 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         _typeResolver = null;
     }
 
-    internal Dictionary<Type, IOrganizationRequestFake> OrganizationRequestFakes { get; } = new();
+    private Dictionary<Type, IOrganizationRequestFake> OrganizationRequestFakes { get; } = new();
+
+    /// <summary>
+    /// Checks if a record exists in the internal state without throwing.
+    /// </summary>
+    internal bool EntityExists(string logicalName, Guid id)
+        => ServiceState.TryGetValue(logicalName, out var entities) && entities.ContainsKey(id);
 
     public void AddRequest(IOrganizationRequestFake fake)
     {
