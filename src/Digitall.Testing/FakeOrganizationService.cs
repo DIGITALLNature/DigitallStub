@@ -58,6 +58,17 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     internal Dictionary<string, Dictionary<Guid, Entity>> ServiceState => State.Entities;
 
+    private EntityTypeResolver? _typeResolver;
+    internal EntityTypeResolver TypeResolver => _typeResolver ??= new EntityTypeResolver(State.ModelAssemblies, State.EntityMetadata);
+
+    /// <summary>
+    /// Invalidates the type resolver cache. Call after modifying ModelAssemblies or EntityMetadata.
+    /// </summary>
+    public void InvalidateTypeResolverCache()
+    {
+        _typeResolver = null;
+    }
+
     internal Dictionary<Type, IOrganizationRequestFake> OrganizationRequestFakes { get; } = new();
 
     public void AddRequest(IOrganizationRequestFake fake)
@@ -168,13 +179,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     public IQueryable<T> CreateQuery<T>() where T : Entity
     {
-        var typeParameter = typeof(T);
-
-        var logicalName = "";
-        if (typeParameter.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true).Length > 0)
-        {
-            logicalName = (typeParameter.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true)[0] as EntityLogicalNameAttribute).LogicalName;
-        }
+        var logicalName = typeof(T).GetCustomAttribute<EntityLogicalNameAttribute>()?.LogicalName;
 
         if (string.IsNullOrWhiteSpace(logicalName))
         {
@@ -243,74 +248,26 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     /// <param name="logicalname">The logical name of the entity.</param>
     /// <param name="EntityType">The Type of the entity if it is known, otherwise null.</param>
     /// <returns>True if the entity type is known, otherwise false.</returns>
-    public bool EntityTypeIsKnown(string logicalname, out Type EntityType)
-    {
-        foreach (var modelAssembly in ModelAssemblies)
-        {
-            var type = modelAssembly.GetTypes().Where(t => typeof(Entity).IsAssignableFrom(t)).Where(t => t.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true).Length > 0)
-                .SingleOrDefault(t => ((EntityLogicalNameAttribute)t.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true)[0]).LogicalName.Equals(logicalname.ToLower()));
-            if (type != null)
-            {
-                EntityType = type;
-                return true;
-            }
-        }
-
-        EntityType = null;
-        return false;
-    }
+    public bool EntityTypeIsKnown(string logicalname, out Type? EntityType)
+        => TypeResolver.EntityTypeIsKnown(logicalname, out EntityType);
 
     /// <summary>
     ///     Checks if the specified attribute is known for the given entity.
-    ///     An attribute is considered known if it exists in the entity's metadata or if it is a known attribute for the entity's early bound type.
     /// </summary>
-    /// <param name="entity">The logical name of the entity.</param>
-    /// <param name="attribute">The logical name of the attribute.</param>
-    /// <param name="attributeInfo">The PropertyInfo of the attribute if it is known, otherwise null.</param>
-    /// <returns>True if the attribute is known, otherwise false.</returns>
-    public bool IsKnownAttributeForType(string entity, string attribute, out PropertyInfo attributeInfo)
-    {
-        attributeInfo = null;
-        if (EntityTypeIsKnown(entity, out var entityType))
-        {
-            attributeInfo = entityType.GetProperties().Where(pi => pi.GetCustomAttributes(typeof(AttributeLogicalNameAttribute), true).Length > 0).FirstOrDefault(pi =>
-                (pi.GetCustomAttributes(typeof(AttributeLogicalNameAttribute), true)[0] as AttributeLogicalNameAttribute).LogicalName.Equals(attribute));
-        }
-
-        return attributeInfo != null;
-    }
+    public bool IsKnownAttributeForType(string entity, string attribute, out PropertyInfo? attributeInfo)
+        => TypeResolver.IsKnownAttributeForType(entity, attribute, out attributeInfo);
 
     /// <summary>
     ///     Throws an exception if the specified entity type is not known.
     /// </summary>
-    /// <param name="entityType">The entity type to check for knowledge.</param>
     public void ThrowIfNotKnownEntityType(string entityType)
-    {
-        if (!EntityTypeIsKnown(entityType, out _))
-        {
-            ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoEntity, $"The entity with a name = '{entityType}' with namemapping = 'Logical' was not found in the MetadataCache.");
-        }
-    }
+        => TypeResolver.ThrowIfNotKnownEntityType(entityType);
 
     /// <summary>
     ///     Throws an exception if the specified attribute is not known for the given entity.
-    ///     An attribute is considered known if it exists in the entity's metadata or if it is a known attribute for the entity's early bound type.
     /// </summary>
-    /// <param name="entityLogicalName">The logical name of the entity.</param>
-    /// <param name="attributeLogicalName">The logical name of the attribute.</param>
     public void ThrowIfNotKnownAttribute(string entityLogicalName, string attributeLogicalName)
-    {
-        // Check if the attribute is known for the entity
-        if (!IsKnownAttributeForType(entityLogicalName, attributeLogicalName, out _))
-        {
-            // Check if the attribute exists in the entity's metadata
-            if (!EntityMetadata.TryGetValue(entityLogicalName, out var entityMetadata) || entityMetadata.Attributes.All(a => a.LogicalName != attributeLogicalName))
-            {
-                // Throw a FaultException with a specific message
-                ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoAttribute, $"The attribute {attributeLogicalName} does not exist on this entity.");
-            }
-        }
-    }
+        => TypeResolver.ThrowIfNotKnownAttribute(entityLogicalName, attributeLogicalName);
 
     #region IOrganizationService
 

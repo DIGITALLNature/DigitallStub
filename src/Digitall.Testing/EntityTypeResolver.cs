@@ -12,10 +12,16 @@ using Microsoft.Xrm.Sdk.Metadata;
 
 namespace Digitall.Testing;
 
+/// <summary>
+/// Resolves entity types and attribute metadata from model assemblies with caching.
+/// </summary>
 public class EntityTypeResolver
 {
     private readonly List<Assembly> _modelAssemblies;
     private readonly Dictionary<string, EntityMetadata> _entityMetadata;
+
+    private Dictionary<string, Type>? _entityTypeCache;
+    private Dictionary<string, Dictionary<string, PropertyInfo>>? _attributeCache;
 
     public EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<string, EntityMetadata> entityMetadata)
     {
@@ -24,53 +30,81 @@ public class EntityTypeResolver
     }
 
     /// <summary>
-    ///     Checks if the specified entity type is known.
-    ///     An entity type is considered known if it exists in the metadata or if it is an early bound type.
+    /// Invalidates the internal caches. Call when ModelAssemblies changes.
     /// </summary>
-    /// <param name="logicalname">The logical name of the entity.</param>
-    /// <param name="EntityType">The Type of the entity if it is known, otherwise null.</param>
-    /// <returns>True if the entity type is known, otherwise false.</returns>
-    public bool EntityTypeIsKnown(string logicalname, out Type EntityType)
+    public void InvalidateCache()
     {
-        foreach (var modelAssembly in _modelAssemblies)
+        _entityTypeCache = null;
+        _attributeCache = null;
+    }
+
+    private Dictionary<string, Type> EntityTypeCache => _entityTypeCache ??= BuildEntityTypeCache();
+
+    private Dictionary<string, Dictionary<string, PropertyInfo>> AttributeCache => _attributeCache ??= BuildAttributeCache();
+
+    private Dictionary<string, Type> BuildEntityTypeCache()
+    {
+        var cache = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+        foreach (var assembly in _modelAssemblies)
         {
-            var type = modelAssembly.GetTypes().Where(t => typeof(Entity).IsAssignableFrom(t)).Where(t => t.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true).Length > 0)
-                .SingleOrDefault(t => ((EntityLogicalNameAttribute)t.GetCustomAttributes(typeof(EntityLogicalNameAttribute), true)[0]).LogicalName.Equals(logicalname.ToLower()));
-            if (type != null)
+            foreach (var type in assembly.GetTypes())
             {
-                EntityType = type;
-                return true;
+                if (!typeof(Entity).IsAssignableFrom(type))
+                    continue;
+
+                var attr = type.GetCustomAttribute<EntityLogicalNameAttribute>();
+                if (attr != null && !cache.ContainsKey(attr.LogicalName))
+                {
+                    cache[attr.LogicalName] = type;
+                }
             }
         }
+        return cache;
+    }
 
-        EntityType = null;
+    private Dictionary<string, Dictionary<string, PropertyInfo>> BuildAttributeCache()
+    {
+        var cache = new Dictionary<string, Dictionary<string, PropertyInfo>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (logicalName, type) in EntityTypeCache)
+        {
+            var props = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
+            foreach (var pi in type.GetProperties())
+            {
+                var attr = pi.GetCustomAttribute<AttributeLogicalNameAttribute>();
+                if (attr != null && !props.ContainsKey(attr.LogicalName))
+                {
+                    props[attr.LogicalName] = pi;
+                }
+            }
+            cache[logicalName] = props;
+        }
+        return cache;
+    }
+
+    /// <summary>
+    /// Checks if the specified entity type is known (early bound or in metadata).
+    /// </summary>
+    public bool EntityTypeIsKnown(string logicalName, out Type? entityType)
+    {
+        return EntityTypeCache.TryGetValue(logicalName, out entityType);
+    }
+
+    /// <summary>
+    /// Checks if the specified attribute is known for the given entity.
+    /// </summary>
+    public bool IsKnownAttributeForType(string entity, string attribute, out PropertyInfo? attributeInfo)
+    {
+        attributeInfo = null;
+        if (AttributeCache.TryGetValue(entity, out var props))
+        {
+            return props.TryGetValue(attribute, out attributeInfo);
+        }
         return false;
     }
 
     /// <summary>
-    ///     Checks if the specified attribute is known for the given entity.
-    ///     An attribute is considered known if it exists in the entity's metadata or if it is a known attribute for the entity's early bound type.
+    /// Throws an exception if the specified entity type is not known.
     /// </summary>
-    /// <param name="entity">The logical name of the entity.</param>
-    /// <param name="attribute">The logical name of the attribute.</param>
-    /// <param name="attributeInfo">The PropertyInfo of the attribute if it is known, otherwise null.</param>
-    /// <returns>True if the attribute is known, otherwise false.</returns>
-    public bool IsKnownAttributeForType(string entity, string attribute, out PropertyInfo attributeInfo)
-    {
-        attributeInfo = null;
-        if (EntityTypeIsKnown(entity, out var entityType))
-        {
-            attributeInfo = entityType.GetProperties().Where(pi => pi.GetCustomAttributes(typeof(AttributeLogicalNameAttribute), true).Length > 0).FirstOrDefault(pi =>
-                (pi.GetCustomAttributes(typeof(AttributeLogicalNameAttribute), true)[0] as AttributeLogicalNameAttribute).LogicalName.Equals(attribute));
-        }
-
-        return attributeInfo != null;
-    }
-
-    /// <summary>
-    ///     Throws an exception if the specified entity type is not known.
-    /// </summary>
-    /// <param name="entityType">The entity type to check for knowledge.</param>
     public void ThrowIfNotKnownEntityType(string entityType)
     {
         if (!EntityTypeIsKnown(entityType, out _))
@@ -80,20 +114,14 @@ public class EntityTypeResolver
     }
 
     /// <summary>
-    ///     Throws an exception if the specified attribute is not known for the given entity.
-    ///     An attribute is considered known if it exists in the entity's metadata or if it is a known attribute for the entity's early bound type.
+    /// Throws an exception if the specified attribute is not known for the given entity.
     /// </summary>
-    /// <param name="entityLogicalName">The logical name of the entity.</param>
-    /// <param name="attributeLogicalName">The logical name of the attribute.</param>
     public void ThrowIfNotKnownAttribute(string entityLogicalName, string attributeLogicalName)
     {
-        // Check if the attribute is known for the entity
         if (!IsKnownAttributeForType(entityLogicalName, attributeLogicalName, out _))
         {
-            // Check if the attribute exists in the entity's metadata
             if (!_entityMetadata.TryGetValue(entityLogicalName, out var entityMetadata) || entityMetadata.Attributes.All(a => a.LogicalName != attributeLogicalName))
             {
-                // Throw a FaultException with a specific message
                 ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoAttribute, $"The attribute {attributeLogicalName} does not exist on this entity.");
             }
         }
