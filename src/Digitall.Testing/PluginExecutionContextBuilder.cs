@@ -2,11 +2,9 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System;
-using System.Linq;
 using Digitall.Testing.Model;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.PluginTelemetry;
-using TUnit.Mocks;
 
 namespace Digitall.Testing;
 

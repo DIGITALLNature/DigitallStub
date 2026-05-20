@@ -10,32 +10,32 @@ namespace Digitall.Testing.Extensions;
     {
         extension(DateTime dateTime)
         {
-            public DateTime ToDayOfWeek(Int32 week, DayOfWeek dayOfWeek)
+            public DateTime ToDayOfWeek(int week, DayOfWeek dayOfWeek)
             {
                 DateTime startOfYear = dateTime.AddDays(1 - dateTime.DayOfYear);
                 return startOfYear.AddDays(7 * (week - 2) + ((dayOfWeek - startOfYear.DayOfWeek + 7) % 7));
             }
 
-            public DateTime ToDayOfDeltaWeek(Int32 deltaWeek, DayOfWeek dayOfWeek)
+            public DateTime ToDayOfDeltaWeek(int deltaWeek, DayOfWeek dayOfWeek)
                 => dateTime.ToDayOfWeek(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(dateTime
                     , CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule
                     , CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek) + deltaWeek, dayOfWeek);
 
-            public DateTime ToLastDayOfDeltaWeek(Int32 deltaWeek = 0)
+            public DateTime ToLastDayOfDeltaWeek(int deltaWeek = 0)
                 => dateTime.ToDayOfDeltaWeek(deltaWeek, CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek).AddDays(6);
 
-            public DateTime ToFirstDayOfDeltaWeek(Int32 deltaWeek = 0)
+            public DateTime ToFirstDayOfDeltaWeek(int deltaWeek = 0)
                 => dateTime.ToDayOfDeltaWeek(deltaWeek, CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
 
-            public DateTime ToFirstDayOfMonth(Int32 month)
+            public DateTime ToFirstDayOfMonth(int month)
                 => dateTime.AddDays(1 - dateTime.Day).AddMonths(month - dateTime.Month);
 
             public DateTime ToFirstDayOfMonth()
                 => dateTime.ToFirstDayOfMonth(dateTime.Month);
 
-            public DateTime ToLastDayOfMonth(Int32 month)
+            public DateTime ToLastDayOfMonth(int month)
             {
-                Int32 addYears = month > 12 ? month % 12 : 0;
+                var addYears = month > 12 ? month % 12 : 0;
                 month = month - 12 * addYears;
                 return dateTime
                     .AddDays(CultureInfo.CurrentCulture.Calendar.GetDaysInMonth(dateTime.Year + addYears, month) - dateTime.Day)

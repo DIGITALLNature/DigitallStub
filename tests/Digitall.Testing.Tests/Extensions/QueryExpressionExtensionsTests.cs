@@ -12,8 +12,7 @@ public class QueryExpressionExtensionsTests
     [Test]
     public async Task CloneQuery_Should_CreateDeepCopy()
     {
-        var qe = new QueryExpression("account");
-        qe.ColumnSet = new ColumnSet("name");
+        var qe = new QueryExpression("account") { ColumnSet = new ColumnSet("name") };
         qe.Criteria.AddCondition("name", ConditionOperator.Equal, "Test");
 
         var cloned = qe.CloneQuery();

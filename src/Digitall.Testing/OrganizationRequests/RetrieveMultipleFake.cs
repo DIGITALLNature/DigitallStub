@@ -24,10 +24,10 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             var queryProcessor = new QueryProcessor(state);
 
             // Initialize variables
-            QueryExpression queryExpression = null;
-            PagingInfo pageInfo = null;
-            string entityName = null;
-            List<Entity> internalResult = null;
+            QueryExpression queryExpression;
+            PagingInfo pageInfo;
+            string entityName;
+            List<Entity> internalResult;
 
             // Check if the query is a QueryExpression
             if (organizationRequest.Query is QueryExpression expression)
@@ -99,7 +99,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             }
 
             // Handle TotalRecordCount here
-            int totalRecordCount = -1;
+            var totalRecordCount = -1;
             if (queryExpression?.PageInfo?.ReturnTotalRecordCount == true)
             {
                 totalRecordCount = internalResult.Count;
@@ -109,18 +109,18 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             var maxRetrieveCount = int.Parse(Environment.GetEnvironmentVariable("MaxRetrieveCount") ?? "5000");
             var pageSize = maxRetrieveCount;
             pageInfo = queryExpression.PageInfo;
-            int pageNumber = 1;
+            var pageNumber = 1;
 
             // Calculate the start position and number of items to retrieve based on the page number and page size
-            if (pageInfo != null && pageInfo.PageNumber > 0)
+            if (pageInfo is { PageNumber: > 0 })
             {
                 pageNumber = pageInfo.PageNumber;
                 pageSize = pageInfo.Count == 0 ? maxRetrieveCount : pageInfo.Count;
             }
 
             // Figure out where in the list we need to start and how many items we need to grab
-            int numberToGet = pageSize;
-            int startPosition = 0;
+            var numberToGet = pageSize;
+            var startPosition = 0;
 
             if (pageNumber != 1)
             {
@@ -139,14 +139,14 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             var recordsToReturn = startPosition + numberToGet > internalResult.Count ? new List<Entity>() : internalResult.GetRange(startPosition, numberToGet);
 
              recordsToReturn.ForEach(e => PatchDateFormat(e,state));
-             recordsToReturn.ForEach(e => FillFormattedValues(e));
+             recordsToReturn.ForEach(FillFormattedValues);
 
             var response = new RetrieveMultipleResponse
             {
                 Results = new ParameterCollection
                                  {
                                     { "EntityCollection", new EntityCollection(recordsToReturn) }
-                                 }
+                                 },
             };
             response.EntityCollection.EntityName = entityName;
             response.EntityCollection.MoreRecords = (internalResult.Count - pageSize * pageNumber) > 0;

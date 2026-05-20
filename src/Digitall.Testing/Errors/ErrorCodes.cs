@@ -34,7 +34,7 @@ public enum ErrorCodes : int
     /// <summary>
     /// Invalid alias for aggregate operation.
     /// </summary>
-    QueryBuilderInvalid_Alias = -2147217143,
+    QueryBuilderInvalidAlias = -2147217143,
 
     /// <summary>
     /// The operator is not valid or it is not supported.

@@ -64,7 +64,7 @@ public class LinkedEntitiesProcessor
                 {
                     var errorMsg =
                         $"Invalid character specified for alias: {le.EntityAlias}. Only characters within the ranges [A-Z], [a-z] or [0-9] or _ are allowed.  The first character may only be in the ranges [A-Z], [a-z] or _.";
-                    throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { ErrorCode = (int)ErrorCodes.QueryBuilderInvalid_Alias, Message = errorMsg }, errorMsg);
+                    throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault { ErrorCode = (int)ErrorCodes.QueryBuilderInvalidAlias, Message = errorMsg }, errorMsg);
                 }
             }
 

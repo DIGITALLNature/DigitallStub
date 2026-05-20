@@ -17,9 +17,7 @@ public class SetStateFake : OrganizationRequestFake<SetStateRequest, SetStateRes
         var entityName = organizationRequest.EntityMoniker.LogicalName;
         var entityId = organizationRequest.EntityMoniker.Id;
 
-        var entityToUpdate = new Entity(entityName) { Id = entityId };
-        entityToUpdate["statecode"] = organizationRequest.State;
-        entityToUpdate["statuscode"] = organizationRequest.Status;
+        var entityToUpdate = new Entity(entityName) { Id = entityId, ["statecode"] = organizationRequest.State, ["statuscode"] = organizationRequest.Status };
         
         state.Update(entityToUpdate);
 

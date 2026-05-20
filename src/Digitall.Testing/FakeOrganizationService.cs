@@ -238,7 +238,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     private RelationshipMetadataBase? GetRelationship(string relationshipSchemaName)
     {
-        return Relationships.TryGetValue(relationshipSchemaName, out var value) ? value : null;
+        return Relationships.GetValueOrDefault(relationshipSchemaName);
     }
 
     // <summary>
@@ -248,8 +248,8 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     /// <param name="logicalname">The logical name of the entity.</param>
     /// <param name="EntityType">The Type of the entity if it is known, otherwise null.</param>
     /// <returns>True if the entity type is known, otherwise false.</returns>
-    public bool EntityTypeIsKnown(string logicalname, out Type? EntityType)
-        => TypeResolver.EntityTypeIsKnown(logicalname, out EntityType);
+    public bool EntityTypeIsKnown(string logicalname, out Type? entityType)
+        => TypeResolver.EntityTypeIsKnown(logicalname, out entityType);
 
     /// <summary>
     ///     Checks if the specified attribute is known for the given entity.
@@ -298,7 +298,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         }
         catch (ArgumentException)
         {
-            ErrorFactory.ThrowFault(ErrorCodes.DuplicateRecord, $"Cannot insert duplicate key.");
+            ErrorFactory.ThrowFault(ErrorCodes.DuplicateRecord, "Cannot insert duplicate key.");
         }
 
         return clone.Id;
@@ -386,11 +386,11 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         {
             if (relationshipMetadata is ManyToManyRelationshipMetadata manyToManyRelationshipMetadata)
             {
-                var isFrom1to2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
-                var fromAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
-                var toAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
-                var fromEntityName = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1LogicalName : manyToManyRelationshipMetadata.Entity2LogicalName;
-                var toEntityName = isFrom1to2 ? manyToManyRelationshipMetadata.Entity2LogicalName : manyToManyRelationshipMetadata.Entity1LogicalName;
+                var isFrom1To2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
+                var fromAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
+                var toAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
+                var fromEntityName = isFrom1To2 ? manyToManyRelationshipMetadata.Entity1LogicalName : manyToManyRelationshipMetadata.Entity2LogicalName;
+                var toEntityName = isFrom1To2 ? manyToManyRelationshipMetadata.Entity2LogicalName : manyToManyRelationshipMetadata.Entity1LogicalName;
 
                 //Check records exist
                 var targetExists = CreateQuery(fromEntityName).FirstOrDefault(e => e.Id == entityId) != null;
@@ -449,9 +449,9 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         {
             if (relationshipMetadata is ManyToManyRelationshipMetadata manyToManyRelationshipMetadata)
             {
-                var isFrom1to2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
-                var fromAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
-                var toAttribute = isFrom1to2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
+                var isFrom1To2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
+                var fromAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
+                var toAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
 
                 var query = new QueryExpression(manyToManyRelationshipMetadata.IntersectEntityName) { ColumnSet = new ColumnSet(true), Criteria = new FilterExpression(LogicalOperator.And) };
 

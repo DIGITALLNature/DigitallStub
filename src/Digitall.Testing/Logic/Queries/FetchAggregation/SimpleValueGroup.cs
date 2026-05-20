@@ -10,9 +10,9 @@ class SimpleValueGroup : FetchGrouping
 {
     public override IComparable FindGroupValue(object attributeValue)
     {
-        if (attributeValue is EntityReference)
+        if (attributeValue is EntityReference entityRef)
         {
-            return new ComparableEntityReference(attributeValue as EntityReference) as IComparable;
+            return new ComparableEntityReference(entityRef) as IComparable;
         }
         else
         {

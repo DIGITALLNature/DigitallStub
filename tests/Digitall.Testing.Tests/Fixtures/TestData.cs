@@ -19,7 +19,7 @@ public static class TestData
     {
         get
         {
-            var CorpA = new Account(Guid.Parse("00000000-0000-0000-0001-000000000001"))
+            var corpA = new Account(Guid.Parse("00000000-0000-0000-0001-000000000001"))
             {
                 Name = "A Corp",
                 Telephone1 = "1",
@@ -30,51 +30,51 @@ public static class TestData
                 AccountId = Guid.Parse("00000000-0000-0000-0001-000000000001"),
                 OverriddenCreatedOn = new DateTime(1999, 12, 31),
                 AccountCategoryCode = new OptionSetValue(Account.Options.AccountCategoryCode.PreferredCustomer),
-                AccountCategoryCodeMultiple = new OptionSetValueCollection
-                {
+                AccountCategoryCodeMultiple =
+                [
                     new OptionSetValue(1),
                     new OptionSetValue(2),
                     new OptionSetValue(3)
-                },
+                ],
                 OwnerId = new EntityReference("systemuser", UserId),
                 OwningBusinessUnit = new EntityReference("businessunit", BusinessUnitId),
             };
-            var CorpB = new Account(Guid.Parse("00000000-0000-0000-0001-000000000002"))
+            var corpB = new Account(Guid.Parse("00000000-0000-0000-0001-000000000002"))
             {
                 Name = "B Corp",
-                ParentAccountId = CorpA.ToNamedEntityReference(),
+                ParentAccountId = corpA.ToNamedEntityReference(),
                 OverriddenCreatedOn = new DateTime(2000,1,2),
                 MarketCap = new Money(321),
-                AccountCategoryCodeMultiple = new OptionSetValueCollection
-                {
+                AccountCategoryCodeMultiple =
+                [
                     new OptionSetValue(3),
                     new OptionSetValue(4),
                     new OptionSetValue(5)
-                },
+                ],
             };
 
 
-            var ConA = new Contact(Guid.Parse("00000000-0000-0000-0002-000000000001"))
+            var conA = new Contact(Guid.Parse("00000000-0000-0000-0002-000000000001"))
             {
                 FirstName = "John A",
                 LastName = " Doe A"
             };
 
-            var ConB = new Contact(Guid.Parse("00000000-0000-0000-0002-000000000002"))
+            var conB = new Contact(Guid.Parse("00000000-0000-0000-0002-000000000002"))
             {
-                ParentCustomerId = CorpB.ToNamedEntityReference(),
+                ParentCustomerId = corpB.ToNamedEntityReference(),
                 FirstName = "John B",
                 LastName = " Doe B (Corp B)"
             };
 
-            var ConC = new Contact(Guid.Parse("00000000-0000-0000-0002-000000000003"))
+            var conC = new Contact(Guid.Parse("00000000-0000-0000-0002-000000000003"))
             {
-                ParentCustomerId = CorpB.ToNamedEntityReference(),
+                ParentCustomerId = corpB.ToNamedEntityReference(),
                 FirstName = "John C",
                 LastName = " Doe C (Corp B)"
             };
 
-            return new List<Entity>{ CorpA, CorpB, ConA, ConB, ConC };
+            return new List<Entity>{ corpA, corpB, conA, conB, conC };
         }
     }
 }

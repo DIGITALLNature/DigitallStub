@@ -56,9 +56,7 @@ internal class FetchProcessor(FakeOrganizationService state)
     {
         if (t == typeof(int) || t == typeof(int?) || t.IsOptionSet() || t.IsOptionSetValueCollection())
         {
-            var intValue = 0;
-
-            if (int.TryParse(value, out intValue))
+            if (int.TryParse(value, out var intValue))
             {
                 if (t.IsOptionSet())
                 {
@@ -434,13 +432,12 @@ internal class FetchProcessor(FakeOrganizationService state)
         }
 
         //Process values
-        object[] values = null;
 
 
         var entityName = GetAssociatedEntityNameForConditionExpression(elem);
 
         //Find values inside the condition expression, if apply
-        values = elem
+        var values = elem
             .Elements() //child nodes of this filter
             .Where(el => el.Name.LocalName.Equals("value"))
             .Select(el => GetConditionExpressionValueCast(el.Value, entityName, attributeName, op))
@@ -480,18 +477,19 @@ internal class FetchProcessor(FakeOrganizationService state)
             .Elements() //entity
             .Elements() //child nodes of entity
             .Where(el => el.Name.LocalName.Equals("link-entity", StringComparison.Ordinal))
-            .Select(el => ExtractLinkLinkEntity(el))
+            .Select(ExtractLinkLinkEntity)
             .ToList();
 
     public LinkEntity ExtractLinkLinkEntity(XElement el)
     {
         //Create this node
-        var linkEntity = new LinkEntity();
-
-        linkEntity.LinkFromEntityName = el.Parent.GetAttribute("name").Value;
-        linkEntity.LinkFromAttributeName = el.GetAttribute("to").Value;
-        linkEntity.LinkToAttributeName = el.GetAttribute("from").Value;
-        linkEntity.LinkToEntityName = el.GetAttribute("name").Value;
+        var linkEntity = new LinkEntity
+        {
+            LinkFromEntityName = el.Parent.GetAttribute("name").Value,
+            LinkFromAttributeName = el.GetAttribute("to").Value,
+            LinkToAttributeName = el.GetAttribute("from").Value,
+            LinkToEntityName = el.GetAttribute("name").Value,
+        };
 
         if (el.GetAttribute("alias") != null)
         {
@@ -565,14 +563,13 @@ internal class FetchProcessor(FakeOrganizationService state)
             }
             catch (Exception e)
             {
-                throw new Exception(string.Format("When trying to parse value for entity {0} and attribute {1}: {2}", entityName, sAttributeName, e.Message));
+                throw new Exception($"When trying to parse value for entity {entityName} and attribute {sAttributeName}: {e.Message}");
             }
         }
 
 
         //Try parsing a guid
-        var gOut = Guid.Empty;
-        if (Guid.TryParse(value, out gOut))
+        if (Guid.TryParse(value, out var gOut))
         {
             return gOut;
         }
