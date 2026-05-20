@@ -1,3 +1,23 @@
+# [1.0.0-beta.14](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.13...v1.0.0-beta.14) (2026-05-20)
+
+
+### Bug Fixes
+
+* resolve nullable reference type and code quality warnings ([a70cda2](https://github.com/DIGITALLNature/DigitallTesting/commit/a70cda2dfa012f62ff4ad05784cf08dc23697821))
+* resolve Qodana style warnings ([910bda7](https://github.com/DIGITALLNature/DigitallTesting/commit/910bda7ae43d150d589896f0a683f1c559ed1262))
+* resolve remaining mechanical Qodana warnings (Phase 4) ([251764a](https://github.com/DIGITALLNature/DigitallTesting/commit/251764aebb003edd36e14a372c515de0852697f9))
+* resolve remaining Qodana warnings (Phase 3) ([aacec43](https://github.com/DIGITALLNature/DigitallTesting/commit/aacec4347c84539ddadddcab7fca0a40fb28cad6))
+
+
+### Features
+
+* migrate to TUnit + TUnit.Mocks + TUnit.Assertions ([942b90e](https://github.com/DIGITALLNature/DigitallTesting/commit/942b90e92e301061ccd5f23681788884b5b3a3be))
+
+
+### Performance Improvements
+
+* cache reflection lookups in EntityTypeResolver ([7d3ab89](https://github.com/DIGITALLNature/DigitallTesting/commit/7d3ab8976c8ee838bd8a9666a74b556df13c3e2a))
+
 # [1.0.0-beta.13](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.12...v1.0.0-beta.13) (2026-04-29)
 
 
