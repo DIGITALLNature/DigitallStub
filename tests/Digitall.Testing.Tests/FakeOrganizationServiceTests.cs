@@ -29,15 +29,13 @@ public class FakeOrganizationServiceTests
     public async Task ModelIsSeeded()
     {
         var sut = new FakeOrganizationService();
-        await Assert.That(sut.ServiceState).IsNotNull();
-        await Assert.That(sut.ServiceState).IsEmpty();
 
         sut.AddRange(TestData.Default);
-        await Assert.That(sut.ServiceState).IsNotEmpty();
-        await Assert.That(sut.ServiceState.ContainsKey(Account.EntityLogicalName)).IsTrue();
-        await Assert.That(sut.ServiceState.ContainsKey(Contact.EntityLogicalName)).IsTrue();
-        await Assert.That(sut.ServiceState[Account.EntityLogicalName]).Count().IsEqualTo(2);
-        await Assert.That(sut.ServiceState[Contact.EntityLogicalName]).Count().IsEqualTo(3);
+
+        var accounts = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true) });
+        var contacts = sut.RetrieveMultiple(new QueryExpression(Contact.EntityLogicalName) { ColumnSet = new ColumnSet(true) });
+        await Assert.That(accounts.Entities).Count().IsEqualTo(2);
+        await Assert.That(contacts.Entities).Count().IsEqualTo(3);
     }
 
     [Test]
@@ -139,9 +137,21 @@ public class FakeOrganizationServiceTests
         var result = sut.Create(entity);
 
         await Assert.That(result).IsNotEqualTo(Guid.Empty);
-        await Assert.That(sut.ServiceState.ContainsKey(Account.EntityLogicalName)).IsTrue();
-        await Assert.That(sut.ServiceState[Account.EntityLogicalName].ContainsKey(result)).IsTrue();
-        await Assert.That(sut.ServiceState[Account.EntityLogicalName][result]).IsNotSameReferenceAs(entity);
+        var retrieved = sut.Retrieve(Account.EntityLogicalName, result, new ColumnSet(true));
+        await Assert.That(retrieved).IsNotNull();
+    }
+
+    [Test]
+    public async Task Create_ClonesInput_MutatingOriginalDoesNotAffectStore()
+    {
+        var sut = new FakeOrganizationService();
+        var entity = new Account { Name = "Original" };
+
+        var id = sut.Create(entity);
+        entity.Name = "Mutated";
+
+        var retrieved = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(retrieved.ToEntity<Account>().Name).IsEqualTo("Original");
     }
 
     [Test]
@@ -154,8 +164,8 @@ public class FakeOrganizationServiceTests
         var result = sut.Create(entity);
 
         await Assert.That(result).IsEqualTo(id);
-        await Assert.That(sut.ServiceState.ContainsKey(Account.EntityLogicalName)).IsTrue();
-        await Assert.That(sut.ServiceState[Account.EntityLogicalName].ContainsKey(id)).IsTrue();
+        var retrieved = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(retrieved).IsNotNull();
     }
 
     [Test]
@@ -263,19 +273,48 @@ public class FakeOrganizationServiceTests
     }
 
     [Test]
-    public async Task Update_UpdatesEntityInStateDictionary()
+    public async Task Update_UpdatesEntity()
     {
         var sut = new FakeOrganizationService();
         var id = Guid.NewGuid();
-        var entity = new Account(id) { Name = nameof(Update_UpdatesEntityInStateDictionary) };
+        var entity = new Account(id) { Name = nameof(Update_UpdatesEntity) };
         sut.Add(entity);
 
-        var updatedEntity = new Account(id) { Name = nameof(Update_UpdatesEntityInStateDictionary), Description = "Changed"};
+        var updatedEntity = new Account(id) { Name = nameof(Update_UpdatesEntity), Description = "Changed"};
         sut.Update(updatedEntity);
 
-        await Assert.That(sut.ServiceState[Account.EntityLogicalName].ContainsKey(id)).IsTrue();
-        await Assert.That(sut.ServiceState[Account.EntityLogicalName][id].ToEntity<Account>().Description).IsEquivalentTo(updatedEntity.Description);
-        await Assert.That(sut.ServiceState[Account.EntityLogicalName][id]).IsNotSameReferenceAs(updatedEntity);
+        var retrieved = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(retrieved.ToEntity<Account>().Description).IsEquivalentTo("Changed");
+    }
+
+    [Test]
+    public async Task Update_ClonesInput_MutatingOriginalDoesNotAffectStore()
+    {
+        var sut = new FakeOrganizationService();
+        var id = Guid.NewGuid();
+        sut.Add(new Account(id) { Name = "Initial" });
+
+        var updatedEntity = new Account(id) { Description = "Updated" };
+        sut.Update(updatedEntity);
+        updatedEntity.Description = "Tampered";
+
+        var retrieved = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(retrieved.ToEntity<Account>().Description).IsEquivalentTo("Updated");
+    }
+
+    [Test]
+    public async Task Retrieve_ReturnsClone_MutatingResultDoesNotAffectStore()
+    {
+        var sut = new FakeOrganizationService();
+        var id = Guid.NewGuid();
+        sut.Add(new Account(id) { Name = "Immutable" });
+
+        var r1 = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        r1["name"] = "Tampered";
+
+        var r2 = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(r2.ToEntity<Account>().Name).IsEqualTo("Immutable");
+        await Assert.That(r1).IsNotSameReferenceAs(r2);
     }
 
     [Test]
@@ -286,7 +325,9 @@ public class FakeOrganizationServiceTests
         sut.Add(new Account(id) { Name = nameof(Delete_WithValidEntityNameAndId_RemovesRecord) });
         sut.Delete(Account.EntityLogicalName, id);
 
-        await Assert.That(sut.ServiceState[Account.EntityLogicalName].ContainsKey(id)).IsFalse();
+        void Action() => sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(Action);
+        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.ObjectDoesNotExist);
     }
 
     [Test]
