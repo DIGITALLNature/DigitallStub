@@ -5,7 +5,7 @@ using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
-abstract class FetchGrouping
+internal abstract class FetchGrouping
 {
     public required string Attribute { get; init; }
     public required string OutputAlias { get; init; }

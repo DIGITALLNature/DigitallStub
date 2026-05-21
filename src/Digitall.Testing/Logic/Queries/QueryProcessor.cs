@@ -12,9 +12,9 @@ namespace Digitall.Testing.Logic.Queries;
 public class QueryProcessor
 {
         private readonly FakeOrganizationService _state;
-        readonly LinkedEntitiesProcessor _linkedEntitiesProcessor;
-        readonly ExpressionProcessor _expressionProcessor;
-        readonly FetchProcessor _fetchProcessor;
+        private readonly LinkedEntitiesProcessor _linkedEntitiesProcessor;
+        private readonly ExpressionProcessor _expressionProcessor;
+        private readonly FetchProcessor _fetchProcessor;
 
         public QueryProcessor(FakeOrganizationService state)
         {
@@ -43,12 +43,12 @@ public class QueryProcessor
         public QueryExpression ConvertXmlDocumentToQueryExpression(XDocument xmlDocument)
         {
             ArgumentNullException.ThrowIfNull(xmlDocument);
-            _fetchProcessor.ValidateXmlDocument(xmlDocument);
+            FetchProcessor.ValidateXmlDocument(xmlDocument);
 
             var entityNode = RetrieveFetchXmlNode(xmlDocument, "entity");
             var query = new QueryExpression(entityNode?.GetAttribute("name")?.Value)
             {
-                ColumnSet = xmlDocument.ToColumnSet(),
+                ColumnSet = xmlDocument.ToColumnSet()
             };
 
             // Ordering is done after grouping/aggregation
@@ -80,7 +80,7 @@ public class QueryProcessor
             return query;
         }
 
-        public List<Entity> ProcessAggregateFetchXml(XDocument xmlDoc, List<Entity> internalResult)
+        public static List<Entity> ProcessAggregateFetchXml(XDocument xmlDoc, List<Entity> internalResult)
         {
            // Validate that <all-attributes> is not present,
             // that all attributes have groupby or aggregate, and an alias,
@@ -206,7 +206,7 @@ public class QueryProcessor
             }
             else
             {
-                aggregateResult = new List<Entity>();
+                aggregateResult = [];
                 var ent = ProcessAggregatesForSingleGroup(entityName, internalResult, aggregates);
                 aggregateResult.Add(ent);
             }

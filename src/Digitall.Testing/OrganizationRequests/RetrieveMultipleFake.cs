@@ -73,7 +73,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
 
                 if (xmlDoc.IsAggregateFetchXml())
                 {
-                    internalResult = queryProcessor.ProcessAggregateFetchXml(xmlDoc, internalResult);
+                    internalResult = QueryProcessor.ProcessAggregateFetchXml(xmlDoc, internalResult);
                 }
             }
             else
@@ -129,10 +129,10 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             }
             else if (internalResult.Count - pageSize * (pageNumber - 1) < pageSize)
             {
-                numberToGet = internalResult.Count - (pageSize * (pageNumber - 1));
+                numberToGet = internalResult.Count - pageSize * (pageNumber - 1);
             }
 
-            var recordsToReturn = startPosition + numberToGet > internalResult.Count ? new List<Entity>() : internalResult.GetRange(startPosition, numberToGet);
+            var recordsToReturn = startPosition + numberToGet > internalResult.Count ? [] : internalResult.GetRange(startPosition, numberToGet);
 
              recordsToReturn.ForEach(e => PatchDateFormat(e, state));
              recordsToReturn.ForEach(FillFormattedValues);
@@ -144,11 +144,11 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
                                     { "EntityCollection", new EntityCollection(recordsToReturn)
                                         {
                                             EntityName = entityName,
-                                            MoreRecords = (internalResult.Count - pageSize * pageNumber) > 0,
+                                            MoreRecords = internalResult.Count - pageSize * pageNumber > 0,
                                             TotalRecordCount = totalRecordCount
                                         }
                                     }
-                                 },
+                                 }
             };
 
             if (response.EntityCollection.MoreRecords)
@@ -169,7 +169,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
         /// <param name="fetchXml">The FetchXML string to parse.</param>
         /// <returns>An XDocument object representing the parsed FetchXML.</returns>
         /// <exception cref="Exception">Thrown when the input string is not a valid XML document.</exception>
-        private XDocument ParseXml(string fetchXml)
+        private static XDocument ParseXml(string fetchXml)
         {
             try
             {
@@ -216,7 +216,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             }
         }
 
-        private void FillFormattedValues(Entity record)
+        private static void FillFormattedValues(Entity record)
         {
             // Iterate through attributes and retrieve formatted values based on type
             foreach (var attributeName in record.Attributes.Keys)
@@ -232,7 +232,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             }
         }
 
-        private bool TryGetFormattedValueForValue(object value, out string formattedValue)
+        private static bool TryGetFormattedValueForValue(object value, out string formattedValue)
         {
             var result = false;
             formattedValue = string.Empty;

@@ -485,7 +485,7 @@ internal class FetchProcessor(FakeOrganizationService state)
             LinkFromEntityName = el.Parent!.GetAttribute("name")!.Value,
             LinkFromAttributeName = el.GetAttribute("to")!.Value,
             LinkToAttributeName = el.GetAttribute("from")!.Value,
-            LinkToEntityName = el.GetAttribute("name")!.Value,
+            LinkToEntityName = el.GetAttribute("name")!.Value
         };
 
         if (el.GetAttribute("alias") != null)
@@ -530,7 +530,7 @@ internal class FetchProcessor(FakeOrganizationService state)
         return linkEntity;
     }
 
-    public void ValidateXmlDocument(XDocument xmlDocument)
+    public static void ValidateXmlDocument(XDocument xmlDocument)
     {
         //Validate nodes
         if (!xmlDocument.Descendants().All(el => el.IsFetchXmlNodeValid()))

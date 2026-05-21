@@ -5,7 +5,7 @@ using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
-class SimpleValueGroup : FetchGrouping
+internal class SimpleValueGroup : FetchGrouping
 {
     protected override IComparable? FindGroupValue(object? attributeValue)
     {

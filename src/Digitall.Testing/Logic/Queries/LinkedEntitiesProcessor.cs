@@ -12,7 +12,7 @@ namespace Digitall.Testing.Logic.Queries;
 
 public partial class LinkedEntitiesProcessor(FakeOrganizationService state, QueryProcessor queryProcessor)
 {
-        readonly Dictionary<string, int> _linkedEntities = new();
+    private readonly Dictionary<string, int> _linkedEntities = new();
 
         public IQueryable<Entity> FilterQuery(QueryExpression qe, IQueryable<Entity> query)
         {
@@ -139,7 +139,7 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
             return query;
         }
 
-        [GeneratedRegex("^[A-Za-z_](\\w|\\.)*$", RegexOptions.ECMAScript)]
+        [GeneratedRegex(@"^[A-Za-z_](\w|\.)*$", RegexOptions.ECMAScript)]
         private static partial Regex EntityAliasRegex();
 
     }

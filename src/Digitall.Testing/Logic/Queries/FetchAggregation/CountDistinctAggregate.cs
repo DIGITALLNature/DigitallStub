@@ -4,7 +4,7 @@
 
 namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
-class CountDistinctAggregate : AliasedAggregate
+internal class CountDistinctAggregate : AliasedAggregate
 {
     protected override object AggregateAliasedValues(IEnumerable<object?> values)
     {
