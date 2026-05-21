@@ -28,12 +28,14 @@ public class PluginExecutionContextBuilder
         Logger = logger;
     }
 
+    // ReSharper disable once UnusedMember.Global : Public API
     public PluginExecutionContextBuilder(ITracingService tracingService, ILogger logger)
     {
         TracingService = tracingService;
         Logger = logger;
     }
 
+    // ReSharper disable once UnusedMember.Global : Public API
     public PluginExecutionContextBuilder(IOrganizationService organizationService, ITracingService tracingService, ILogger logger)
     {
         OrganizationService = organizationService;
@@ -52,13 +54,14 @@ public class PluginExecutionContextBuilder
     public ParameterCollection SharedVariables { get; set; } = [];
     public Guid InitiatingUserId { get; set; }
 
-    public Guid UserId
+    public static Guid UserId
     {
         get
         {
             Guid.TryParse(Environment.GetEnvironmentVariable("UserId"), out var userId);
             return userId;
         }
+        // ReSharper disable once UnusedMember.Global : Public API
         set { Environment.SetEnvironmentVariable("UserId", value.ToString()); }
     }
 

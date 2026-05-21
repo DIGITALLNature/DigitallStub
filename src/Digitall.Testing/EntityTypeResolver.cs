@@ -20,6 +20,7 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
     /// <summary>
     /// Invalidates the internal caches. Call when ModelAssemblies changes.
     /// </summary>
+    // ReSharper disable once UnusedMember.Global : Public API
     public void InvalidateCache()
     {
         _entityTypeCache = null;

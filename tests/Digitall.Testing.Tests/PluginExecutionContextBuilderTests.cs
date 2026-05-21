@@ -272,10 +272,9 @@ public class PluginExecutionContextBuilderTests
     [Test]
     public async Task Mode_Should_BeSettableAfterConstruction()
     {
-        var builder = new PluginExecutionContextBuilder
-        {
-            Mode = 1
-        };
+        // ReSharper disable once UseObjectOrCollectionInitializer : Testing non-initializer syntax
+        var builder = new PluginExecutionContextBuilder();
+        builder.Mode = 1;
 
         var serviceProvider = builder.BuildServiceProvider();
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
@@ -287,10 +286,9 @@ public class PluginExecutionContextBuilderTests
     [Test]
     public async Task Stage_Should_BeSettableAfterConstruction()
     {
-        var builder = new PluginExecutionContextBuilder
-        {
-            Stage = 40
-        };
+        // ReSharper disable once UseObjectOrCollectionInitializer : Testing non-initializer syntax
+        var builder = new PluginExecutionContextBuilder();
+        builder.Stage = 40;
 
         var serviceProvider = builder.BuildServiceProvider();
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
