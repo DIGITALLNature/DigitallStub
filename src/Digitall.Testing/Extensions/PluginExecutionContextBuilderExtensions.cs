@@ -99,5 +99,23 @@ public static class PluginExecutionContextBuilderExtensions
             builder.MessageName = messageName;
             return builder;
         }
+
+        public TPluginExecutionContextBuilder WithTenantId(Guid tenantId)
+        {
+            builder.TenantId = tenantId;
+            return builder;
+        }
+
+        public TPluginExecutionContextBuilder WithDepth(int depth)
+        {
+            builder.Depth = depth;
+            return builder;
+        }
+
+        public TPluginExecutionContextBuilder WithTracingService(ITracingService tracingService)
+        {
+            builder.TracingService = tracingService;
+            return builder;
+        }
     }
 }
