@@ -1,8 +1,8 @@
-# Digitall.Testing
+# Digitall.Dataverse.Testing
 
-[![NuGet](https://img.shields.io/nuget/v/Digitall.Testing)](https://www.nuget.org/packages/Digitall.Testing)
+[![NuGet](https://img.shields.io/nuget/v/Digitall.Dataverse.Testing)](https://www.nuget.org/packages/Digitall.Dataverse.Testing)
 [![Build](https://github.com/DIGITALLNature/DigitallTesting/actions/workflows/build.yml/badge.svg)](https://github.com/DIGITALLNature/DigitallTesting/actions/workflows/build.yml)
-[![License: MS-PL](https://img.shields.io/badge/License-MS--PL-blue.svg)](Licence.md)
+[![License: MS-RL](https://img.shields.io/badge/License-MS--RL-blue.svg)](LICENSE.md)
 
 A comprehensive, in-memory testing framework for **Microsoft Dataverse** / Power Platform. It provides a lightweight `IOrganizationService` (and `IOrganizationServiceAsync2`) implementation that enables fast, deterministic unit tests **without any connection to a live Dataverse environment**.
 
@@ -72,13 +72,13 @@ A comprehensive, in-memory testing framework for **Microsoft Dataverse** / Power
 Install from NuGet:
 
 ```bash
-dotnet add package Digitall.Testing
+dotnet add package Digitall.Dataverse.Testing
 ```
 
 Or add to your `.csproj`:
 
 ```xml
-<PackageReference Include="Digitall.Testing" Version="1.0.0-beta.*" />
+<PackageReference Include="Digitall.Dataverse.Testing" Version="1.0.0-beta.*" />
 ```
 
 ---
@@ -90,7 +90,7 @@ Or add to your `.csproj`:
 ```csharp
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
-using Digitall.Testing;
+using Digitall.Dataverse.Testing;
 
 public class AccountTests
 {
@@ -560,7 +560,7 @@ Configure via the builder:
 
 ```csharp
 var service = new FakeDataverseBuilder()
-    .AddConfig("MaxRetrieveCount", "MaxRetrieveCount", "1000")
+    .AddConfig("MaxRetrieveCount", "5000", "1000")
     .GetOrganizationService();
 ```
 
@@ -570,45 +570,49 @@ var service = new FakeDataverseBuilder()
 
 ```
 DigitallTesting/
-├── src/Digitall.Testing/                    # Core library (NuGet package)
-│   ├── FakeOrganizationService.cs           # IOrganizationService implementation
-│   ├── FakeOrganizationServiceAsync.cs      # IOrganizationServiceAsync2 implementation
-│   ├── FakeOrganizationServiceState.cs      # Internal entity store
-│   ├── FakeDataverseBuilder.cs              # Fluent builder for service setup
-│   ├── FakePluginContextBuilder.cs          # Combined plugin + service builder
-│   ├── PluginExecutionContextBuilder.cs     # Plugin context configuration
-│   ├── EntityTypeResolver.cs                # Early-bound type discovery & caching
-│   ├── MetadataService.cs                   # Metadata cache management
-│   ├── RequestFakeRegistry.cs               # Request handler registry
-│   ├── SpyOrganizationRequestFake.cs        # Generic spy for request verification
-│   ├── Extensions/                          # Extension methods
-│   │   ├── EntityExtensions.cs              # Entity cloning, projection, joins
-│   │   ├── FakeDataverseBuilderExtensions.cs # Builder fluent API
+├── src/Digitall.Dataverse.Testing/             # Core library (NuGet package)
+│   ├── FakeOrganizationService.cs              # IOrganizationService implementation
+│   ├── FakeOrganizationServiceAsync.cs         # IOrganizationServiceAsync2 implementation
+│   ├── FakeOrganizationServiceState.cs         # Internal entity store
+│   ├── FakeDataverseBuilder.cs                 # Fluent builder for service setup
+│   ├── FakePluginContextBuilder.cs             # Combined plugin + service builder
+│   ├── IFakeDataverseBuilder.cs                # Builder interface
+│   ├── PluginExecutionContextBuilder.cs        # Plugin context configuration
+│   ├── EntityTypeResolver.cs                   # Early-bound type discovery & caching
+│   ├── SpyOrganizationRequestFake.cs           # Generic spy for request verification
+│   ├── Extensions/                             # Extension methods
+│   │   ├── EntityExtensions.cs                 # Entity cloning, projection, joins
+│   │   ├── FakeDataverseBuilderExtensions.cs   # Builder fluent API
+│   │   ├── FakeOrganizationServiceStateExtensions.cs # State helper extensions
 │   │   ├── PluginExecutionContextBuilderExtensions.cs
-│   │   ├── QueryExpressionExtensions.cs     # Query helpers
-│   │   ├── DateTimeExtensions.cs            # Fiscal year/date utilities
-│   │   ├── DeepCloneExtensions.cs           # FastCloner integration
-│   │   ├── TypeExtensions.cs                # Reflection helpers
-│   │   └── XDocumentExtensions.cs           # FetchXml parsing
-│   ├── Logic/                               # Query processing engine
+│   │   ├── QueryExpressionExtensions.cs        # Query helpers
+│   │   ├── DateTimeExtensions.cs               # Fiscal year/date utilities
+│   │   ├── DeepCloneExtensions.cs              # FastCloner integration
+│   │   ├── TypeExtensions.cs                   # Reflection helpers
+│   │   └── XDocumentExtensions.cs              # FetchXml parsing
+│   ├── Logic/                                  # Query processing engine
 │   │   ├── Queries/
-│   │   │   ├── QueryProcessor.cs            # Query orchestration
-│   │   │   ├── ExpressionProcessor.cs       # Filter evaluation
-│   │   │   ├── ConditionParser.cs           # 50+ condition operators
-│   │   │   ├── LinkedEntitiesProcessor.cs   # JOIN logic
-│   │   │   ├── FetchProcessor.cs            # FetchXml → QueryExpression
-│   │   │   ├── Validators.cs                # Type/attribute validation
-│   │   │   └── FetchAggregation/            # Aggregate functions
+│   │   │   ├── QueryProcessor.cs               # Query orchestration
+│   │   │   ├── ExpressionProcessor.cs          # Filter evaluation
+│   │   │   ├── ConditionParser.cs              # 50+ condition operators
+│   │   │   ├── LinkedEntitiesProcessor.cs      # JOIN logic
+│   │   │   ├── FetchProcessor.cs               # FetchXml → QueryExpression
+│   │   │   ├── QueryExpressionExtensions.cs    # Query-specific extensions
+│   │   │   ├── TypedConditionExpression.cs     # Typed condition wrapper
+│   │   │   ├── Validators.cs                   # Type/attribute validation
+│   │   │   └── FetchAggregation/               # Aggregate functions
 │   │   │       ├── CountAggregate.cs
+│   │   │       ├── CountColumnAggregate.cs
+│   │   │       ├── CountDistinctAggregate.cs
 │   │   │       ├── SumAggregate.cs
 │   │   │       ├── AvgAggregate.cs
 │   │   │       ├── MinAggregate.cs
 │   │   │       ├── MaxAggregate.cs
-│   │   │       └── ...                      # Grouping support
-│   │   └── XrmOrderByAttributeComparer.cs   # Sorting logic
-│   ├── OrganizationRequests/                # Built-in request fakes
-│   │   ├── IOrganizationRequestFake.cs      # Extension interface
-│   │   ├── OrganizationRequestFake.cs       # Typed base class
+│   │   │       └── ...                         # Grouping support
+│   │   └── XrmOrderByAttributeComparer.cs      # Sorting logic
+│   ├── OrganizationRequests/                   # Built-in request fakes
+│   │   ├── IOrganizationRequestFake.cs         # Extension interface
+│   │   ├── OrganizationRequestFake.cs          # Typed base class
 │   │   ├── CreateFake.cs
 │   │   ├── RetrieveFake.cs
 │   │   ├── RetrieveMultipleFake.cs
@@ -623,30 +627,30 @@ DigitallTesting/
 │   │   ├── RetrieveEntityFake.cs
 │   │   ├── ExecuteTransactionFake.cs
 │   │   └── BulkDeleteFake.cs
-│   ├── Model/                               # Internal models
-│   │   └── Target.cs                        # Plugin target wrapper
-│   └── Errors/                              # Error infrastructure
-│       ├── ErrorCodes.cs                    # Dataverse error code constants
-│       └── ErrorFactory.cs                  # FaultException factory
-├── tests/Digitall.Testing.Tests/            # Unit tests
+│   ├── Model/                                  # Internal models
+│   │   └── Target.cs                           # Plugin target wrapper
+│   └── Errors/                                 # Error infrastructure
+│       ├── ErrorCodes.cs                       # Dataverse error code constants
+│       └── ErrorFactory.cs                     # FaultException factory
+├── tests/Digitall.Dataverse.Testing.Tests/     # Unit tests
 │   ├── FakeOrganizationServiceTests.cs
 │   ├── FakeDataverseBuilderTests.cs
 │   ├── FakePluginContextBuilderTests.cs
 │   ├── PluginExecutionContextBuilderTests.cs
-│   ├── Extensions/                          # Extension method tests
-│   ├── Logic/                               # Query processor tests
-│   ├── OrganizationRequests/                # Request fake tests
-│   └── Fixtures/                            # Test data and helpers
-├── .github/workflows/                       # CI/CD
-│   ├── build.yml                            # PR build + test
-│   ├── release.yml                          # Semantic release + NuGet publish
-│   ├── checks.yml                           # Additional checks
-│   ├── codeql.yml                           # Security scanning
-│   └── qodana_code_quality.yml              # JetBrains Qodana analysis
-├── Directory.Build.props                    # Shared MSBuild properties & versioning
-├── global.json                              # .NET SDK version pinning
-├── package.json                             # semantic-release & commitlint config
-└── qodana.yaml                              # Qodana configuration
+│   ├── Extensions/                             # Extension method tests
+│   ├── Logic/                                  # Query processor tests
+│   ├── OrganizationRequests/                   # Request fake tests
+│   └── Fixtures/                              # Test data and helpers
+├── .github/workflows/                          # CI/CD
+│   ├── build.yml                               # PR build + test
+│   ├── release.yml                             # Semantic release + NuGet publish
+│   ├── checks.yml                              # Additional checks
+│   ├── codeql.yml                              # Security scanning
+│   └── qodana_code_quality.yml                 # JetBrains Qodana analysis
+├── Directory.Build.props                       # Shared MSBuild properties & versioning
+├── global.json                                 # .NET SDK version pinning
+├── package.json                                # semantic-release & commitlint config
+└── qodana.yaml                                 # Qodana configuration
 ```
 
 ---
@@ -705,6 +709,6 @@ feat!: remove deprecated API               → major version bump
 
 ## License
 
-This project is licensed under the **Microsoft Public License (MS-PL)**. See [Licence.md](Licence.md) for details.
+This project is licensed under the **Microsoft Reciprocal License (MS-RL)**. See [LICENSE.md](LICENSE.md) for details.
 
 © 2024 DIGITALL Nature GmbH

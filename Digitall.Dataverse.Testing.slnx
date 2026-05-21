@@ -1,0 +1,8 @@
+﻿<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Digitall.Dataverse.Testing/Digitall.Dataverse.Testing.csproj" Type="C#" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Digitall.Dataverse.Testing.Tests/Digitall.Dataverse.Testing.Tests.csproj" Type="C#" />
+  </Folder>
+</Solution>

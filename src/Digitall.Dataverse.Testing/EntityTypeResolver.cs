@@ -1,0 +1,118 @@
+// Copyright (c) DIGITALL Nature. All rights reserved
+// DIGITALL Nature licenses this file to you under the Microsoft Public License.
+
+using System.Reflection;
+using Digitall.Dataverse.Testing.Errors;
+using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Client;
+using Microsoft.Xrm.Sdk.Metadata;
+
+namespace Digitall.Dataverse.Testing;
+
+/// <summary>
+/// Resolves entity types and attribute metadata from model assemblies with caching.
+/// </summary>
+public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<string, EntityMetadata> entityMetadata)
+{
+    private Dictionary<string, Type>? _entityTypeCache;
+    private Dictionary<string, Dictionary<string, PropertyInfo>>? _attributeCache;
+
+    /// <summary>
+    /// Invalidates the internal caches. Call when ModelAssemblies changes.
+    /// </summary>
+    // ReSharper disable once UnusedMember.Global : Public API
+    public void InvalidateCache()
+    {
+        _entityTypeCache = null;
+        _attributeCache = null;
+    }
+
+    private Dictionary<string, Type> EntityTypeCache => _entityTypeCache ??= BuildEntityTypeCache();
+
+    private Dictionary<string, Dictionary<string, PropertyInfo>> AttributeCache => _attributeCache ??= BuildAttributeCache();
+
+    private Dictionary<string, Type> BuildEntityTypeCache()
+    {
+        var cache = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+        foreach (var assembly in modelAssemblies)
+        {
+            foreach (var type in assembly.GetTypes())
+            {
+                if (!typeof(Entity).IsAssignableFrom(type))
+                    continue;
+
+                var attr = type.GetCustomAttribute<EntityLogicalNameAttribute>();
+                if (attr != null)
+                {
+                    cache.TryAdd(attr.LogicalName, type);
+                }
+            }
+        }
+        return cache;
+    }
+
+    private Dictionary<string, Dictionary<string, PropertyInfo>> BuildAttributeCache()
+    {
+        var cache = new Dictionary<string, Dictionary<string, PropertyInfo>>(StringComparer.OrdinalIgnoreCase);
+        foreach (var (logicalName, type) in EntityTypeCache)
+        {
+            var props = new Dictionary<string, PropertyInfo>(StringComparer.OrdinalIgnoreCase);
+            foreach (var pi in type.GetProperties())
+            {
+                var attr = pi.GetCustomAttribute<AttributeLogicalNameAttribute>();
+                if (attr != null)
+                {
+                    props.TryAdd(attr.LogicalName, pi);
+                }
+            }
+            cache[logicalName] = props;
+        }
+        return cache;
+    }
+
+    /// <summary>
+    /// Checks if the specified entity type is known (early bound or in metadata).
+    /// </summary>
+    public bool EntityTypeIsKnown(string logicalName, out Type? entityType)
+    {
+        return EntityTypeCache.TryGetValue(logicalName, out entityType);
+    }
+
+    /// <summary>
+    /// Checks if the specified attribute is known for the given entity.
+    /// </summary>
+    public bool IsKnownAttributeForType(string entity, string attribute, out PropertyInfo? attributeInfo)
+    {
+        attributeInfo = null;
+        if (AttributeCache.TryGetValue(entity, out var props))
+        {
+            return props.TryGetValue(attribute, out attributeInfo);
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Throws an exception if the specified entity type is not known.
+    /// </summary>
+    public void ThrowIfNotKnownEntityType(string entityType)
+    {
+        if (!EntityTypeIsKnown(entityType, out _))
+        {
+            ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoEntity, $"The entity with a name = '{entityType}' with namemapping = 'Logical' was not found in the MetadataCache.");
+        }
+    }
+
+    /// <summary>
+    /// Throws an exception if the specified attribute is not known for the given entity.
+    /// </summary>
+    public void ThrowIfNotKnownAttribute(string entityLogicalName, string attributeLogicalName)
+    {
+        if (!IsKnownAttributeForType(entityLogicalName, attributeLogicalName, out _))
+        {
+            if (!entityMetadata.TryGetValue(entityLogicalName, out var metadata) || metadata.Attributes.All(a => a.LogicalName != attributeLogicalName))
+            {
+                ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoAttribute, $"The attribute {attributeLogicalName} does not exist on this entity.");
+            }
+        }
+    }
+}
