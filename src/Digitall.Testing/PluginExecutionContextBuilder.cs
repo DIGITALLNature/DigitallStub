@@ -54,15 +54,20 @@ public class PluginExecutionContextBuilder
     public ParameterCollection SharedVariables { get; set; } = [];
     public Guid InitiatingUserId { get; set; }
 
-    public static Guid UserId
+    private Guid? _userId;
+
+    public Guid UserId
     {
         get
         {
+            if (_userId.HasValue)
+                return _userId.Value;
+
             Guid.TryParse(Environment.GetEnvironmentVariable("UserId"), out var userId);
             return userId;
         }
         // ReSharper disable once UnusedMember.Global : Public API
-        set { Environment.SetEnvironmentVariable("UserId", value.ToString()); }
+        set => _userId = value;
     }
 
     public Guid CorrelationId { get; set; } = Guid.NewGuid();

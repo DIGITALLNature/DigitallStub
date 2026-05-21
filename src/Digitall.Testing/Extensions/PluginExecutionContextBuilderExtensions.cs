@@ -89,6 +89,12 @@ public static class PluginExecutionContextBuilderExtensions
             return builder;
         }
 
+        public TPluginExecutionContextBuilder WithUserId(Guid userId)
+        {
+            builder.UserId = userId;
+            return builder;
+        }
+
         public TPluginExecutionContextBuilder WithCorrelationId(Guid correlationId)
         {
             builder.CorrelationId = correlationId;

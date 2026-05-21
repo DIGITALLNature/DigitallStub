@@ -298,6 +298,28 @@ public class PluginExecutionContextBuilderTests
     }
 
     [Test]
+    public async Task UserId_WhenEnvVariableSet_Should_BeUsedAsDefault()
+    {
+        var originalUserId = Environment.GetEnvironmentVariable("UserId");
+        var envUserId = Guid.NewGuid();
+
+        try
+        {
+            Environment.SetEnvironmentVariable("UserId", envUserId.ToString());
+
+            var serviceProvider = new PluginExecutionContextBuilder().BuildServiceProvider();
+            var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
+
+            await Assert.That(pluginContext).IsNotNull();
+            await Assert.That(pluginContext!.UserId).IsEqualTo(envUserId);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("UserId", originalUserId);
+        }
+    }
+
+    [Test]
     public async Task InvalidUserIdEnvVar_Should_DefaultToEmptyGuid()
     {
         var originalUserId = Environment.GetEnvironmentVariable("UserId");
