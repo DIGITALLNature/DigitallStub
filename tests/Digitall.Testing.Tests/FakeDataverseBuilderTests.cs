@@ -95,7 +95,7 @@ public class FakeDataverseBuilderTests
             .AddRelationships(relationship)
             .GetOrganizationService();
 
-        await Assert.That(service.EntityMetadata.ContainsKey("account")).IsTrue();
-        await Assert.That(service.Relationships.ContainsKey("dg_account_contact")).IsTrue();
+        await Assert.That(service.State.EntityMetadata.ContainsKey("account")).IsTrue();
+        await Assert.That(service.State.Relationships.ContainsKey("dg_account_contact")).IsTrue();
     }
 }

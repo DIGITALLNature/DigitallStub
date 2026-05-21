@@ -300,7 +300,7 @@ public class OrganizationRequestFakeTests
     {
         _sut.AddRequest(new RetrieveEntityFake());
         var metadata = new EntityMetadata { LogicalName = Account.EntityLogicalName };
-        _sut.EntityMetadata.Add(Account.EntityLogicalName, metadata);
+        _sut.State.EntityMetadata.Add(Account.EntityLogicalName, metadata);
 
         var request = new RetrieveEntityRequest { LogicalName = Account.EntityLogicalName };
 

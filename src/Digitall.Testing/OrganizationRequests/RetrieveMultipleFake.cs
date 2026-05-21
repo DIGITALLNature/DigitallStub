@@ -201,9 +201,9 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             return output;
         }
 
-        private static void PatchDateFormat(Entity record, FakeOrganizationService dataverse)
+        private static void PatchDateFormat(Entity record, FakeOrganizationService fakeOrganizationService)
         {
-            if (dataverse.EntityMetadata.TryGetValue(record.LogicalName, out var entityMetadata))
+            if (fakeOrganizationService.State.EntityMetadata.TryGetValue(record.LogicalName, out var entityMetadata))
             {
                 foreach (var dateTimeAttribute in record.Attributes.Where(a => a.Value is DateTime))
                 {
