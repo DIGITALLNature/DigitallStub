@@ -63,6 +63,91 @@ public static class XDocumentExtensions
 
             return "true".Equals(val, StringComparison.InvariantCultureIgnoreCase) || "1".Equals(val, StringComparison.InvariantCultureIgnoreCase);
         }
+
+        private int? ToPageNumber()
+        {
+            var pageAttr = el.GetAttribute("page");
+            if (pageAttr == null)
+            {
+                return null;
+            }
+
+            if (!int.TryParse(pageAttr.Value, out var iPage))
+            {
+                throw new Exception("Count attribute in fetch node must be an integer");
+            }
+
+            return iPage;
+        }
+
+        private bool ToReturnTotalRecordCount()
+        {
+            var returnTotalRecordCountAttr = el.GetAttribute("returntotalrecordcount");
+            if (returnTotalRecordCountAttr == null)
+            {
+                return false;
+            }
+
+            if (!bool.TryParse(returnTotalRecordCountAttr.Value, out var bReturnCount))
+            {
+                throw new Exception("returntotalrecordcount attribute in fetch node must be an boolean");
+            }
+
+            return bReturnCount;
+        }
+
+        private int? ToTopCount()
+        {
+            var countAttr = el.GetAttribute("top");
+            if (countAttr == null)
+            {
+                return null;
+            }
+
+            if (!int.TryParse(countAttr.Value, out var iCount))
+            {
+                throw new Exception("Top attribute in fetch node must be an integer");
+            }
+
+            return iCount;
+        }
+
+        public bool IsFetchXmlNodeValid()
+        {
+            switch (el.Name.LocalName)
+            {
+                case "filter":
+                case "value":
+                case "fetch":
+                    return true;
+
+                case "entity":
+                    return el.GetAttribute("name") != null;
+
+                case "all-attributes":
+                    return true;
+
+                case "attribute":
+                    return el.GetAttribute("name") != null;
+
+                case "link-entity":
+                    return el.GetAttribute("name") != null && el.GetAttribute("from") != null && el.GetAttribute("to") != null;
+
+                case "order":
+                    if (el.Document?.IsAggregateFetchXml() == true)
+                    {
+                        return el.GetAttribute("alias") != null && el.GetAttribute("attribute") == null;
+                    }
+
+                    return el.GetAttribute("attribute") != null;
+
+                case "condition":
+                    return el.GetAttribute("attribute") != null && el.GetAttribute("operator") != null;
+
+                default:
+                    throw new Exception($"Node {el.Name.LocalName} is not a valid FetchXml node or it doesn't have the required attributes");
+            }
+        }
     }
 
     extension(XDocument xlDoc)
@@ -84,22 +169,6 @@ public static class XDocumentExtensions
         }
     }
 
-    private static int? ToPageNumber(this XElement el)
-    {
-        var pageAttr = el.GetAttribute("page");
-        if (pageAttr == null)
-        {
-            return null;
-        }
-
-        if (!int.TryParse(pageAttr.Value, out var iPage))
-        {
-            throw new Exception("Count attribute in fetch node must be an integer");
-        }
-
-        return iPage;
-    }
-
 
     public static int? ToPageNumber(this XDocument xlDoc) =>
         //Check if all-attributes exist
@@ -107,82 +176,13 @@ public static class XDocumentExtensions
             .FirstOrDefault()?.ToPageNumber();
 
 
-    private static bool ToReturnTotalRecordCount(this XElement el)
-    {
-        var returnTotalRecordCountAttr = el.GetAttribute("returntotalrecordcount");
-        if (returnTotalRecordCountAttr == null)
-        {
-            return false;
-        }
-
-        if (!bool.TryParse(returnTotalRecordCountAttr.Value, out var bReturnCount))
-        {
-            throw new Exception("returntotalrecordcount attribute in fetch node must be an boolean");
-        }
-
-        return bReturnCount;
-    }
-
     public static bool? ToReturnTotalRecordCount(this XDocument xlDoc) =>
         xlDoc.Elements() //fetch
             .FirstOrDefault()?.ToReturnTotalRecordCount();
-
-    private static int? ToTopCount(this XElement el)
-    {
-        var countAttr = el.GetAttribute("top");
-        if (countAttr == null)
-        {
-            return null;
-        }
-
-        if (!int.TryParse(countAttr.Value, out var iCount))
-        {
-            throw new Exception("Top attribute in fetch node must be an integer");
-        }
-
-        return iCount;
-    }
 
 
     public static int? ToTopCount(this XDocument xlDoc) =>
         //Check if all-attributes exist
         xlDoc.Elements() //fetch
             .FirstOrDefault()?.ToTopCount();
-
-    public static bool IsFetchXmlNodeValid(this XElement elem)
-    {
-        switch (elem.Name.LocalName)
-        {
-            case "filter":
-            case "value":
-            case "fetch":
-                return true;
-
-            case "entity":
-                return elem.GetAttribute("name") != null;
-
-            case "all-attributes":
-                return true;
-
-            case "attribute":
-                return elem.GetAttribute("name") != null;
-
-            case "link-entity":
-                return elem.GetAttribute("name") != null && elem.GetAttribute("from") != null && elem.GetAttribute("to") != null;
-
-            case "order":
-                if (elem.Document?.IsAggregateFetchXml() == true)
-                {
-                    return elem.GetAttribute("alias") != null && elem.GetAttribute("attribute") == null;
-                }
-
-                return elem.GetAttribute("attribute") != null;
-
-            case "condition":
-                return elem.GetAttribute("attribute") != null && elem.GetAttribute("operator") != null;
-
-            default:
-                throw new Exception($"Node {elem.Name.LocalName} is not a valid FetchXml node or it doesn't have the required attributes");
-        }
-    }
 }
