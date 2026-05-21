@@ -1,3 +1,10 @@
+# [1.0.0-beta.16](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.15...v1.0.0-beta.16) (2026-05-21)
+
+
+### Bug Fixes
+
+* **WhoAmIFake:** use TryParse for env var GUIDs to handle invalid values ([3774a74](https://github.com/DIGITALLNature/DigitallTesting/commit/3774a74ee6bfad930ebd38802a22070a49f6c45e))
+
 # [1.0.0-beta.15](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.14...v1.0.0-beta.15) (2026-05-20)
 
 
