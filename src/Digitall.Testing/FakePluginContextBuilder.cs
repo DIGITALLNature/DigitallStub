@@ -42,10 +42,11 @@ public class FakePluginContextBuilder : PluginExecutionContextBuilder, IFakeData
     public FakeOrganizationService GetOrganizationService() =>
         OrganizationService as FakeOrganizationService ?? throw new InvalidOperationException("OrganizationService is not a FakeOrganizationService.");
 
-    protected override Dictionary<Type, object> AdditionalServices => new()
+    protected override void ConfigureServices(IServiceProviderMock serviceProvider)
     {
-        [typeof(TimeProvider)] = _timeProvider
-    };
+        base.ConfigureServices(serviceProvider);
+        serviceProvider.GetService(typeof(TimeProvider)).Returns(_timeProvider);
+    }
 
     private static FakeOrganizationService ConfigureOrganizationService(TimeProvider timeProvider)
     {

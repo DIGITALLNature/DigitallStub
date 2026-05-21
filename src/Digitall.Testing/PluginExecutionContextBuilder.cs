@@ -71,10 +71,12 @@ public class PluginExecutionContextBuilder
     public ILogger Logger { get; set; } = ILogger.Mock();
 
     /// <summary>
-    /// Additional services to register in the mock <see cref="IServiceProvider"/>.
-    /// Override in subclasses to register custom services.
+    /// Override this method to add additional service mocks to the <see cref="IServiceProvider"/>.
     /// </summary>
-    protected virtual Dictionary<Type, object> AdditionalServices => new();
+    /// <param name="serviceProvider">The service provider.</param>
+    protected virtual void ConfigureServices(IServiceProviderMock serviceProvider)
+    {
+    }
 
     public IServiceProvider BuildServiceProvider()
     {
@@ -128,10 +130,7 @@ public class PluginExecutionContextBuilder
         serviceProvider.GetService(typeof(ITracingService)).Returns(TracingService);
         serviceProvider.GetService(typeof(ILogger)).Returns(Logger);
 
-        foreach (var (type, instance) in AdditionalServices)
-        {
-            serviceProvider.GetService(type).Returns(instance);
-        }
+        ConfigureServices(serviceProvider);
 
         return serviceProvider;
     }
