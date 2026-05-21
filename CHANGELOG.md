@@ -1,3 +1,10 @@
+# [1.0.0-beta.20](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.19...v1.0.0-beta.20) (2026-05-21)
+
+
+### Bug Fixes
+
+* remove redundant code ([81f5d4e](https://github.com/DIGITALLNature/DigitallTesting/commit/81f5d4e60101b3e83d61a3f3de27cf4ac963dbc5))
+
 # [1.0.0-beta.19](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.18...v1.0.0-beta.19) (2026-05-21)
 
 
