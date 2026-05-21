@@ -53,7 +53,7 @@ public class OrganizationRequestFakeTests
     }
 
     [Test]
-    public Task DeleteFake_Should_RemoveRecord()
+    public async Task DeleteFake_Should_RemoveRecord()
     {
         _sut.AddRequest(new DeleteFake());
         var id = Guid.NewGuid();
@@ -65,7 +65,6 @@ public class OrganizationRequestFakeTests
 
         void Action() => _sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
         Assert.Throws<FaultException<OrganizationServiceFault>>(Action);
-        return Task.CompletedTask;
     }
 
     [Test]
@@ -78,7 +77,7 @@ public class OrganizationRequestFakeTests
         var request = new RetrieveRequest
         {
             Target = new EntityReference(Account.EntityLogicalName, id),
-            ColumnSet = new ColumnSet("name")
+            ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet("name")
         };
 
         var response = (RetrieveResponse)_sut.Execute(request);
@@ -139,6 +138,27 @@ public class OrganizationRequestFakeTests
         var updated = _sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
         await Assert.That(updated.GetAttributeValue<OptionSetValue>("statecode").Value).IsEqualTo(1);
         await Assert.That(updated.GetAttributeValue<OptionSetValue>("statuscode").Value).IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task SetStateFake_Should_UseDefaultStatusValue()
+    {
+        _sut.AddRequest(new SetStateFake());
+        var id = Guid.NewGuid();
+        _sut.Add(new Account(id));
+
+        var request = new Microsoft.Crm.Sdk.Messages.SetStateRequest
+        {
+            EntityMoniker = new EntityReference(Account.EntityLogicalName, id),
+            State = new OptionSetValue(0),
+            Status = new OptionSetValue(-1) // Dataverse should use the default statuscode for the statecode
+        };
+
+        _sut.Execute(request);
+
+        var updated = _sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(updated.GetAttributeValue<OptionSetValue>("statecode").Value).IsEqualTo(0);
+        await Assert.That(updated.GetAttributeValue<OptionSetValue>("statuscode").Value).IsEqualTo(1);
     }
 
     [Test]
@@ -232,7 +252,7 @@ public class OrganizationRequestFakeTests
         var response = (ExecuteTransactionResponse)_sut.Execute(request);
 
         await Assert.That(response.Responses.Count).IsEqualTo(2);
-        var accounts = _sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true) });
+        var accounts = _sut.RetrieveMultiple(new Microsoft.Xrm.Sdk.Query.QueryExpression(Account.EntityLogicalName) { ColumnSet = new Microsoft.Xrm.Sdk.Query.ColumnSet(true) });
         await Assert.That(accounts.Entities).Count().IsEqualTo(2);
     }
 
@@ -251,10 +271,10 @@ public class OrganizationRequestFakeTests
         {
             JobName = "Bulk Delete Test",
             QuerySet = [
-                new QueryExpression(Account.EntityLogicalName) {
-                    Criteria = new FilterExpression {
+                new Microsoft.Xrm.Sdk.Query.QueryExpression(Account.EntityLogicalName) {
+                    Criteria = new Microsoft.Xrm.Sdk.Query.FilterExpression {
                         Conditions = {
-                            new ConditionExpression("name", ConditionOperator.Equal, "Delete Me")
+                            new Microsoft.Xrm.Sdk.Query.ConditionExpression("name", Microsoft.Xrm.Sdk.Query.ConditionOperator.Equal, "Delete Me")
                         }
                     }
                 }
@@ -268,10 +288,10 @@ public class OrganizationRequestFakeTests
 
         await Assert.That(response.Results.ContainsKey("JobId")).IsTrue();
 
-        void RetrieveDeleted() => _sut.Retrieve(Account.EntityLogicalName, id1, new ColumnSet(true));
+        void RetrieveDeleted() => _sut.Retrieve(Account.EntityLogicalName, id1, new Microsoft.Xrm.Sdk.Query.ColumnSet(true));
         Assert.Throws<FaultException<OrganizationServiceFault>>(RetrieveDeleted);
 
-        var kept = _sut.Retrieve(Account.EntityLogicalName, id2, new ColumnSet(true));
+        var kept = _sut.Retrieve(Account.EntityLogicalName, id2, new Microsoft.Xrm.Sdk.Query.ColumnSet(true));
         await Assert.That(kept).IsNotNull();
     }
 
@@ -280,7 +300,7 @@ public class OrganizationRequestFakeTests
     {
         _sut.AddRequest(new RetrieveEntityFake());
         var metadata = new EntityMetadata { LogicalName = Account.EntityLogicalName };
-        _sut.State.EntityMetadata.Add(Account.EntityLogicalName, metadata);
+        _sut.EntityMetadata.Add(Account.EntityLogicalName, metadata);
 
         var request = new RetrieveEntityRequest { LogicalName = Account.EntityLogicalName };
 
