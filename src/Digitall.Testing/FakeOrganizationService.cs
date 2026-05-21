@@ -32,27 +32,6 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     {
     }
 
-    [Obsolete("Use State.ModelAssemblies instead.")]
-    public List<Assembly> ModelAssemblies
-    {
-        get => State.ModelAssemblies;
-        set => State.ModelAssemblies = value;
-    }
-
-    [Obsolete("Use State.EntityMetadata instead.")]
-    public Dictionary<string, EntityMetadata> EntityMetadata
-    {
-        get => State.EntityMetadata;
-        set => State.EntityMetadata = value;
-    }
-
-    [Obsolete("Use State.Relationships instead.")]
-    public Dictionary<string, RelationshipMetadataBase> Relationships
-    {
-        get => State.Relationships;
-        set => State.Relationships = value;
-    }
-
     private Dictionary<string, Dictionary<Guid, Entity>> ServiceState => State.Entities;
 
     private EntityTypeResolver? _typeResolver;
@@ -97,7 +76,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     public void AddMetadata(EntityMetadata entityMetadata)
     {
-        EntityMetadata.Add(entityMetadata.LogicalName, entityMetadata);
+        State.EntityMetadata.Add(entityMetadata.LogicalName, entityMetadata);
 
         var relationships = new List<RelationshipMetadataBase>();
         if (entityMetadata.ManyToManyRelationships != null)
@@ -136,7 +115,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     public void AddRelationship(RelationshipMetadataBase relationship)
     {
-        Relationships[relationship.SchemaName] = relationship;
+        State.Relationships[relationship.SchemaName] = relationship;
     }
 
     public void AddRelationships(IEnumerable<RelationshipMetadataBase> relationships)
@@ -241,7 +220,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     private RelationshipMetadataBase? GetRelationship(string relationshipSchemaName)
     {
-        return Relationships.GetValueOrDefault(relationshipSchemaName);
+        return State.Relationships.GetValueOrDefault(relationshipSchemaName);
     }
 
     /// <summary>
@@ -282,7 +261,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     /// <param name="entity">The entity to create.</param>
     /// <returns>The Id of the created entity.</returns>
     /// <exception cref="FaultException">Thrown if the entity already exists in the Dataverse.</exception>
-    public Guid Create(Entity entity)
+    public Guid Create(Entity? entity)
     {
         if (entity == null)
         {
@@ -332,7 +311,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         return record.ProjectAttributes(columnSet, this).CloneEntity();
     }
 
-    public void Update(Entity entity)
+    public void Update(Entity? entity)
     {
         if (entity == null)
         {
@@ -352,7 +331,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         value[entity.Id] = entity.CloneEntity();
     }
 
-    public void Delete(string entityName, Guid id)
+    public void Delete(string? entityName, Guid id)
     {
         if (entityName == null)
         {
