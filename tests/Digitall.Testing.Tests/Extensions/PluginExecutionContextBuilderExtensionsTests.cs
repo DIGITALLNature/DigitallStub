@@ -3,6 +3,7 @@
 
 using Digitall.Testing.Extensions;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.PluginTelemetry;
 
 namespace Digitall.Testing.Tests.Extensions;
 
@@ -275,6 +276,30 @@ public class PluginExecutionContextBuilderExtensionsTests
     }
 
     [Test]
+    public async Task WithOrganizationService_ShouldSetOrganizationServiceAndReturnSameBuilder()
+    {
+        var orgService = Mock.Of<IOrganizationService>();
+        var builder = new PluginExecutionContextBuilder();
+
+        var result = builder.WithOrganizationService((IOrganizationService)orgService);
+
+        await Assert.That(result).IsSameReferenceAs(builder);
+        await Assert.That(builder.OrganizationService).IsEqualTo((IOrganizationService)orgService);
+    }
+
+    [Test]
+    public async Task WithLogger_ShouldSetLoggerAndReturnSameBuilder()
+    {
+        var logger = Mock.Of<ILogger>();
+        var builder = new PluginExecutionContextBuilder();
+
+        var result = builder.WithLogger((ILogger)logger);
+
+        await Assert.That(result).IsSameReferenceAs(builder);
+        await Assert.That(builder.Logger).IsEqualTo((ILogger)logger);
+    }
+
+    [Test]
     public async Task Extensions_ShouldPreserveDerivedType_WhenUsedOnFakePluginContextBuilder()
     {
         var target = new Entity("account", Guid.NewGuid());
@@ -296,6 +321,8 @@ public class PluginExecutionContextBuilderExtensionsTests
         var correlationId = Guid.NewGuid();
         var tenantId = Guid.NewGuid();
         var tracingService = Mock.Of<ITracingService>();
+        var orgService = Mock.Of<IOrganizationService>();
+        var logger = Mock.Of<ILogger>();
 
         var builder = new PluginExecutionContextBuilder()
             .WithTarget(entityTarget)
@@ -309,7 +336,9 @@ public class PluginExecutionContextBuilderExtensionsTests
             .WithMessageName("Create")
             .WithTenantId(tenantId)
             .WithDepth(2)
-            .WithTracingService((ITracingService)tracingService);
+            .WithTracingService((ITracingService)tracingService)
+            .WithOrganizationService((IOrganizationService)orgService)
+            .WithLogger((ILogger)logger);
 
         await Assert.That(builder.Target).IsNotNull();
         await Assert.That(builder.PreEntityImages.ContainsKey("PreImage")).IsTrue();
@@ -323,5 +352,7 @@ public class PluginExecutionContextBuilderExtensionsTests
         await Assert.That(builder.TenantId).IsEqualTo(tenantId);
         await Assert.That(builder.Depth).IsEqualTo(2);
         await Assert.That(builder.TracingService).IsEqualTo((ITracingService)tracingService);
+        await Assert.That(builder.OrganizationService).IsEqualTo((IOrganizationService)orgService);
+        await Assert.That(builder.Logger).IsEqualTo((ILogger)logger);
     }
 }
