@@ -3,6 +3,7 @@
 
 using Digitall.Testing.Model;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.PluginTelemetry;
 
 namespace Digitall.Testing.Extensions;
 
@@ -115,6 +116,18 @@ public static class PluginExecutionContextBuilderExtensions
         public TPluginExecutionContextBuilder WithTracingService(ITracingService tracingService)
         {
             builder.TracingService = tracingService;
+            return builder;
+        }
+
+        public TPluginExecutionContextBuilder WithOrganizationService(IOrganizationService organizationService)
+        {
+            builder.OrganizationService = organizationService;
+            return builder;
+        }
+
+        public TPluginExecutionContextBuilder WithLogger(ILogger logger)
+        {
+            builder.Logger = logger;
             return builder;
         }
     }
