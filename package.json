@@ -66,7 +66,7 @@
         ],
         "includeSymbols": true,
         "projectPath": [
-            "src/Digitall.Testing/Digitall.Testing.csproj"
+            "src/Digitall.Dataverse.Testing/Digitall.Dataverse.Testing.csproj"
         ],
         "npmPublish": false,
         "usePackageVersion": true
