@@ -39,6 +39,6 @@ public enum ErrorCodes
     /// <summary>
     /// The operator is not valid or it is not supported.
     /// </summary>
-    InvalidOperatorCode = -2147187691,
+    InvalidOperatorCode = -2147187691
 
 }
