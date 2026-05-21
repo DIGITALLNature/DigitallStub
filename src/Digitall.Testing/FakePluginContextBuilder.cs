@@ -10,6 +10,8 @@ namespace Digitall.Testing;
 /// </summary>
 public class FakePluginContextBuilder : PluginExecutionContextBuilder, IFakeDataverseBuilder<FakeOrganizationService>
 {
+    private readonly TimeProvider _timeProvider;
+
     /// <summary>
     /// Creates a new instance of <see cref="FakePluginContextBuilder"/> with a default <see cref="FakeOrganizationService"/>.
     /// </summary>
@@ -23,6 +25,7 @@ public class FakePluginContextBuilder : PluginExecutionContextBuilder, IFakeData
     /// </summary>
     public FakePluginContextBuilder(TimeProvider timeProvider) : base(ConfigureOrganizationService(timeProvider))
     {
+        _timeProvider = timeProvider;
     }
 
     /// <summary>
@@ -30,6 +33,7 @@ public class FakePluginContextBuilder : PluginExecutionContextBuilder, IFakeData
     /// </summary>
     public FakePluginContextBuilder(FakeOrganizationService organizationService) : base(organizationService)
     {
+        _timeProvider = organizationService.TimeProvider;
     }
 
     /// <summary>
@@ -37,6 +41,11 @@ public class FakePluginContextBuilder : PluginExecutionContextBuilder, IFakeData
     /// </summary>
     public FakeOrganizationService GetOrganizationService() =>
         OrganizationService as FakeOrganizationService ?? throw new InvalidOperationException("OrganizationService is not a FakeOrganizationService.");
+
+    protected override Dictionary<Type, object> AdditionalServices => new()
+    {
+        [typeof(TimeProvider)] = _timeProvider
+    };
 
     private static FakeOrganizationService ConfigureOrganizationService(TimeProvider timeProvider)
     {
