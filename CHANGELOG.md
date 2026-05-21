@@ -1,3 +1,10 @@
+# [1.0.0-beta.19](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.18...v1.0.0-beta.19) (2026-05-21)
+
+
+### Bug Fixes
+
+* **builder:** make UserId settable agnostically without mutating env variable ([a01cbd6](https://github.com/DIGITALLNature/DigitallTesting/commit/a01cbd65ef5c9f76d1a44464ff6239706bd078d0))
+
 # [1.0.0-beta.18](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.17...v1.0.0-beta.18) (2026-05-21)
 
 
