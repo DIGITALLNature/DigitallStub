@@ -28,6 +28,7 @@ exclude:
   - name: All
     paths:
       - tests
+      - README.md
 
 #Execute shell command before Qodana execution (Applied in CI/CD pipeline)
 bootstrap: dotnet restore ./Digitall.Testing.slnx && dotnet build ./Digitall.Testing.slnx --configuration Debug
