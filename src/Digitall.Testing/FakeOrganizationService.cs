@@ -295,6 +295,15 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             clone.Id = Guid.NewGuid();
         }
 
+        var defaultStateCode = State.GetDefaultStateCode(clone.LogicalName);
+        if (!clone.Contains("statecode")) clone["statecode"] = defaultStateCode;
+        // Resolve statuscode based on the actual statecode (passed or defaulted)
+        if (!clone.Contains("statuscode"))
+        {
+            var resolvedStatecode = clone.GetAttributeValue<OptionSetValue>("statecode");
+            clone["statuscode"] = State.GetDefaultStatusCode(clone.LogicalName, resolvedStatecode.Value);
+        }
+
         try
         {
             Add(clone);
@@ -485,7 +494,6 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     public Entity RetrieveWithAlternateKey(string entityName, KeyAttributeCollection keys, ColumnSet columnSet)
     {
-
         if (!ServiceState.TryGetValue(entityName, out var value))
         {
             ThrowIfNotKnownEntityType(entityName);

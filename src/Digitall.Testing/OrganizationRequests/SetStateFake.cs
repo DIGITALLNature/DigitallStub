@@ -1,6 +1,7 @@
 // Copyright (c) DIGITALL Nature. All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
+using Digitall.Testing.Extensions;
 using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 
@@ -16,8 +17,17 @@ public class SetStateFake : OrganizationRequestFake<SetStateRequest, SetStateRes
         var entityName = organizationRequest.EntityMoniker.LogicalName;
         var entityId = organizationRequest.EntityMoniker.Id;
 
-        var entityToUpdate = new Entity(entityName) { Id = entityId, ["statecode"] = organizationRequest.State, ["statuscode"] = organizationRequest.Status };
-        
+        var statusCode = organizationRequest.Status.Value == -1
+            ? state.State.GetDefaultStatusCode(entityName, organizationRequest.State.Value)
+            : organizationRequest.Status;
+
+        var entityToUpdate = new Entity(entityName)
+        {
+            Id = entityId,
+            ["statecode"] = organizationRequest.State,
+            ["statuscode"] = statusCode
+        };
+
         state.Update(entityToUpdate);
 
         return new SetStateResponse();

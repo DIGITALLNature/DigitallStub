@@ -129,19 +129,6 @@ public class FakeOrganizationServiceTests
     }
 
     [Test]
-    public async Task Create_ReturnsNonEmptyId_WhenEntityIsAddedSuccessfully()
-    {
-        var sut = new FakeOrganizationService();
-        var entity = new Account { Name = nameof(Create_ReturnsNonEmptyId_WhenEntityIsAddedSuccessfully) };
-
-        var result = sut.Create(entity);
-
-        await Assert.That(result).IsNotEqualTo(Guid.Empty);
-        var retrieved = sut.Retrieve(Account.EntityLogicalName, result, new ColumnSet(true));
-        await Assert.That(retrieved).IsNotNull();
-    }
-
-    [Test]
     public async Task Create_ClonesInput_MutatingOriginalDoesNotAffectStore()
     {
         var sut = new FakeOrganizationService();
@@ -159,7 +146,7 @@ public class FakeOrganizationServiceTests
     {
         var sut = new FakeOrganizationService();
         var id = Guid.NewGuid();
-        var entity = new Account (id) { Name = nameof(Create_ReturnsGivenId_WhenEntityIsAddedSuccessfully) };
+        var entity = new Account(id) { Name = nameof(Create_ReturnsGivenId_WhenEntityIsAddedSuccessfully) };
 
         var result = sut.Create(entity);
 
@@ -173,13 +160,48 @@ public class FakeOrganizationServiceTests
     {
         var sut = new FakeOrganizationService();
         var id = Guid.NewGuid();
-        var entity = new Account (id) { Name = nameof(Create_ThrowsFaultException_WhenEntityIdIsDuplicate) };
+        var entity = new Account(id) { Name = nameof(Create_ThrowsFaultException_WhenEntityIdIsDuplicate) };
 
         void ActionOne() => sut.Create(entity);
         void ActionTwo() => sut.Create(entity);
         await Assert.That(ActionOne).ThrowsNothing();
         var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(ActionTwo);
         await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.DuplicateRecord);
+    }
+
+    [Test]
+    public async Task Create_SetsDefaultState_WhenStateIsNotProvided()
+    {
+        var entity = new Account { Name = nameof(Create_SetsDefaultState_WhenStateIsNotProvided) };
+        var sut = new FakeOrganizationService();
+
+        var result = sut.Create(entity);
+
+        var createdRecord = sut.Retrieve(Account.EntityLogicalName, result, new ColumnSet(true)).ToEntity<Account>();
+        await Assert.That(createdRecord.StateCode).IsNotNull();
+        await Assert.That(createdRecord.StateCode!.Value).IsEqualTo(Account.Options.StateCode.Active);
+        await Assert.That(createdRecord.StatusCode).IsNotNull();
+        await Assert.That(createdRecord.StatusCode!.Value).IsEqualTo(Account.Options.StatusCode.Active);
+    }
+
+    [Test]
+    public async Task Create_DoesNotOverride_WhenStateIsProvided()
+    {
+        var entity = new Account
+        {
+            Name = nameof(Create_DoesNotOverride_WhenStateIsProvided),
+            StateCode = new OptionSetValue(Account.Options.StateCode.Inactive),
+            StatusCode = new OptionSetValue(Account.Options.StatusCode.Inactive)
+        };
+        var sut = new FakeOrganizationService();
+
+        var result = sut.Create(entity);
+
+        var createdRecord = sut.Retrieve(Account.EntityLogicalName, result, new ColumnSet(true)).ToEntity<Account>();
+        await Assert.That(createdRecord.StateCode).IsNotNull();
+        await Assert.That(createdRecord.StateCode!.Value).IsEqualTo(entity.StateCode.Value);
+        await Assert.That(createdRecord.StatusCode).IsNotNull();
+        await Assert.That(createdRecord.StatusCode!.Value).IsEqualTo(entity.StatusCode.Value);
     }
 
     [Test]
@@ -207,10 +229,7 @@ public class FakeOrganizationServiceTests
         var sut = new FakeOrganizationService();
         sut.AddRange(TestData.Default);
 
-        var result = sut.Retrieve(Account.EntityLogicalName, Guid.Parse("00000000-0000-0000-0001-000000000001"), new ColumnSet(
-            Account.LogicalNames.Name,
-            Account.LogicalNames.Telephone1
-            ));
+        var result = sut.Retrieve(Account.EntityLogicalName, Guid.Parse("00000000-0000-0000-0001-000000000001"), new ColumnSet(Account.LogicalNames.Name, Account.LogicalNames.Telephone1));
 
         await Assert.That(result).IsNotNull();
         await Assert.That(result.Id).IsEqualTo(Guid.Parse("00000000-0000-0000-0001-000000000001"));
@@ -268,8 +287,8 @@ public class FakeOrganizationServiceTests
 
         void Action() => sut.Update(entity);
 
-        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(Action);
-        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.ObjectDoesNotExist);
+        var ex2 = Assert.Throws<FaultException<OrganizationServiceFault>>(Action);
+        await Assert.That(ex2.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.ObjectDoesNotExist);
     }
 
     [Test]
@@ -280,7 +299,7 @@ public class FakeOrganizationServiceTests
         var entity = new Account(id) { Name = nameof(Update_UpdatesEntity) };
         sut.Add(entity);
 
-        var updatedEntity = new Account(id) { Name = nameof(Update_UpdatesEntity), Description = "Changed"};
+        var updatedEntity = new Account(id) { Name = nameof(Update_UpdatesEntity), Description = "Changed" };
         sut.Update(updatedEntity);
 
         var retrieved = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
