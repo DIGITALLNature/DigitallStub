@@ -810,7 +810,7 @@ public static class ConditionParser
                 return Expression.Constant(iValue, typeof(int));
             case string stringValue when (attributeType == typeof(EntityReference) || attributeType == typeof(Guid)) && Guid.TryParse(stringValue, out var id):
                 return Expression.Constant(id);
-            case string stringValue:
+            case string:
                 return GetCaseInsensitiveExpression(Expression.Constant(value, typeof(string)));
             case EntityReference reference:
                 {

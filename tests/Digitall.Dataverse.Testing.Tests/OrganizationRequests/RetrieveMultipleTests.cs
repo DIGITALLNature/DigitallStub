@@ -189,7 +189,7 @@ public class RetrieveMultipleTests
             Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Descending) } });
         await Assert.That(resultDescending).IsNotNull();
         var descItems = resultDescending.Entities.Select(a => a.ToEntity<Account>()).ToList();
-        await Assert.That(descItems.SequenceEqual(descItems.OrderByDescending<Account, decimal?>(x => x.ExchangeRate))).IsTrue();
+        await Assert.That(descItems.SequenceEqual(descItems.OrderByDescending(x => x.ExchangeRate))).IsTrue();
 
         var resultAscending = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),
             Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Ascending) } });
@@ -322,7 +322,7 @@ public class RetrieveMultipleTests
             Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Descending) } });
         await Assert.That(resultDescending).IsNotNull();
         var descItems = resultDescending.Entities.Select(a => a.ToEntity<Account>()).ToList();
-        await Assert.That(descItems.SequenceEqual(descItems.OrderByDescending<Account, decimal?>(x => x.ExchangeRate))).IsTrue();
+        await Assert.That(descItems.SequenceEqual(descItems.OrderByDescending(x => x.ExchangeRate))).IsTrue();
 
         var resultAscending = sut.RetrieveMultiple(new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true),
             Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Ascending) } });

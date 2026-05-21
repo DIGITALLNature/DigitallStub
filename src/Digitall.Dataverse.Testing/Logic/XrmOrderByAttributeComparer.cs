@@ -92,7 +92,6 @@ public class XrmOrderByAttributeComparer : IComparer<object?>
 
             objectA = (objectA as AliasedValue)?.Value;
             objectB = (objectB as AliasedValue)?.Value;
-            continue;
         }
     }
 }
