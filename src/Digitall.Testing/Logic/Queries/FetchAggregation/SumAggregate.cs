@@ -5,7 +5,7 @@ using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
-class SumAggregate : AliasedAggregate
+internal class SumAggregate : AliasedAggregate
 {
     protected override object? AggregateAliasedValues(IEnumerable<object?> values)
     {

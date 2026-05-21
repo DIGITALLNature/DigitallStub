@@ -5,7 +5,7 @@ using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
-class ComparableEntityReference(EntityReference entityReference) : IComparable
+internal class ComparableEntityReference(EntityReference entityReference) : IComparable
 {
     public EntityReference EntityReference { get; } = entityReference;
 

@@ -4,7 +4,7 @@
 
 namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
-class ArrayComparer : IEqualityComparer<IComparable?[]>
+internal class ArrayComparer : IEqualityComparer<IComparable?[]>
 {
     public bool Equals(IComparable?[]? x, IComparable?[]? y)
     {

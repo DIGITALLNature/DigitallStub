@@ -4,7 +4,7 @@
 
 namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
-class DateTimeGroup : FetchGrouping
+internal class DateTimeGroup : FetchGrouping
 {
     public DateGroupType Type { get; init; }
 

@@ -3,7 +3,7 @@
 
 namespace Digitall.Testing.Logic.Queries.FetchAggregation;
 
- enum DateGroupType
+internal enum DateGroupType
 {
     DateTime,
     Day,
