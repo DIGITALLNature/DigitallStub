@@ -1,3 +1,28 @@
+# [1.0.0-beta.18](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.17...v1.0.0-beta.18) (2026-05-21)
+
+
+* feat!: remove deprecated state proxy properties from FakeOrganizationService ([cdfef89](https://github.com/DIGITALLNature/DigitallTesting/commit/cdfef892ab5161b2f295bad826a3c7acdac3f0f9))
+
+
+### Bug Fixes
+
+* correct typo getNonBasibuteValueExpr -> getNonBasicValueExpr in ConditionParser ([038354c](https://github.com/DIGITALLNature/DigitallTesting/commit/038354cc2c5748186a8adc6555056964cdeae28c))
+* resolve Qodana quality and performance findings ([4ebe327](https://github.com/DIGITALLNature/DigitallTesting/commit/4ebe327e074d9cd9dccb456a767c871180dc3820))
+
+
+### Features
+
+* add WithTenantId, WithDepth and WithTracingService builder extensions ([426fc1a](https://github.com/DIGITALLNature/DigitallTesting/commit/426fc1a90172330cb62d9dac1ac8a2134a25f186))
+* set default state on create ([#19](https://github.com/DIGITALLNature/DigitallTesting/issues/19)) ([30f7daa](https://github.com/DIGITALLNature/DigitallTesting/commit/30f7daa797ee4ab273b34bad75d11c567844b86b)), closes [#18](https://github.com/DIGITALLNature/DigitallTesting/issues/18)
+
+
+### BREAKING CHANGES
+
+* use State.ModelAssemblies, State.EntityMetadata and
+State.Relationships instead of the removed proxy properties.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+
 # [1.0.0-beta.17](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.16...v1.0.0-beta.17) (2026-05-21)
 
 
