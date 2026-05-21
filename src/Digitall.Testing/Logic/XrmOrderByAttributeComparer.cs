@@ -21,8 +21,8 @@ public class XrmOrderByAttributeComparer : IComparer<object?>
             if (attributeType == typeof(OptionSetValue))
             {
                 // we'll want the text value
-                OptionSetValue attributeValueA = (OptionSetValue)(objectA);
-                OptionSetValue attributeValueB = (OptionSetValue)(objectB);
+                OptionSetValue attributeValueA = (OptionSetValue)objectA;
+                OptionSetValue attributeValueB = (OptionSetValue)objectB;
                 return attributeValueA.Value.CompareTo(attributeValueB.Value);
             }
 
@@ -55,7 +55,7 @@ public class XrmOrderByAttributeComparer : IComparer<object?>
 
             if (attributeType == typeof(int))
             {
-                return ((int)objectA).CompareTo(((int)objectB));
+                return ((int)objectA).CompareTo((int)objectB);
             }
 
             if (attributeType == typeof(DateTime))

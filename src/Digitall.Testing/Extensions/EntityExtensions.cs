@@ -187,7 +187,7 @@ public static class EntityExtensions
         // If the attribute value is an EntityReference, create a new EntityReference with the same logical name and ID.
         if (attributeValue is EntityReference reference)
         {
-            var clonedReference = new EntityReference(reference.LogicalName, reference.Id) { Name = (string?)CloneAttribute(reference.Name), };
+            var clonedReference = new EntityReference(reference.LogicalName, reference.Id) { Name = (string?)CloneAttribute(reference.Name) };
 
             // If the reference has key attributes, clone them.
             if (reference.KeyAttributes != null)

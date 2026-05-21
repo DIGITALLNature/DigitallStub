@@ -35,7 +35,7 @@ public static class TestData
                     new OptionSetValue(3)
                 ],
                 OwnerId = new EntityReference("systemuser", UserId),
-                OwningBusinessUnit = new EntityReference("businessunit", BusinessUnitId),
+                OwningBusinessUnit = new EntityReference("businessunit", BusinessUnitId)
             };
             var corpB = new Account(Guid.Parse("00000000-0000-0000-0001-000000000002"))
             {
@@ -48,7 +48,7 @@ public static class TestData
                     new OptionSetValue(3),
                     new OptionSetValue(4),
                     new OptionSetValue(5)
-                ],
+                ]
             };
 
 

@@ -1,6 +1,7 @@
 // Copyright (c) DIGITALL Nature. All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace Digitall.Testing.Extensions;
@@ -12,9 +13,10 @@ namespace Digitall.Testing.Extensions;
             public DateTime ToDayOfWeek(int week, DayOfWeek dayOfWeek)
             {
                 DateTime startOfYear = dateTime.AddDays(1 - dateTime.DayOfYear);
-                return startOfYear.AddDays(7 * (week - 2) + ((dayOfWeek - startOfYear.DayOfWeek + 7) % 7));
+                return startOfYear.AddDays(7 * (week - 2) + (dayOfWeek - startOfYear.DayOfWeek + 7) % 7);
             }
 
+            // ReSharper disable once MemberCanBePrivate.Global : Public API
             public DateTime ToDayOfDeltaWeek(int deltaWeek, DayOfWeek dayOfWeek)
                 => dateTime.ToDayOfWeek(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(dateTime
                     , CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule
@@ -46,6 +48,8 @@ namespace Digitall.Testing.Extensions;
         }
     }
 
+    // ReSharper disable once UnusedType.Global
+    [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public enum FiscalPeriod
     {
         Annually = 2000,

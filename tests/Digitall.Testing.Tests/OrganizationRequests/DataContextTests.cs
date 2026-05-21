@@ -39,7 +39,7 @@ public class DataContextTests
         var accountName = "Test Account";
         var account = new Account(accountId)
         {
-            Name = accountName,
+            Name = accountName
         };
         dataverse.Add(account);
 
