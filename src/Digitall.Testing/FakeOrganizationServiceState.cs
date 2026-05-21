@@ -10,11 +10,11 @@ namespace Digitall.Testing;
 
 public class FakeOrganizationServiceState
 {
-    public List<Assembly> ModelAssemblies { get; set; } = SearchProxyTypesAssembly();
+    public List<Assembly> ModelAssemblies { get; } = SearchProxyTypesAssembly();
 
-    public Dictionary<string, EntityMetadata> EntityMetadata { get; set; } = new();
+    public Dictionary<string, EntityMetadata> EntityMetadata { get; } = new();
 
-    public Dictionary<string, RelationshipMetadataBase> Relationships { get; set; } = new();
+    public Dictionary<string, RelationshipMetadataBase> Relationships { get; } = new();
 
     internal Dictionary<string, Dictionary<Guid, Entity>> Entities { get; } = new(); // statt "State"
 

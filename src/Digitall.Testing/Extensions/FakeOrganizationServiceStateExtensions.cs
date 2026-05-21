@@ -10,13 +10,6 @@ internal static class FakeOrganizationServiceStateExtensions
 {
     extension(FakeOrganizationServiceState state)
     {
-        public (OptionSetValue statecode, OptionSetValue statuscode) GetDefaultState(string logicalName)
-        {
-            var defaultStateCode = state.GetDefaultStateCode(logicalName);
-            var defaultStatusCode = state.GetDefaultStatusCode(logicalName, defaultStateCode.Value);
-            return (defaultStateCode, defaultStatusCode);
-        }
-
         public OptionSetValue GetDefaultStateCode(string entityLogicalName)
         {
             // Safe universal fallback — correct for most standard entities
