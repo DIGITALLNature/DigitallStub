@@ -107,12 +107,7 @@ public class ExpressionProcessor(FakeOrganizationService fakeOrgService)
         if (conditionsLambda != null && filtersLambda != null)
         {
             //Satisfy both
-            if (fe.FilterOperator == LogicalOperator.And)
-            {
-                return Expression.And(conditionsLambda, filtersLambda);
-            }
-
-            return Expression.Or(conditionsLambda, filtersLambda);
+            return fe.FilterOperator == LogicalOperator.And ? Expression.And(conditionsLambda, filtersLambda) : Expression.Or(conditionsLambda, filtersLambda);
         }
 
         if (conditionsLambda != null)
@@ -229,7 +224,7 @@ public class ExpressionProcessor(FakeOrganizationService fakeOrgService)
                 }
                 else
                 {
-                    if (c.AttributeName.Contains(".", StringComparison.CurrentCultureIgnoreCase))
+                    if (c.AttributeName.Contains('.', StringComparison.CurrentCultureIgnoreCase))
                     {
                         var alias = c.AttributeName.Split('.')[0];
                         cEntityName = queryExpression.GetEntityNameFromAlias(alias);

@@ -25,60 +25,65 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
             string? entityName;
             List<Entity> internalResult;
 
-            // Check if the query is a QueryExpression
-            if (organizationRequest.Query is QueryExpression expression)
+            switch (organizationRequest.Query)
             {
-                // Clone the QueryExpression
-                queryExpression = expression.CloneQuery();
-                entityName = queryExpression.EntityName;
+                // Check if the query is a QueryExpression
+                case QueryExpression expression:
+                    {
+                        // Clone the QueryExpression
+                        queryExpression = expression.CloneQuery();
+                        entityName = queryExpression.EntityName;
 
-                // Execute the query and store the results in a list
-                var linqQuery = queryProcessor.ExecuteQueryExpression(queryExpression);
-                internalResult = linqQuery.ToList();
-            }
-            else if (organizationRequest.Query is QueryByAttribute query)
-            {
-// We instantiate a QueryExpression to be executed as we have the implementation done already
-                queryExpression = new QueryExpression(query.EntityName);
-                entityName = query.EntityName;
+                        // Execute the query and store the results in a list
+                        var linqQuery = queryProcessor.ExecuteQueryExpression(queryExpression);
+                        internalResult = linqQuery.ToList();
+                        break;
+                    }
+                case QueryByAttribute query:
+                    {
+                        // We instantiate a QueryExpression to be executed as we have the implementation done already
+                        queryExpression = new QueryExpression(query.EntityName);
+                        entityName = query.EntityName;
 
-                queryExpression.ColumnSet = query.ColumnSet;
-                queryExpression.Criteria = new FilterExpression();
-                for (var i = 0; i < query.Attributes.Count; i++)
-                {
-                    queryExpression.Criteria.AddCondition(new ConditionExpression(query.Attributes[i], ConditionOperator.Equal, query.Values[i]));
-                }
+                        queryExpression.ColumnSet = query.ColumnSet;
+                        queryExpression.Criteria = new FilterExpression();
+                        for (var i = 0; i < query.Attributes.Count; i++)
+                        {
+                            queryExpression.Criteria.AddCondition(new ConditionExpression(query.Attributes[i], ConditionOperator.Equal, query.Values[i]));
+                        }
 
-                foreach (var order in query.Orders)
-                {
-                    queryExpression.AddOrder(order.AttributeName, order.OrderType);
-                }
+                        foreach (var order in query.Orders)
+                        {
+                            queryExpression.AddOrder(order.AttributeName, order.OrderType);
+                        }
 
-                queryExpression.PageInfo = query.PageInfo;
-                queryExpression.TopCount = query.TopCount;
+                        queryExpression.PageInfo = query.PageInfo;
+                        queryExpression.TopCount = query.TopCount;
 
-                // QueryExpression now done... execute it!
-                var linqQuery = queryProcessor.ExecuteQueryExpression(queryExpression);
-                internalResult = linqQuery.ToList();
-            }
-            else if (organizationRequest.Query is FetchExpression fetchXml)
-            {
-                var xmlDoc = ParseXml(fetchXml.Query);
-                queryExpression = queryProcessor.ConvertXmlDocumentToQueryExpression(xmlDoc);
-                entityName = queryExpression.EntityName;
+                        // QueryExpression now done... execute it!
+                        var linqQuery = queryProcessor.ExecuteQueryExpression(queryExpression);
+                        internalResult = linqQuery.ToList();
+                        break;
+                    }
+                case FetchExpression fetchXml:
+                    {
+                        var xmlDoc = ParseXml(fetchXml.Query);
+                        queryExpression = queryProcessor.ConvertXmlDocumentToQueryExpression(xmlDoc);
+                        entityName = queryExpression.EntityName;
 
-                // QueryExpression now done... execute it!
-                var linqQuery = queryProcessor.ExecuteQueryExpression(queryExpression);
-                internalResult = linqQuery.ToList();
+                        // QueryExpression now done... execute it!
+                        var linqQuery = queryProcessor.ExecuteQueryExpression(queryExpression);
+                        internalResult = linqQuery.ToList();
 
-                if (xmlDoc.IsAggregateFetchXml())
-                {
-                    internalResult = QueryProcessor.ProcessAggregateFetchXml(xmlDoc, internalResult);
-                }
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(organizationRequest), organizationRequest.Query.GetType().Name, "Query type is unknown");
+                        if (xmlDoc.IsAggregateFetchXml())
+                        {
+                            internalResult = QueryProcessor.ProcessAggregateFetchXml(xmlDoc, internalResult);
+                        }
+
+                        break;
+                    }
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(organizationRequest), organizationRequest.Query.GetType().Name, "Query type is unknown");
             }
 
 

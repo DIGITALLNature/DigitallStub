@@ -9,18 +9,10 @@ public static class QueryExpressionExtensions
 {
     public static string GetEntityNameFromAlias(this QueryExpression queryExpression, string? alias)
     {
-        if (alias == null)
-            return queryExpression.EntityName;
+        if (alias == null) return queryExpression.EntityName;
 
-        var linkedEntity = queryExpression.LinkEntities
-            .FirstOrDefault(le => le.EntityAlias != null && le.EntityAlias.Equals(alias, StringComparison.Ordinal));
+        var linkedEntity = queryExpression.LinkEntities.FirstOrDefault(le => le.EntityAlias != null && le.EntityAlias.Equals(alias, StringComparison.Ordinal));
 
-        if (linkedEntity != null)
-        {
-            return linkedEntity.LinkToEntityName;
-        }
-
-        //If the alias wasn't found, it means it  could be any of the EntityNames
-        return alias;
+        return linkedEntity != null ? linkedEntity.LinkToEntityName : alias; //If the alias wasn't found, it means it could be any of the EntityNames
     }
 }

@@ -5,18 +5,14 @@ using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
-public abstract class OrganizationRequestFake<TIn, TOut> : IOrganizationRequestFake where TIn : OrganizationRequest where TOut : OrganizationResponse
+public abstract class OrganizationRequestFake<TRequest, TResponse> : IOrganizationRequestFake where TRequest : OrganizationRequest where TResponse : OrganizationResponse
 {
-    public Type ForType => typeof(TIn);
+    public Type ForType => typeof(TRequest);
 
     public OrganizationResponse Execute(OrganizationRequest organizationRequest, FakeOrganizationService state)
     {
-        if(organizationRequest is not TIn @in)
-        {
-            throw new InvalidCastException($"Cannot cast {organizationRequest.GetType()} to {typeof(TIn)}");
-        }
-        return Execute(@in, state);
+        return organizationRequest is TRequest request ? Execute(request, state) : throw new InvalidCastException($"Cannot cast {organizationRequest.GetType()} to {typeof(TRequest)}");
     }
 
-    public abstract TOut Execute(TIn organizationRequest, FakeOrganizationService state);
+    public abstract TResponse Execute(TRequest organizationRequest, FakeOrganizationService state);
 }

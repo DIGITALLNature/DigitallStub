@@ -84,11 +84,7 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
     public bool IsKnownAttributeForType(string entity, string attribute, out PropertyInfo? attributeInfo)
     {
         attributeInfo = null;
-        if (AttributeCache.TryGetValue(entity, out var props))
-        {
-            return props.TryGetValue(attribute, out attributeInfo);
-        }
-        return false;
+        return AttributeCache.TryGetValue(entity, out var props) && props.TryGetValue(attribute, out attributeInfo);
     }
 
     /// <summary>

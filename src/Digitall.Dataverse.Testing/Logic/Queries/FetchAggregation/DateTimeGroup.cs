@@ -12,8 +12,7 @@ internal class DateTimeGroup : FetchGrouping
     {
         if (attributeValue is not DateTime d)
         {
-            if (attributeValue == null) return null;
-            throw new Exception("Can only do date grouping of DateTime values");
+            return attributeValue == null ? null : throw new Exception("Can only do date grouping of DateTime values");
         }
 
         return Type switch

@@ -1,6 +1,7 @@
 using System.ServiceModel;
 using Digitall.Dataverse.Testing.Errors;
 using Digitall.Dataverse.Testing.Tests.Fixtures;
+using DotNetEnv;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Query;
@@ -12,7 +13,7 @@ public class FakeOrganizationServiceTests
     [Before(Class)]
     public static async Task MyClassInitialize()
     {
-        DotNetEnv.Env.Load();
+        Env.Load();
         await Task.CompletedTask;
     }
 
@@ -178,10 +179,10 @@ public class FakeOrganizationServiceTests
         var result = sut.Create(entity);
 
         var createdRecord = sut.Retrieve(Account.EntityLogicalName, result, new ColumnSet(true)).ToEntity<Account>();
-        await Assert.That(createdRecord.StateCode).IsNotNull<OptionSetValue>();
-        await IntEqualsAssertionExtensions.IsEqualTo(Assert.That(createdRecord.StateCode.Value), Account.Options.StateCode.Active);
-        await Assert.That(createdRecord.StatusCode).IsNotNull<OptionSetValue>();
-        await IntEqualsAssertionExtensions.IsEqualTo(Assert.That(createdRecord.StatusCode.Value), Account.Options.StatusCode.Active);
+        await Assert.That(createdRecord.StateCode).IsNotNull();
+        await Assert.That(createdRecord.StateCode.Value).IsEqualTo(Account.Options.StateCode.Active);
+        await Assert.That(createdRecord.StatusCode).IsNotNull();
+        await Assert.That(createdRecord.StatusCode.Value).IsEqualTo(Account.Options.StatusCode.Active);
     }
 
     [Test]
@@ -198,10 +199,10 @@ public class FakeOrganizationServiceTests
         var result = sut.Create(entity);
 
         var createdRecord = sut.Retrieve(Account.EntityLogicalName, result, new ColumnSet(true)).ToEntity<Account>();
-        await Assert.That(createdRecord.StateCode).IsNotNull<OptionSetValue>();
-        await IntEqualsAssertionExtensions.IsEqualTo(Assert.That(createdRecord.StateCode.Value), entity.StateCode.Value);
+        await Assert.That(createdRecord.StateCode).IsNotNull();
+        await Assert.That(createdRecord.StateCode.Value).IsEqualTo(entity.StateCode.Value);
         await Assert.That(createdRecord.StatusCode).IsNotNull<OptionSetValue>();
-        await IntEqualsAssertionExtensions.IsEqualTo(Assert.That(createdRecord.StatusCode.Value), entity.StatusCode.Value);
+        await Assert.That(createdRecord.StatusCode.Value).IsEqualTo(entity.StatusCode.Value);
     }
 
     [Test]

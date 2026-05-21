@@ -1,8 +1,9 @@
-using System.Diagnostics.CodeAnalysis;
+using System.CodeDom.Compiler;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Client;
@@ -18,7 +19,7 @@ namespace Digitall.Dataverse.Testing.Tests.Fixtures
 	/// </summary>
 	[DataContract()]
 	[EntityLogicalName("account")]
-	[System.CodeDom.Compiler.GeneratedCode("dgtp", "2023")]
+	[GeneratedCode("dgtp", "2023")]
     [ExcludeFromCodeCoverage]
 	public partial class Account : Entity, INotifyPropertyChanging, INotifyPropertyChanged
     {
@@ -124,7 +125,7 @@ namespace Digitall.Dataverse.Testing.Tests.Fixtures
 				}
 				else
 				{
-					base.Id = System.Guid.Empty;
+					base.Id = Guid.Empty;
 				}
                 OnPropertyChanged(nameof(AccountId));
             }
@@ -152,7 +153,7 @@ namespace Digitall.Dataverse.Testing.Tests.Fixtures
 				}
 				else
 				{
-					base.Id = System.Guid.Empty;
+					base.Id = Guid.Empty;
 				}
                 OnPropertyChanged(nameof(Address1AddressId));
             }
@@ -180,7 +181,7 @@ namespace Digitall.Dataverse.Testing.Tests.Fixtures
 				}
 				else
 				{
-					base.Id = System.Guid.Empty;
+					base.Id = Guid.Empty;
 				}
                 OnPropertyChanged(nameof(Address2AddressId));
             }
