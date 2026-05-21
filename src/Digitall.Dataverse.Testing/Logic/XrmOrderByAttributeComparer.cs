@@ -88,14 +88,11 @@ public class XrmOrderByAttributeComparer : IComparer<object?>
                 return ((bool)objectA).CompareTo((bool)objectB);
             }
 
-            if (attributeType == typeof(AliasedValue))
-            {
-                objectA = (objectA as AliasedValue)?.Value;
-                objectB = (objectB as AliasedValue)?.Value;
-                continue;
-            }
+            if (attributeType != typeof(AliasedValue)) return 0;
 
-            return 0;
+            objectA = (objectA as AliasedValue)?.Value;
+            objectB = (objectB as AliasedValue)?.Value;
+            continue;
         }
     }
 }

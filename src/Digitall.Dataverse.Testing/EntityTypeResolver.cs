@@ -38,8 +38,7 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
         {
             foreach (var type in assembly.GetTypes())
             {
-                if (!typeof(Entity).IsAssignableFrom(type))
-                    continue;
+                if (!typeof(Entity).IsAssignableFrom(type)) continue;
 
                 var attr = type.GetCustomAttribute<EntityLogicalNameAttribute>();
                 if (attr != null)
@@ -48,6 +47,7 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
                 }
             }
         }
+
         return cache;
     }
 
@@ -65,8 +65,10 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
                     props.TryAdd(attr.LogicalName, pi);
                 }
             }
+
             cache[logicalName] = props;
         }
+
         return cache;
     }
 
@@ -103,12 +105,11 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
     /// </summary>
     public void ThrowIfNotKnownAttribute(string entityLogicalName, string attributeLogicalName)
     {
-        if (!IsKnownAttributeForType(entityLogicalName, attributeLogicalName, out _))
+        if (IsKnownAttributeForType(entityLogicalName, attributeLogicalName, out _)) return;
+
+        if (!entityMetadata.TryGetValue(entityLogicalName, out var metadata) || metadata.Attributes.All(a => a.LogicalName != attributeLogicalName))
         {
-            if (!entityMetadata.TryGetValue(entityLogicalName, out var metadata) || metadata.Attributes.All(a => a.LogicalName != attributeLogicalName))
-            {
-                ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoAttribute, $"The attribute {attributeLogicalName} does not exist on this entity.");
-            }
+            ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoAttribute, $"The attribute {attributeLogicalName} does not exist on this entity.");
         }
     }
 }

@@ -36,7 +36,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -54,7 +54,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -72,7 +72,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -90,7 +90,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -109,7 +109,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -127,7 +127,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -145,7 +145,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -163,7 +163,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -181,7 +181,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -199,7 +199,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -217,7 +217,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -235,7 +235,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -255,7 +255,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
     [Test]
@@ -274,7 +274,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -295,7 +295,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -313,7 +313,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -331,7 +331,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -349,7 +349,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -368,7 +368,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -386,7 +386,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -404,7 +404,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -422,7 +422,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -440,7 +440,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -460,7 +460,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
     [Test]
@@ -479,7 +479,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
     #endregion
@@ -500,7 +500,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(2);
     }
 
@@ -518,7 +518,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -536,7 +536,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(2);
     }
 
@@ -554,7 +554,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -572,7 +572,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(2);
     }
 
@@ -590,7 +590,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(2);
     }
 
@@ -611,7 +611,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(0);
     }
 
@@ -629,7 +629,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -647,7 +647,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(0);
     }
 
@@ -665,7 +665,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -683,7 +683,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(0);
     }
 
@@ -701,7 +701,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(0);
     }
     #endregion
@@ -721,7 +721,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -739,7 +739,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -761,7 +761,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -779,7 +779,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -797,7 +797,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -815,7 +815,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
@@ -837,7 +837,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(2);
     }
 
@@ -856,7 +856,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(2);
     }
 
@@ -875,7 +875,7 @@ public class QueryTests
         await Assert.That(result).IsNotNull();
 
         var queryResult = dataverse.CreateQuery<Account>().Where(result);
-        await Assert.That(queryResult).IsNotNull<IEnumerable<Entity>, Entity>();
+        await Assert.That(queryResult).IsNotNull();
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 

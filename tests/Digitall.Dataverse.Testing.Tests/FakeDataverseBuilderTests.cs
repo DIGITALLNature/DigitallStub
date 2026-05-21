@@ -81,11 +81,11 @@ public class FakeDataverseBuilderTests
             LogicalName = "account"
         };
 
-        typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.ManyToManyRelationships))!
+        typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.ManyToManyRelationships))?
             .SetValue(accountMetadata, Array.Empty<ManyToManyRelationshipMetadata>());
-        typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.OneToManyRelationships))!
+        typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.OneToManyRelationships))?
             .SetValue(accountMetadata, Array.Empty<OneToManyRelationshipMetadata>());
-        typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.ManyToOneRelationships))!
+        typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.ManyToOneRelationships))?
             .SetValue(accountMetadata, Array.Empty<OneToManyRelationshipMetadata>());
 
         var relationship = new OneToManyRelationshipMetadata { SchemaName = "dg_account_contact" };

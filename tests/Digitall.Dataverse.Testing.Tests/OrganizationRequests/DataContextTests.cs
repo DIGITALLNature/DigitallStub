@@ -36,7 +36,7 @@ public class DataContextTests
         dataverse.AddDefaultRequests();
 
         var accountId = Guid.NewGuid();
-        var accountName = "Test Account";
+        const string accountName = "Test Account";
         var account = new Account(accountId)
         {
             Name = accountName
@@ -45,7 +45,7 @@ public class DataContextTests
 
         using (var dataContext = new DataContext(dataverse))
         {
-            await Assert.That(dataContext.AccountSet.Select<Account, Guid>(a => a.Id).Single()).IsEqualTo(accountId);
+            await Assert.That(dataContext.AccountSet.Select(a => a.Id).Single()).IsEqualTo(accountId);
         }
 
         using (var dataContext = new DataContext(dataverse))

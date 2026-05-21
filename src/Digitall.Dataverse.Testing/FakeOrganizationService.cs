@@ -175,10 +175,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             return entityStateCopy.AsQueryable(); //Empty list
         }
 
-        foreach (var e in entityState.Values)
-        {
-            entityStateCopy.Add(typeof(T) == typeof(Entity) ? (T)e.CloneEntity() : e.CloneEntity().ToEntity<T>());
-        }
+        entityStateCopy.AddRange(entityState.Values.Select(e => typeof(T) == typeof(Entity) ? (T)e.CloneEntity() : e.CloneEntity().ToEntity<T>()));
 
         return entityStateCopy.AsQueryable();
     }
@@ -197,16 +194,14 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
         foreach (var entityRef in entity.Attributes.Values.OfType<EntityReference>().Where(er => er.KeyAttributes?.Count > 0))
         {
-            if (ServiceState.TryGetValue(entityRef.LogicalName, out var refState))
-            {
-                var match = refState.Values.SingleOrDefault(e => entityRef.KeyAttributes.All(k => e.Contains(k.Key) && e[k.Key].Equals(k.Value)));
+            if (!ServiceState.TryGetValue(entityRef.LogicalName, out var refState)) continue;
 
-                if (match is not null)
-                {
-                    entityRef.KeyAttributes = [];
-                    entityRef.Id = match.Id;
-                }
-            }
+            var match = refState.Values.SingleOrDefault(e => entityRef.KeyAttributes.All(k => e.Contains(k.Key) && e[k.Key].Equals(k.Value)));
+
+            if (match is null) continue;
+
+            entityRef.KeyAttributes = [];
+            entityRef.Id = match.Id;
         }
 
         value.Add(entity.Id, entity);
@@ -347,7 +342,9 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        return OrganizationRequestFakes.TryGetValue(request.GetType(), out var fake) ? fake.Execute(request, this) : throw new ArgumentOutOfRangeException(nameof(request), $"No implementation found for request of type {request.GetType().Name}");
+        return OrganizationRequestFakes.TryGetValue(request.GetType(), out var fake)
+            ? fake.Execute(request, this)
+            : throw new ArgumentOutOfRangeException(nameof(request), $"No implementation found for request of type {request.GetType().Name}");
     }
 
     public void Associate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities)

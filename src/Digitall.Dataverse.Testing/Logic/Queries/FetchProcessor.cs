@@ -53,47 +53,38 @@ internal class FetchProcessor(FakeOrganizationService state)
     {
         if (t == typeof(int) || t == typeof(int?) || t.IsOptionSet() || t.IsOptionSetValueCollection())
         {
-            if (int.TryParse(value, out var intValue))
-            {
-                if (t.IsOptionSet())
-                {
-                    return new OptionSetValue(intValue);
-                }
+            if (!int.TryParse(value, out var intValue)) throw new Exception("Integer value expected");
 
-                return intValue;
+            if (t.IsOptionSet())
+            {
+                return new OptionSetValue(intValue);
             }
 
-            throw new Exception("Integer value expected");
+            return intValue;
         }
 
         if (t == typeof(Guid) || t == typeof(Guid?) || t == typeof(EntityReference))
         {
-            if (Guid.TryParse(value, out var result))
-            {
-                if (t == typeof(EntityReference))
-                {
-                    return new EntityReference { Id = result };
-                }
+            if (!Guid.TryParse(value, out var result)) throw new Exception("Guid value expected");
 
-                return result;
+            if (t == typeof(EntityReference))
+            {
+                return new EntityReference { Id = result };
             }
 
-            throw new Exception("Guid value expected");
+            return result;
         }
 
         if (t == typeof(decimal) || t == typeof(decimal?) || t == typeof(Money))
         {
-            if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
-            {
-                if (t == typeof(Money))
-                {
-                    return new Money(result);
-                }
+            if (!decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result)) throw new Exception("Decimal value expected");
 
-                return result;
+            if (t == typeof(Money))
+            {
+                return new Money(result);
             }
 
-            throw new Exception("Decimal value expected");
+            return result;
         }
 
         if (t == typeof(double) || t == typeof(double?))
@@ -114,22 +105,20 @@ internal class FetchProcessor(FakeOrganizationService state)
 
         if (t == typeof(bool) || t == typeof(bool?))
         {
-            if (bool.TryParse(value, out var result))
             {
-                return result;
-            }
+                if (bool.TryParse(value, out var result))
+                {
+                    return result;
+                }
 
-            switch (value)
-            {
-                case "0":
-                    return false;
-                case "1":
-                    return true;
-                default:
-                    throw new Exception("Boolean value expected");
+                return value switch
+                {
+                    "0" => false,
+                    "1" => true,
+                    _ => throw new Exception("Boolean value expected")
+                };
             }
         }
-
         //Otherwise, return the string
         return value;
     }
@@ -463,15 +452,11 @@ internal class FetchProcessor(FakeOrganizationService state)
         //Join operator
         if (el.GetAttribute("link-type") != null)
         {
-            switch (el.GetAttribute("link-type")!.Value)
+            linkEntity.JoinOperator = el.GetAttribute("link-type")!.Value switch
             {
-                case "outer":
-                    linkEntity.JoinOperator = JoinOperator.LeftOuter;
-                    break;
-                default:
-                    linkEntity.JoinOperator = JoinOperator.Inner;
-                    break;
-            }
+                "outer" => JoinOperator.LeftOuter,
+                _ => JoinOperator.Inner
+            };
         }
 
         //Process other link entities recursively

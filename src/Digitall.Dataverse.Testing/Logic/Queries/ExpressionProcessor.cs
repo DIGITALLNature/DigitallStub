@@ -59,10 +59,7 @@ public class ExpressionProcessor(FakeOrganizationService fakeOrgService)
         {
             //Return the and of the two
             Expression andExpression = Expression.Constant(true);
-            foreach (var e in linkedEntitiesQueryExpressions)
-            {
-                andExpression = Expression.And(e, andExpression);
-            }
+            andExpression = linkedEntitiesQueryExpressions.Aggregate(andExpression, (current, e) => Expression.And(e, current));
 
             var feExpression = TranslateFilterExpressionToExpression(queryExpression, queryExpression.EntityName, queryExpression.Criteria, entity, false);
             return Expression.And(andExpression, feExpression);
@@ -72,12 +69,8 @@ public class ExpressionProcessor(FakeOrganizationService fakeOrgService)
         {
             //Linked entity expressions only
             Expression andExpression = Expression.Constant(true);
-            foreach (var e in linkedEntitiesQueryExpressions)
-            {
-                andExpression = Expression.And(e, andExpression);
-            }
 
-            return andExpression;
+            return linkedEntitiesQueryExpressions.Aggregate(andExpression, (current, e) => Expression.And(e, current));
         }
 
         //Criteria only

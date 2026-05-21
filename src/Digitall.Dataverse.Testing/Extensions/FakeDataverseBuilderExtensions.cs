@@ -75,11 +75,10 @@ public static class FakeDataverseBuilderExtensions
             var envVarDef = new Entity("environmentvariabledefinition") { Id = Guid.NewGuid(), ["schemaname"] = key, ["defaultvalue"] = defaultValue };
             builder.GetOrganizationService().Add(envVarDef);
 
-            if (!string.IsNullOrWhiteSpace(value))
-            {
-                var envVarVal = new Entity("environmentvariablevalue") { Id = Guid.NewGuid(), ["environmentvariabledefinitionid"] = envVarDef.ToEntityReference(), ["value"] = value };
-                builder.GetOrganizationService().Add(envVarVal);
-            }
+            if (string.IsNullOrWhiteSpace(value)) return builder;
+
+            var envVarVal = new Entity("environmentvariablevalue") { Id = Guid.NewGuid(), ["environmentvariabledefinitionid"] = envVarDef.ToEntityReference(), ["value"] = value };
+            builder.GetOrganizationService().Add(envVarVal);
 
             return builder;
         }
