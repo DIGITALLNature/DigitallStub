@@ -214,7 +214,7 @@ public class QueryProcessor
             return OrderAggregateResult(xmlDoc, aggregateResult.AsQueryable());
         }
 
-        private static List<Entity> ProcessGroupedAggregate(string entityName, IList<Entity> resultOfQuery, IList<FetchAggregate> aggregates, IList<FetchGrouping> groups)
+        private static List<Entity> ProcessGroupedAggregate(string entityName, IList<Entity> resultOfQuery, IList<FetchAggregate> aggregates, List<FetchGrouping> groups)
         {
             // Group by the groupBy-attribute
             var grouped = resultOfQuery.GroupBy(e =>

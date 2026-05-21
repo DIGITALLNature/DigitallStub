@@ -195,7 +195,7 @@ public class RetrieveMultipleTests
             Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Ascending) } });
         await Assert.That(resultAscending).IsNotNull();
         var ascItems = resultAscending.Entities.Select(a => a.ToEntity<Account>()).ToList();
-        await Assert.That(ascItems.SequenceEqual(ascItems.OrderBy<Account, decimal?>(x => x.ExchangeRate))).IsTrue();
+        await Assert.That(ascItems.SequenceEqual(ascItems.OrderBy(x => x.ExchangeRate))).IsTrue();
     }
 
     #endregion
@@ -328,7 +328,7 @@ public class RetrieveMultipleTests
             Orders = { new OrderExpression(Account.LogicalNames.ExchangeRate, OrderType.Ascending) } });
         await Assert.That(resultAscending).IsNotNull();
         var ascItems = resultAscending.Entities.Select(a => a.ToEntity<Account>()).ToList();
-        await Assert.That(ascItems.SequenceEqual(ascItems.OrderBy<Account, decimal?>(x => x.ExchangeRate))).IsTrue();
+        await Assert.That(ascItems.SequenceEqual(ascItems.OrderBy(x => x.ExchangeRate))).IsTrue();
     }
     #endregion
 }

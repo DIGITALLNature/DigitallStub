@@ -36,22 +36,13 @@ public static class EntityExtensions
 
             var keyValue = entity[sAttributeName] is AliasedValue av ? av.Value : entity[sAttributeName];
 
-            if (keyValue is EntityReference entityReference)
+            return keyValue switch
             {
-                return entityReference.Id;
-            }
-
-            if (keyValue is OptionSetValue optionSetValue)
-            {
-                return optionSetValue.Value;
-            }
-
-            if (keyValue is Money money)
-            {
-                return money.Value;
-            }
-
-            return keyValue;
+                EntityReference entityReference => entityReference.Id,
+                OptionSetValue optionSetValue => optionSetValue.Value,
+                Money money => money.Value,
+                _ => keyValue
+            };
         }
 
         public Entity ProjectAttributes(ColumnSet qs, FakeOrganizationService state)
@@ -172,91 +163,72 @@ public static class EntityExtensions
     /// <returns>The cloned attribute value.</returns>
     private static object? CloneAttribute(object? attributeValue)
     {
-        // If the attribute value is null, return null.
-        if (attributeValue == null)
+        switch (attributeValue)
         {
-            return null;
+            // If the attribute value is null, return null.
+            case null:
+                return null;
+            // If the attribute value is a string, create a new string with the same characters.
+            case string text:
+                return new string(text.ToCharArray());
+            // If the attribute value is an EntityReference, create a new EntityReference with the same logical name and ID.
+            case EntityReference reference:
+                {
+                    var clonedReference = new EntityReference(reference.LogicalName, reference.Id) { Name = (string?)CloneAttribute(reference.Name) };
+
+                    // If the reference has key attributes, clone them.
+                    if (reference.KeyAttributes != null)
+                    {
+                        var clonedKeyAttributes = new KeyAttributeCollection();
+                        clonedKeyAttributes.AddRange(reference.KeyAttributes.Select(kvp => new KeyValuePair<string, object?>(kvp.Key, CloneAttribute(kvp.Value))).ToArray());
+
+                        clonedReference.KeyAttributes = clonedKeyAttributes;
+                    }
+
+                    return clonedReference;
+                }
+            // If the attribute value is a BooleanManagedProperty, create a new BooleanManagedProperty with the same value.
+            case BooleanManagedProperty booleanManagedProperty:
+                return new BooleanManagedProperty(booleanManagedProperty.Value);
+            // If the attribute value is an OptionSetValue, create a new OptionSetValue with the same value.
+            case OptionSetValue optionSetValue:
+                return new OptionSetValue(optionSetValue.Value);
+            // If the attribute value is an AliasedValue, create a new AliasedValue with the same entity logical name, attribute logical name, and cloned value.
+            case AliasedValue aliasedValue:
+                {
+                    var clonedAliasedValue = new AliasedValue(aliasedValue.EntityLogicalName, aliasedValue.AttributeLogicalName, CloneAttribute(aliasedValue.Value));
+
+                    return clonedAliasedValue;
+                }
+            // If the attribute value is a Money, create new Money with the same value.
+            case Money money:
+                return new Money(money.Value);
+            // If the attribute value is an EntityCollection, clone each entity in the collection.
+            case EntityCollection collection:
+                {
+                    var clonedEntities = collection.Entities.Select(e => e.CloneEntity()).ToList();
+                    return new EntityCollection(clonedEntities);
+                }
+            // If the attribute value is an IEnumerable of entities, clone each entity in the collection.
+            case IEnumerable<Entity> entities:
+                return entities.Select(e => e.CloneEntity()).ToArray();
+            // If the attribute value is a byte array, create a new byte array with the same values.
+            case byte[] bytes:
+                {
+                    var clonedBytes = new byte[bytes.Length];
+                    bytes.CopyTo(clonedBytes, 0);
+                    return clonedBytes;
+                }
+            // If the attribute value is an OptionSetValueCollection, create a new OptionSetValueCollection with the same values.
+            case OptionSetValueCollection optionSetValues:
+                {
+                    var clonedOptionSetValues = new OptionSetValueCollection(optionSetValues.ToArray());
+                    return clonedOptionSetValues;
+                }
+            default:
+                // If the attribute value is none of the above, return the original attribute value.
+                return attributeValue;
         }
-
-        // If the attribute value is a string, create a new string with the same characters.
-        if (attributeValue is string text)
-        {
-            return new string(text.ToCharArray());
-        }
-
-        // If the attribute value is an EntityReference, create a new EntityReference with the same logical name and ID.
-        if (attributeValue is EntityReference reference)
-        {
-            var clonedReference = new EntityReference(reference.LogicalName, reference.Id) { Name = (string?)CloneAttribute(reference.Name) };
-
-            // If the reference has key attributes, clone them.
-            if (reference.KeyAttributes != null)
-            {
-                var clonedKeyAttributes = new KeyAttributeCollection();
-                clonedKeyAttributes.AddRange(reference.KeyAttributes.Select(kvp => new KeyValuePair<string, object?>(kvp.Key, CloneAttribute(kvp.Value))).ToArray());
-
-                clonedReference.KeyAttributes = clonedKeyAttributes;
-            }
-
-            return clonedReference;
-        }
-
-        // If the attribute value is a BooleanManagedProperty, create a new BooleanManagedProperty with the same value.
-        if (attributeValue is BooleanManagedProperty booleanManagedProperty)
-        {
-            return new BooleanManagedProperty(booleanManagedProperty.Value);
-        }
-
-        // If the attribute value is an OptionSetValue, create a new OptionSetValue with the same value.
-        if (attributeValue is OptionSetValue optionSetValue)
-        {
-            return new OptionSetValue(optionSetValue.Value);
-        }
-
-        // If the attribute value is an AliasedValue, create a new AliasedValue with the same entity logical name, attribute logical name, and cloned value.
-        if (attributeValue is AliasedValue aliasedValue)
-        {
-            var clonedAliasedValue = new AliasedValue(aliasedValue.EntityLogicalName, aliasedValue.AttributeLogicalName, CloneAttribute(aliasedValue.Value));
-
-            return clonedAliasedValue;
-        }
-
-        // If the attribute value is a Money, create new Money with the same value.
-        if (attributeValue is Money money)
-        {
-            return new Money(money.Value);
-        }
-
-        // If the attribute value is an EntityCollection, clone each entity in the collection.
-        if (attributeValue is EntityCollection collection)
-        {
-            var clonedEntities = collection.Entities.Select(e => e.CloneEntity()).ToList();
-            return new EntityCollection(clonedEntities);
-        }
-
-        // If the attribute value is an IEnumerable of entities, clone each entity in the collection.
-        if (attributeValue is IEnumerable<Entity> entities)
-        {
-            return entities.Select(e => e.CloneEntity()).ToArray();
-        }
-
-        // If the attribute value is a byte array, create a new byte array with the same values.
-        if (attributeValue is byte[] bytes)
-        {
-            var clonedBytes = new byte[bytes.Length];
-            bytes.CopyTo(clonedBytes, 0);
-            return clonedBytes;
-        }
-
-        // If the attribute value is an OptionSetValueCollection, create a new OptionSetValueCollection with the same values.
-        if (attributeValue is OptionSetValueCollection optionSetValues)
-        {
-            var clonedOptionSetValues = new OptionSetValueCollection(optionSetValues.ToArray());
-            return clonedOptionSetValues;
-        }
-
-        // If the attribute value is none of the above, return the original attribute value.
-        return attributeValue;
     }
 
     private static void ProjectLinkedEntitiesAttributes(Entity e, Entity projected, LinkEntity le)

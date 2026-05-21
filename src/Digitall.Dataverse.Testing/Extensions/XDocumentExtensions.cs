@@ -47,12 +47,7 @@ public static class XDocumentExtensions
                 return null;
             }
 
-            if (!int.TryParse(countAttr.Value, out var iCount))
-            {
-                throw new Exception("Count attribute in fetch node must be an integer");
-            }
-
-            return iCount;
+            return int.TryParse(countAttr.Value, out var iCount) ? iCount : throw new Exception("Count attribute in fetch node must be an integer");
         }
 
         public XAttribute? GetAttribute(string sAttributeName) => el.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals(sAttributeName));
@@ -72,12 +67,7 @@ public static class XDocumentExtensions
                 return null;
             }
 
-            if (!int.TryParse(pageAttr.Value, out var iPage))
-            {
-                throw new Exception("Count attribute in fetch node must be an integer");
-            }
-
-            return iPage;
+            return int.TryParse(pageAttr.Value, out var iPage) ? iPage : throw new Exception("Count attribute in fetch node must be an integer");
         }
 
         private bool ToReturnTotalRecordCount()
@@ -88,12 +78,7 @@ public static class XDocumentExtensions
                 return false;
             }
 
-            if (!bool.TryParse(returnTotalRecordCountAttr.Value, out var bReturnCount))
-            {
-                throw new Exception("returntotalrecordcount attribute in fetch node must be an boolean");
-            }
-
-            return bReturnCount;
+            return bool.TryParse(returnTotalRecordCountAttr.Value, out var bReturnCount) ? bReturnCount : throw new Exception("returntotalrecordcount attribute in fetch node must be an boolean");
         }
 
         private int? ToTopCount()
@@ -104,12 +89,7 @@ public static class XDocumentExtensions
                 return null;
             }
 
-            if (!int.TryParse(countAttr.Value, out var iCount))
-            {
-                throw new Exception("Top attribute in fetch node must be an integer");
-            }
-
-            return iCount;
+            return int.TryParse(countAttr.Value, out var iCount) ? iCount : throw new Exception("Top attribute in fetch node must be an integer");
         }
 
         public bool IsFetchXmlNodeValid()
@@ -167,22 +147,19 @@ public static class XDocumentExtensions
 
             return orderByElements;
         }
+
+        public int? ToPageNumber() =>
+            //Check if all-attributes exist
+            xlDoc.Elements() //fetch
+                .FirstOrDefault()?.ToPageNumber();
+
+        public bool? ToReturnTotalRecordCount() =>
+            xlDoc.Elements() //fetch
+                .FirstOrDefault()?.ToReturnTotalRecordCount();
+
+        public int? ToTopCount() =>
+            //Check if all-attributes exist
+            xlDoc.Elements() //fetch
+                .FirstOrDefault()?.ToTopCount();
     }
-
-
-    public static int? ToPageNumber(this XDocument xlDoc) =>
-        //Check if all-attributes exist
-        xlDoc.Elements() //fetch
-            .FirstOrDefault()?.ToPageNumber();
-
-
-    public static bool? ToReturnTotalRecordCount(this XDocument xlDoc) =>
-        xlDoc.Elements() //fetch
-            .FirstOrDefault()?.ToReturnTotalRecordCount();
-
-
-    public static int? ToTopCount(this XDocument xlDoc) =>
-        //Check if all-attributes exist
-        xlDoc.Elements() //fetch
-            .FirstOrDefault()?.ToTopCount();
 }

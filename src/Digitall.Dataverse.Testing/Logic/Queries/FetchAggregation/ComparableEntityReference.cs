@@ -17,17 +17,16 @@ internal class ComparableEntityReference(EntityReference entityReference) : ICom
     public override bool Equals(object? obj)
     {
         EntityReference? other;
-        if (obj is EntityReference entityRef)
+        switch (obj)
         {
-            other = entityRef;
-        }
-        else if (obj is ComparableEntityReference comparableRef)
-        {
-            other = comparableRef.EntityReference;
-        }
-        else
-        {
-            return false;
+            case EntityReference entityRef:
+                other = entityRef;
+                break;
+            case ComparableEntityReference comparableRef:
+                other = comparableRef.EntityReference;
+                break;
+            default:
+                return false;
         }
         return EntityReference.Id == other.Id && EntityReference.LogicalName == other.LogicalName;
     }

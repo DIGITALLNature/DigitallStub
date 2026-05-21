@@ -45,20 +45,20 @@ public class DataContextTests
 
         using (var dataContext = new DataContext(dataverse))
         {
-            await Assert.That(Queryable.Select<Account, Guid>(dataContext.AccountSet, a => a.Id).Single()).IsEqualTo(accountId);
+            await Assert.That(dataContext.AccountSet.Select<Account, Guid>(a => a.Id).Single()).IsEqualTo(accountId);
         }
 
         using (var dataContext = new DataContext(dataverse))
         {
-            await Assert.That(Queryable.Select<Account, string>(dataContext.AccountSet, a => a.Name).Single()).IsEqualTo(accountName);
+            await Assert.That(dataContext.AccountSet.Select<Account, string>(a => a.Name).Single()).IsEqualTo(accountName);
         }
 
-        await Assert.That(account.Id).IsEqualTo<Guid>(accountId);
+        await Assert.That(account.Id).IsEqualTo(accountId);
         await Assert.That(account.Name).IsEqualTo(accountName);
 
         using (var dataContext = new DataContext(dataverse))
         {
-            await Assert.That(Queryable.Select<Account, string>(dataContext.AccountSet, a => a.Name).Single()).IsEqualTo(accountName);
+            await Assert.That(dataContext.AccountSet.Select<Account, string>(a => a.Name).Single()).IsEqualTo(accountName);
         }
     }
 }

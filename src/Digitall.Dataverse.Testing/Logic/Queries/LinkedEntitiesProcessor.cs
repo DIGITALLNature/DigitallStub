@@ -99,17 +99,17 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
             {
                 case JoinOperator.Inner:
                 case JoinOperator.Natural:
-                    query = Queryable.Join<Entity, Entity, object, Entity>(query, inner,
+                    query = query.Join<Entity, Entity, object, Entity>(inner,
                         outerKey => outerKey.KeySelector(linkFromAlias),
                         innerKey => innerKey.KeySelector(le.LinkToAttributeName),
                         (outerEl, innerEl) => outerEl.CloneEntity().JoinAttributes(innerEl, new ColumnSet(true), leAlias));
 
                     break;
                 case JoinOperator.LeftOuter:
-                    query = Queryable.SelectMany(Queryable.GroupJoin(query, inner,
-                                outerKey => outerKey.KeySelector(linkFromAlias),
-                                innerKey => innerKey.KeySelector(le.LinkToAttributeName),
-                                (outerEl, innerElemsCol) => new { outerEl, innerElemsCol }), x => x.innerElemsCol.DefaultIfEmpty()
+                    query = query.GroupJoin(inner,
+                        outerKey => outerKey.KeySelector(linkFromAlias),
+                        innerKey => innerKey.KeySelector(le.LinkToAttributeName),
+                        (outerEl, innerElemsCol) => new { outerEl, innerElemsCol }).SelectMany(x => x.innerElemsCol.DefaultIfEmpty()
                             , (x, y) => x.outerEl
                                 .JoinAttributes(y!, new ColumnSet(true), leAlias));
 

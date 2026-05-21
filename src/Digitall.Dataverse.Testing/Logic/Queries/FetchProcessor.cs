@@ -96,33 +96,19 @@ internal class FetchProcessor(FakeOrganizationService state)
             throw new Exception("Decimal value expected");
         }
 
-        if (t == typeof(double) || t == typeof(double?)) {
-            if (double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
-            {
-                return result;
-            }
-
-            throw new Exception("Double value expected");
+        if (t == typeof(double) || t == typeof(double?))
+        {
+            return double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ? result : throw new Exception("Double value expected");
         }
 
         if (t == typeof(float) || t == typeof(float?))
         {
-            if (float.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
-            {
-                return result;
-            }
-
-            throw new Exception("Float value expected");
+            return float.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result) ? result : throw new Exception("Float value expected");
         }
 
         if (t == typeof(DateTime) || t == typeof(DateTime?))
         {
-            if (DateTime.TryParse(value, out var result))
-            {
-                return result;
-            }
-
-            throw new Exception("DateTime value expected");
+            return DateTime.TryParse(value, out var result) ? result : throw new Exception("DateTime value expected");
         }
         //fix Issue #141
 
@@ -135,8 +121,10 @@ internal class FetchProcessor(FakeOrganizationService state)
 
             switch (value)
             {
-                case "0": return false;
-                case "1": return true;
+                case "0":
+                    return false;
+                case "1":
+                    return true;
                 default:
                     throw new Exception("Boolean value expected");
             }
@@ -163,19 +151,13 @@ internal class FetchProcessor(FakeOrganizationService state)
         }
 
         //Process other filters recursively
-        var otherFilters = elem
-            .Elements() //child nodes of this filter
-            .Where(el => el.Name.LocalName.Equals("filter"))
-            .Select(ExractFilterExpression)
-            .ToList();
+        var otherFilters = elem.Elements() //child nodes of this filter
+            .Where(el => el.Name.LocalName.Equals("filter")).Select(ExractFilterExpression).ToList();
 
 
         //Process conditions
-        var conditions = elem
-            .Elements() //child nodes of this filter
-            .Where(el => el.Name.LocalName.Equals("condition"))
-            .Select(ExtractConditionExpression)
-            .ToList();
+        var conditions = elem.Elements() //child nodes of this filter
+            .Where(el => el.Name.LocalName.Equals("condition")).Select(ExtractConditionExpression).ToList();
 
         foreach (var c in conditions)
         {
@@ -434,48 +416,33 @@ internal class FetchProcessor(FakeOrganizationService state)
         var entityName = GetAssociatedEntityNameForConditionExpression(elem);
 
         //Find values inside the condition expression, if apply
-        var values = elem
-            .Elements() //child nodes of this filter
-            .Where(el => el.Name.LocalName.Equals("value"))
-            .Select(el => GetConditionExpressionValueCast(el.Value, entityName, attributeName, op))
-            .ToArray();
+        var values = elem.Elements() //child nodes of this filter
+            .Where(el => el.Name.LocalName.Equals("value")).Select(el => GetConditionExpressionValueCast(el.Value, entityName, attributeName, op)).ToArray();
 
 
         //Otherwise, a single value was used
         if (value != null)
         {
-            if (string.IsNullOrWhiteSpace(conditionEntityName))
-            {
-                return new ConditionExpression(attributeName, op, GetConditionExpressionValueCast(value, entityName, attributeName, op));
-            }
-
-            return new ConditionExpression(conditionEntityName, attributeName, op, GetConditionExpressionValueCast(value, entityName, attributeName, op));
+            return string.IsNullOrWhiteSpace(conditionEntityName)
+                ? new ConditionExpression(attributeName, op, GetConditionExpressionValueCast(value, entityName, attributeName, op))
+                : new ConditionExpression(conditionEntityName, attributeName, op, GetConditionExpressionValueCast(value, entityName, attributeName, op));
         }
 
 
-        if (string.IsNullOrWhiteSpace(conditionEntityName))
-        {
-            return new ConditionExpression(attributeName, op, values);
-        }
-
-        return new ConditionExpression(conditionEntityName, attributeName, op, values);
+        return string.IsNullOrWhiteSpace(conditionEntityName) ? new ConditionExpression(attributeName, op, values) : new ConditionExpression(conditionEntityName, attributeName, op, values);
     }
 
     public FilterExpression? ExtractCriteria(XDocument xmlDocument) =>
         xmlDocument.Elements() //fetch
             .Elements() //entity
             .Elements() //child nodes of entity
-            .Where(el => el.Name.LocalName.Equals("filter"))
-            .Select(ExractFilterExpression)
-            .FirstOrDefault();
+            .Where(el => el.Name.LocalName.Equals("filter")).Select(ExractFilterExpression).FirstOrDefault();
 
     public IEnumerable<LinkEntity> ExtractLinkEntities(XDocument xmlDocument) =>
         xmlDocument.Elements() //fetch
             .Elements() //entity
             .Elements() //child nodes of entity
-            .Where(el => el.Name.LocalName.Equals("link-entity", StringComparison.Ordinal))
-            .Select(ExtractLinkLinkEntity)
-            .ToList();
+            .Where(el => el.Name.LocalName.Equals("link-entity", StringComparison.Ordinal)).Select(ExtractLinkLinkEntity).ToList();
 
     private LinkEntity ExtractLinkLinkEntity(XElement el)
     {
@@ -508,10 +475,7 @@ internal class FetchProcessor(FakeOrganizationService state)
         }
 
         //Process other link entities recursively
-        var convertedLinkEntityNodes = el.Elements()
-            .Where(e => e.Name.LocalName.Equals("link-entity", StringComparison.Ordinal))
-            .Select(ExtractLinkLinkEntity)
-            .ToList();
+        var convertedLinkEntityNodes = el.Elements().Where(e => e.Name.LocalName.Equals("link-entity", StringComparison.Ordinal)).Select(ExtractLinkLinkEntity).ToList();
 
         foreach (var le in convertedLinkEntityNodes)
         {
@@ -522,10 +486,7 @@ internal class FetchProcessor(FakeOrganizationService state)
         linkEntity.Columns = el.ToColumnSet();
 
         //Process filter
-        linkEntity.LinkCriteria = el.Elements()
-            .Where(e => e.Name.LocalName.Equals("filter"))
-            .Select(ExractFilterExpression)
-            .FirstOrDefault();
+        linkEntity.LinkCriteria = el.Elements().Where(e => e.Name.LocalName.Equals("filter")).Select(ExractFilterExpression).FirstOrDefault();
 
         return linkEntity;
     }

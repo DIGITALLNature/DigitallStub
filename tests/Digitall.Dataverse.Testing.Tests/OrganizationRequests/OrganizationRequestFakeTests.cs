@@ -4,6 +4,7 @@
 using System.ServiceModel;
 using Digitall.Dataverse.Testing.OrganizationRequests;
 using Digitall.Dataverse.Testing.Tests.Fixtures;
+using Microsoft.Crm.Sdk.Messages;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -126,7 +127,7 @@ public class OrganizationRequestFakeTests
         var id = Guid.NewGuid();
         _sut.Add(new Account(id));
 
-        var request = new Microsoft.Crm.Sdk.Messages.SetStateRequest
+        var request = new SetStateRequest
         {
             EntityMoniker = new EntityReference(Account.EntityLogicalName, id),
             State = new OptionSetValue(1),
@@ -147,7 +148,7 @@ public class OrganizationRequestFakeTests
         var id = Guid.NewGuid();
         _sut.Add(new Account(id));
 
-        var request = new Microsoft.Crm.Sdk.Messages.SetStateRequest
+        var request = new SetStateRequest
         {
             EntityMoniker = new EntityReference(Account.EntityLogicalName, id),
             State = new OptionSetValue(0),
@@ -170,7 +171,7 @@ public class OrganizationRequestFakeTests
         var userId = Guid.NewGuid();
         var userRef = new EntityReference("systemuser", userId);
 
-        var request = new Microsoft.Crm.Sdk.Messages.AssignRequest
+        var request = new AssignRequest
         {
             Target = new EntityReference(Account.EntityLogicalName, id),
             Assignee = userRef
@@ -267,7 +268,7 @@ public class OrganizationRequestFakeTests
         _sut.Add(new Account(id1) { Name = "Delete Me" });
         _sut.Add(new Account(id2) { Name = "Keep Me" });
 
-        var request = new Microsoft.Crm.Sdk.Messages.BulkDeleteRequest
+        var request = new BulkDeleteRequest
         {
             JobName = "Bulk Delete Test",
             QuerySet = [
@@ -284,7 +285,7 @@ public class OrganizationRequestFakeTests
             SendEmailNotification = false
         };
 
-        var response = (Microsoft.Crm.Sdk.Messages.BulkDeleteResponse)_sut.Execute(request);
+        var response = (BulkDeleteResponse)_sut.Execute(request);
 
         await Assert.That(response.Results.ContainsKey("JobId")).IsTrue();
 

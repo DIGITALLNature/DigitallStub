@@ -26,52 +26,48 @@ public static class ConditionParser
                           $"Consider changing the implementation of the ResolveName method on your DataContractResolver to return a non-null value for name " +
                           $"'{input.GetType()}' and namespace 'http://schemas.microsoft.com/xrm/2011/Contracts'.'.  Please see InnerException for more details.";
 
-        if (input is int intValue)
+        switch (input)
         {
-            set.Add(intValue);
-        }
-        else if (input is string stringValue)
-        {
-            set.Add(int.Parse(stringValue));
-        }
-        else if (input is int[] intArray)
-        {
-            set.UnionWith(intArray);
-        }
-        else if (input is string[] strings)
-        {
-            set.UnionWith(strings.Select(int.Parse));
-        }
-        else if (input is DataCollection<object> collection)
-        {
-            if (collection.All(o => o is int))
-            {
+            case int intValue:
+                set.Add(intValue);
+                break;
+            case string stringValue:
+                set.Add(int.Parse(stringValue));
+                break;
+            case int[] intArray:
+                set.UnionWith(intArray);
+                break;
+            case string[] strings:
+                set.UnionWith(strings.Select(int.Parse));
+                break;
+            case DataCollection<object> collection when collection.All(o => o is int):
                 set.UnionWith(collection.Cast<int>());
-            }
-            else if (collection.All(o => o is string))
-            {
+                break;
+            case DataCollection<object> collection when collection.All(o => o is string):
                 set.UnionWith(collection.Select(o => int.Parse((o as string)!)));
-            }
-            else if (collection is [int[] iArray])
-            {
+                break;
+            case DataCollection<object> and [int[] iArray]:
                 set.UnionWith(iArray);
-            }
-            else if (collection is [string[] sArray])
-            {
+                break;
+            case DataCollection<object> and [string[] sArray]:
                 set.UnionWith(sArray.Select(int.Parse));
-            }
-            else
-            {
+                break;
+            case DataCollection<object>:
                 ThrowFaultException(faultReason);
-            }
-        }
-        else if (isOptionSetValueCollectionAccepted && input is OptionSetValueCollection optionSetValueCollection)
-        {
-            set.UnionWith(optionSetValueCollection.Select(osv => osv.Value));
-        }
-        else
-        {
-            ThrowFaultException(faultReason);
+                break;
+            default:
+                {
+                    if (isOptionSetValueCollectionAccepted && input is OptionSetValueCollection optionSetValueCollection)
+                    {
+                        set.UnionWith(optionSetValueCollection.Select(osv => osv.Value));
+                    }
+                    else
+                    {
+                        ThrowFaultException(faultReason);
+                    }
+
+                    break;
+                }
         }
 
         return set;
@@ -101,14 +97,10 @@ public static class ConditionParser
             attributeName = condition.CondExpression.AttributeName;
         }
 
-        Expression containsAttributeExpression = Expression.Call(attributesProperty, typeof(AttributeCollection).GetMethod(nameof(AttributeCollection.ContainsKey),
-                [typeof(string)])!, Expression.Constant(attributeName)
-        );
+        Expression containsAttributeExpression = Expression.Call(attributesProperty, typeof(AttributeCollection).GetMethod(nameof(AttributeCollection.ContainsKey), [typeof(string)])!,
+            Expression.Constant(attributeName));
 
-        Expression getAttributeValueExpr = Expression.Property(
-            attributesProperty, "Item",
-            Expression.Constant(attributeName, typeof(string))
-        );
+        Expression getAttributeValueExpr = Expression.Property(attributesProperty, "Item", Expression.Constant(attributeName, typeof(string)));
 
 
         var getNonBasicValueExpr = getAttributeValueExpr;
@@ -117,7 +109,7 @@ public static class ConditionParser
 
         switch (condition.CondExpression.Operator)
         {
-#region equal and not equal
+            #region equal and not equal
 
             case ConditionOperator.Equal:
             case ConditionOperator.On:
@@ -135,9 +127,11 @@ public static class ConditionParser
             case ConditionOperator.NotEqualBusinessId:
                 operatorExpression = Expression.Not(TranslateConditionExpressionEqual(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression));
                 break;
-#endregion
 
-#region like and not like
+            #endregion
+
+            #region like and not like
+
             case ConditionOperator.BeginsWith:
             case ConditionOperator.Like:
                 operatorExpression = TranslateConditionExpressionLike(condition, getNonBasicValueExpr, containsAttributeExpression);
@@ -162,9 +156,11 @@ public static class ConditionParser
             case ConditionOperator.DoesNotContain:
                 operatorExpression = Expression.Not(TranslateConditionExpressionContains(condition, getAttributeValueExpr, containsAttributeExpression));
                 break;
-#endregion
 
-#region null and not null
+            #endregion
+
+            #region null and not null
+
             case ConditionOperator.Null:
                 operatorExpression = TranslateConditionExpressionNull(getAttributeValueExpr, containsAttributeExpression);
                 break;
@@ -172,9 +168,11 @@ public static class ConditionParser
             case ConditionOperator.NotNull:
                 operatorExpression = Expression.Not(TranslateConditionExpressionNull(getAttributeValueExpr, containsAttributeExpression));
                 break;
-#endregion
 
-#region Greater & Less
+            #endregion
+
+            #region Greater & Less
+
             case ConditionOperator.GreaterThan:
                 operatorExpression = TranslateConditionExpressionGreaterThan(condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
@@ -190,9 +188,11 @@ public static class ConditionParser
             case ConditionOperator.LessEqual:
                 operatorExpression = TranslateConditionExpressionLessThanOrEqual(context, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
-#endregion
 
-#region Array Operations
+            #endregion
+
+            #region Array Operations
+
             case ConditionOperator.In:
                 operatorExpression = TranslateConditionExpressionIn(condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
@@ -209,12 +209,12 @@ public static class ConditionParser
                 operatorExpression = Expression.Not(TranslateConditionExpressionContainValues(condition, getAttributeValueExpr, containsAttributeExpression));
                 break;
 
-#endregion
+            #endregion
 
-#region Time Operations
+            #region Time Operations
+
             case ConditionOperator.OnOrAfter:
-                operatorExpression = Expression.Or(
-                    TranslateConditionExpressionEqual(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression),
+                operatorExpression = Expression.Or(TranslateConditionExpressionEqual(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression),
                     TranslateConditionExpressionGreaterThan(condition, getAttributeValueExpr, containsAttributeExpression));
                 break;
             case ConditionOperator.LastXHours:
@@ -227,8 +227,7 @@ public static class ConditionParser
                 break;
 
             case ConditionOperator.OnOrBefore:
-                operatorExpression = Expression.Or(
-                    TranslateConditionExpressionEqual(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression),
+                operatorExpression = Expression.Or(TranslateConditionExpressionEqual(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression),
                     TranslateConditionExpressionLessThan(condition, getAttributeValueExpr, containsAttributeExpression));
                 break;
 
@@ -255,7 +254,7 @@ public static class ConditionParser
             case ConditionOperator.OlderThanXWeeks:
             case ConditionOperator.OlderThanXYears:
             case ConditionOperator.OlderThanXMonths:
-                operatorExpression = TranslateConditionExpressionOlderThan(context.TimeProvider,condition, getAttributeValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionOlderThan(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.NextXHours:
@@ -264,7 +263,7 @@ public static class ConditionParser
             case ConditionOperator.NextXWeeks:
             case ConditionOperator.NextXMonths:
             case ConditionOperator.NextXYears:
-                operatorExpression = TranslateConditionExpressionNext(context.TimeProvider,condition, getAttributeValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionNext(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
             case ConditionOperator.ThisYear:
             case ConditionOperator.LastYear:
@@ -276,11 +275,12 @@ public static class ConditionParser
             case ConditionOperator.ThisWeek:
             case ConditionOperator.NextWeek:
             case ConditionOperator.InFiscalYear:
-                operatorExpression = TranslateConditionExpressionBetweenDates(context.TimeProvider,condition, getAttributeValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionBetweenDates(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
-#endregion
 
-default:
+            #endregion
+
+            default:
                 throw new ArgumentOutOfRangeException($"Operator {condition.CondExpression.Operator.ToString()} not yet implemented for condition expression");
         }
 
@@ -293,11 +293,9 @@ default:
         return operatorExpression;
     }
 
-    private static Expression GetCaseInsensitiveExpression(Expression e) =>
-        Expression.Call(e,
-            typeof(string).GetMethod("ToLowerInvariant", Type.EmptyTypes)!);
+    private static MethodCallExpression GetCaseInsensitiveExpression(Expression e) => Expression.Call(e, typeof(string).GetMethod("ToLowerInvariant", Type.EmptyTypes)!);
 
-    private static Expression GetCompareToExpression<T>(Expression left, Expression right) => Expression.Call(left, typeof(T).GetMethod("CompareTo", [typeof(string)])!, right);
+    private static MethodCallExpression GetCompareToExpression<T>(Expression left, Expression right) => Expression.Call(left, typeof(T).GetMethod("CompareTo", [typeof(string)])!, right);
 
 
     private static object GetSingleConditionValue(TypedConditionExpression c)
@@ -329,26 +327,19 @@ default:
         return conditionValue;
     }
 
-    private static Expression TransformExpressionGetDateOnlyPart(Expression input) => Expression.Call(input, typeof(DateTime).GetMethod("get_Date")!);
+    private static MethodCallExpression TransformExpressionGetDateOnlyPart(Expression input) => Expression.Call(input, typeof(DateTime).GetMethod("get_Date")!);
 
     private static Expression TransformExpressionValueBasedOnOperator(ConditionOperator op, Expression input)
     {
-        switch (op)
+        return op switch
         {
-            case ConditionOperator.Today:
-            case ConditionOperator.Yesterday:
-            case ConditionOperator.Tomorrow:
-            case ConditionOperator.On:
-            case ConditionOperator.OnOrAfter:
-            case ConditionOperator.OnOrBefore:
-                return TransformExpressionGetDateOnlyPart(input);
-
-            default:
-                return input; //No transformation
-        }
+            ConditionOperator.Today or ConditionOperator.Yesterday or ConditionOperator.Tomorrow or ConditionOperator.On or ConditionOperator.OnOrAfter or ConditionOperator.OnOrBefore =>
+                TransformExpressionGetDateOnlyPart(input),
+            _ => input
+        };
     }
 
-    private static Expression TranslateConditionExpressionBetween(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionBetween(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -356,32 +347,25 @@ default:
 
         //Between the range...
         var exp = Expression.And(
-            Expression.GreaterThanOrEqual(
-                GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, value1),
-                GetAppropiateTypedValueAndType(value1, tc.AttributeType)),
-            Expression.LessThanOrEqual(
-                GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, value2),
-                GetAppropiateTypedValueAndType(value2, tc.AttributeType)));
+            Expression.GreaterThanOrEqual(GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, value1), GetAppropiateTypedValueAndType(value1, tc.AttributeType)),
+            Expression.LessThanOrEqual(GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, value2), GetAppropiateTypedValueAndType(value2, tc.AttributeType)));
 
 
         //and... attribute exists too
-        return Expression.AndAlso(
-            containsAttributeExpr,
-            Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)),
-                exp));
+        return Expression.AndAlso(containsAttributeExpr, Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)), exp));
     }
 
     /// <summary>
     ///     Takes a condition expression which needs translating into a 'between two dates' expression and works out the relevant dates
     /// </summary>
-    private static Expression TranslateConditionExpressionBetweenDates(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionBetweenDates(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
         DateTime? fromDate = null;
         DateTime? toDate = null;
 
-        var today =timeProvider.GetLocalNow().Date;
+        var today = timeProvider.GetLocalNow().Date;
         var thisYear = today.Year;
         var thisMonth = today.Month;
 
@@ -389,31 +373,31 @@ default:
         switch (c.Operator)
         {
             case ConditionOperator.ThisYear: // From first day of this year to last day of this year
-                fromDate = new DateTime(thisYear, 1, 1,0,0,0, DateTimeKind.Local);
-                toDate = new DateTime(thisYear, 12, 31,0,0,0, DateTimeKind.Local);
+                fromDate = new DateTime(thisYear, 1, 1, 0, 0, 0, DateTimeKind.Local);
+                toDate = new DateTime(thisYear, 12, 31, 0, 0, 0, DateTimeKind.Local);
                 break;
             case ConditionOperator.LastYear: // From first day of last year to last day of last year
-                fromDate = new DateTime(thisYear - 1, 1, 1,0,0,0, DateTimeKind.Local);
-                toDate = new DateTime(thisYear - 1, 12, 31,0,0,0, DateTimeKind.Local);
+                fromDate = new DateTime(thisYear - 1, 1, 1, 0, 0, 0, DateTimeKind.Local);
+                toDate = new DateTime(thisYear - 1, 12, 31, 0, 0, 0, DateTimeKind.Local);
                 break;
             case ConditionOperator.NextYear: // From first day of next year to last day of next year
-                fromDate = new DateTime(thisYear + 1, 1, 1,0,0,0, DateTimeKind.Local);
-                toDate = new DateTime(thisYear + 1, 12, 31,0,0,0, DateTimeKind.Local);
+                fromDate = new DateTime(thisYear + 1, 1, 1, 0, 0, 0, DateTimeKind.Local);
+                toDate = new DateTime(thisYear + 1, 12, 31, 0, 0, 0, DateTimeKind.Local);
                 break;
             case ConditionOperator.ThisMonth: // From first day of this month to last day of this month
-                fromDate = new DateTime(thisYear, thisMonth, 1,0,0,0, DateTimeKind.Local);
+                fromDate = new DateTime(thisYear, thisMonth, 1, 0, 0, 0, DateTimeKind.Local);
                 // Last day of this month: Add one month to the first of this month, and then remove one day
-                toDate = new DateTime(thisYear, thisMonth, 1,0,0,0, DateTimeKind.Local).AddMonths(1).AddDays(-1);
+                toDate = new DateTime(thisYear, thisMonth, 1, 0, 0, 0, DateTimeKind.Local).AddMonths(1).AddDays(-1);
                 break;
             case ConditionOperator.LastMonth: // From first day of last month to last day of last month
-                fromDate = new DateTime(thisYear, thisMonth, 1,0,0,0, DateTimeKind.Local).AddMonths(-1);
+                fromDate = new DateTime(thisYear, thisMonth, 1, 0, 0, 0, DateTimeKind.Local).AddMonths(-1);
                 // Last day of last month: One day before the first of this month
-                toDate = new DateTime(thisYear, thisMonth, 1,0,0,0, DateTimeKind.Local).AddDays(-1);
+                toDate = new DateTime(thisYear, thisMonth, 1, 0, 0, 0, DateTimeKind.Local).AddDays(-1);
                 break;
             case ConditionOperator.NextMonth: // From first day of next month to last day of next month
-                fromDate = new DateTime(thisYear, thisMonth, 1,0,0,0, DateTimeKind.Local).AddMonths(1);
+                fromDate = new DateTime(thisYear, thisMonth, 1, 0, 0, 0, DateTimeKind.Local).AddMonths(1);
                 // LAst day of Next Month: Add two months to the first of this month, and then go back one day
-                toDate = new DateTime(thisYear, thisMonth, 1,0,0,0, DateTimeKind.Local).AddMonths(2).AddDays(-1);
+                toDate = new DateTime(thisYear, thisMonth, 1, 0, 0, 0, DateTimeKind.Local).AddMonths(2).AddDays(-1);
                 break;
             case ConditionOperator.ThisWeek:
                 fromDate = today.ToFirstDayOfDeltaWeek();
@@ -442,7 +426,7 @@ default:
         return TranslateConditionExpressionBetween(tc, getAttributeValueExpr, containsAttributeExpr);
     }
 
-    private static Expression TranslateConditionExpressionContains(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionContains(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -454,21 +438,17 @@ default:
     }
 
 
-    private static Expression TranslateConditionExpressionContainValues(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionContainValues(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var leftHandSideExpression = GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, null);
         var rightHandSideExpression = Expression.Constant(ConvertToHashSetOfInt(tc.CondExpression.Values, false));
 
-        return Expression.AndAlso(
-            containsAttributeExpr,
-            Expression.AndAlso(
-                Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)),
-                Expression.Equal(
-                    Expression.Call(leftHandSideExpression, typeof(HashSet<int>).GetMethod("Overlaps")!, rightHandSideExpression),
-                    Expression.Constant(true))));
+        return Expression.AndAlso(containsAttributeExpr,
+            Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)),
+                Expression.Equal(Expression.Call(leftHandSideExpression, typeof(HashSet<int>).GetMethod("Overlaps")!, rightHandSideExpression), Expression.Constant(true))));
     }
 
-    private static Expression TranslateConditionExpressionEndsWith(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionEndsWith(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -479,34 +459,22 @@ default:
         return TranslateConditionExpressionLike(typedComputedCondition, getAttributeValueExpr, containsAttributeExpr);
     }
 
-    private static Expression TranslateConditionExpressionEqual(TimeProvider timeProvider, TypedConditionExpression c, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionEqual(TimeProvider timeProvider, TypedConditionExpression c, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var expOrValues = Expression.Or(Expression.Constant(false), Expression.Constant(false));
 
         object? unaryOperatorValue = null;
 
         var today = timeProvider.GetLocalNow().Date;
-        switch (c.CondExpression.Operator)
+        unaryOperatorValue = c.CondExpression.Operator switch
         {
-            case ConditionOperator.Today:
-                unaryOperatorValue = today;
-                break;
-            case ConditionOperator.Yesterday:
-                unaryOperatorValue = today.AddDays(-1);
-                break;
-            case ConditionOperator.Tomorrow:
-                unaryOperatorValue = today.AddDays(1);
-                break;
-            case ConditionOperator.EqualUserId:
-            case ConditionOperator.NotEqualUserId:
-                unaryOperatorValue = Guid.Parse(Environment.GetEnvironmentVariable("UserId") ?? Guid.Empty.ToString());
-                break;
-
-            case ConditionOperator.EqualBusinessId:
-            case ConditionOperator.NotEqualBusinessId:
-                unaryOperatorValue = Guid.Parse(Environment.GetEnvironmentVariable("BusinessUnitId") ?? Guid.Empty.ToString());
-                break;
-        }
+            ConditionOperator.Today => today,
+            ConditionOperator.Yesterday => today.AddDays(-1),
+            ConditionOperator.Tomorrow => today.AddDays(1),
+            ConditionOperator.EqualUserId or ConditionOperator.NotEqualUserId => Guid.Parse(Environment.GetEnvironmentVariable("UserId") ?? Guid.Empty.ToString()),
+            ConditionOperator.EqualBusinessId or ConditionOperator.NotEqualBusinessId => Guid.Parse(Environment.GetEnvironmentVariable("BusinessUnitId") ?? Guid.Empty.ToString()),
+            _ => unaryOperatorValue
+        };
 
         if (unaryOperatorValue != null)
         {
@@ -514,8 +482,7 @@ default:
             var leftHandSideExpression = GetAppropiateCastExpressionBasedOnType(c.AttributeType, getAttributeValueExpr, unaryOperatorValue);
             var transformedExpression = TransformExpressionValueBasedOnOperator(c.CondExpression.Operator, leftHandSideExpression);
 
-            expOrValues = Expression.Equal(transformedExpression,
-                GetAppropiateTypedValueAndType(unaryOperatorValue, c.AttributeType));
+            expOrValues = Expression.Equal(transformedExpression, GetAppropiateTypedValueAndType(unaryOperatorValue, c.AttributeType));
         }
 
         else if (c.AttributeType == typeof(OptionSetValueCollection))
@@ -525,9 +492,7 @@ default:
             var leftHandSideExpression = GetAppropiateCastExpressionBasedOnType(c.AttributeType, getAttributeValueExpr, conditionValue);
             var rightHandSideExpression = Expression.Constant(ConvertToHashSetOfInt(conditionValue, false));
 
-            expOrValues = Expression.Equal(
-                Expression.Call(leftHandSideExpression, typeof(HashSet<int>).GetMethod(nameof(HashSet<>.SetEquals))!, rightHandSideExpression),
-                Expression.Constant(true));
+            expOrValues = Expression.Equal(Expression.Call(leftHandSideExpression, typeof(HashSet<int>).GetMethod(nameof(HashSet<>.SetEquals))!, rightHandSideExpression), Expression.Constant(true));
         }
 
         else
@@ -537,19 +502,15 @@ default:
                 var leftHandSideExpression = GetAppropiateCastExpressionBasedOnType(c.AttributeType, getAttributeValueExpr, value);
                 var transformedExpression = TransformExpressionValueBasedOnOperator(c.CondExpression.Operator, leftHandSideExpression);
 
-                expOrValues = Expression.Or(expOrValues, Expression.Equal(
-                    transformedExpression,
-                    TransformExpressionValueBasedOnOperator(c.CondExpression.Operator, GetAppropiateTypedValueAndType(value, c.AttributeType))));
+                expOrValues = Expression.Or(expOrValues,
+                    Expression.Equal(transformedExpression, TransformExpressionValueBasedOnOperator(c.CondExpression.Operator, GetAppropiateTypedValueAndType(value, c.AttributeType))));
             }
         }
 
-        return Expression.AndAlso(
-            containsAttributeExpr,
-            Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)),
-                expOrValues));
+        return Expression.AndAlso(containsAttributeExpr, Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)), expOrValues));
     }
 
-    private static Expression TranslateConditionExpressionGreaterThan(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionGreaterThan(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -570,23 +531,18 @@ default:
             var transformedExpression = TransformExpressionValueBasedOnOperator(tc.CondExpression.Operator, leftHandSideExpression);
 
             expOrValues = Expression.Or(expOrValues,
-                Expression.GreaterThan(
-                    transformedExpression,
-                    TransformExpressionValueBasedOnOperator(tc.CondExpression.Operator, GetAppropiateTypedValueAndType(value, tc.AttributeType))));
+                Expression.GreaterThan(transformedExpression, TransformExpressionValueBasedOnOperator(tc.CondExpression.Operator, GetAppropiateTypedValueAndType(value, tc.AttributeType))));
         }
 
-        return Expression.AndAlso(
-            containsAttributeExpr,
-            Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)),
-                expOrValues));
+        return Expression.AndAlso(containsAttributeExpr, Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)), expOrValues));
     }
 
-    private static Expression TranslateConditionExpressionGreaterThanOrEqual(FakeOrganizationService context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
-        Expression.Or(
-            TranslateConditionExpressionEqual(context.TimeProvider, tc, getAttributeValueExpr, containsAttributeExpr),
+    private static BinaryExpression
+        TranslateConditionExpressionGreaterThanOrEqual(FakeOrganizationService context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
+        Expression.Or(TranslateConditionExpressionEqual(context.TimeProvider, tc, getAttributeValueExpr, containsAttributeExpr),
             TranslateConditionExpressionGreaterThan(tc, getAttributeValueExpr, containsAttributeExpr));
 
-    private static Expression TranslateConditionExpressionGreaterThanString(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionGreaterThanString(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -601,19 +557,13 @@ default:
 
             var methodCallExpr = GetCompareToExpression<string>(left, right);
 
-            expOrValues = Expression.Or(expOrValues,
-                Expression.GreaterThan(
-                    methodCallExpr,
-                    Expression.Constant(0)));
+            expOrValues = Expression.Or(expOrValues, Expression.GreaterThan(methodCallExpr, Expression.Constant(0)));
         }
 
-        return Expression.AndAlso(
-            containsAttributeExpr,
-            Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)),
-                expOrValues));
+        return Expression.AndAlso(containsAttributeExpr, Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)), expOrValues));
     }
 
-    private static Expression TranslateConditionExpressionIn(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionIn(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -625,9 +575,7 @@ default:
             var leftHandSideExpression = GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, null);
             var rightHandSideExpression = Expression.Constant(ConvertToHashSetOfInt(c.Values, false));
 
-            expOrValues = Expression.Equal(
-                Expression.Call(leftHandSideExpression, typeof(HashSet<int>).GetMethod(nameof(HashSet<>.SetEquals))!, rightHandSideExpression),
-                Expression.Constant(true));
+            expOrValues = Expression.Equal(Expression.Call(leftHandSideExpression, typeof(HashSet<int>).GetMethod(nameof(HashSet<>.SetEquals))!, rightHandSideExpression), Expression.Constant(true));
         }
         else
 
@@ -639,53 +587,37 @@ default:
                 {
                     foreach (var a in array)
                     {
-                        expOrValues = Expression.Or(expOrValues, Expression.Equal(
-                            GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, a),
-                            GetAppropiateTypedValueAndType(a, tc.AttributeType)));
+                        expOrValues = Expression.Or(expOrValues,
+                            Expression.Equal(GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, a), GetAppropiateTypedValueAndType(a, tc.AttributeType)));
                     }
                 }
                 else
                 {
-                    expOrValues = Expression.Or(expOrValues, Expression.Equal(
-                        GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, value),
-                        GetAppropiateTypedValueAndType(value, tc.AttributeType)));
+                    expOrValues = Expression.Or(expOrValues,
+                        Expression.Equal(GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, value), GetAppropiateTypedValueAndType(value, tc.AttributeType)));
                 }
             }
         }
 
-        return Expression.AndAlso(
-            containsAttributeExpr,
-            Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)),
-                expOrValues));
+        return Expression.AndAlso(containsAttributeExpr, Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)), expOrValues));
     }
 
-    private static Expression TranslateConditionExpressionLast(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionLast(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
         var beforeDateTime = default(DateTime);
         var currentDateTime = timeProvider.GetLocalNow().DateTime;
-        switch (c.Operator)
+        beforeDateTime = c.Operator switch
         {
-            case ConditionOperator.LastXHours:
-                beforeDateTime = currentDateTime.AddHours(-(int)c.Values[0]);
-                break;
-            case ConditionOperator.LastXDays:
-                beforeDateTime = currentDateTime.AddDays(-(int)c.Values[0]);
-                break;
-            case ConditionOperator.Last7Days:
-                beforeDateTime = currentDateTime.AddDays(-7);
-                break;
-            case ConditionOperator.LastXWeeks:
-                beforeDateTime = currentDateTime.AddDays(-7 * (int)c.Values[0]);
-                break;
-            case ConditionOperator.LastXMonths:
-                beforeDateTime = currentDateTime.AddMonths(-(int)c.Values[0]);
-                break;
-            case ConditionOperator.LastXYears:
-                beforeDateTime = currentDateTime.AddYears(-(int)c.Values[0]);
-                break;
-        }
+            ConditionOperator.LastXHours => currentDateTime.AddHours(-(int)c.Values[0]),
+            ConditionOperator.LastXDays => currentDateTime.AddDays(-(int)c.Values[0]),
+            ConditionOperator.Last7Days => currentDateTime.AddDays(-7),
+            ConditionOperator.LastXWeeks => currentDateTime.AddDays(-7 * (int)c.Values[0]),
+            ConditionOperator.LastXMonths => currentDateTime.AddMonths(-(int)c.Values[0]),
+            ConditionOperator.LastXYears => currentDateTime.AddYears(-(int)c.Values[0]),
+            _ => beforeDateTime
+        };
 
         c.Values.Clear();
         c.Values.Add(beforeDateTime);
@@ -695,7 +627,7 @@ default:
     }
 
 
-    private static Expression TranslateConditionExpressionLessThan(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionLessThan(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -716,23 +648,18 @@ default:
             var transformedExpression = TransformExpressionValueBasedOnOperator(tc.CondExpression.Operator, leftHandSideExpression);
 
             expOrValues = Expression.Or(expOrValues,
-                Expression.LessThan(
-                    transformedExpression,
-                    TransformExpressionValueBasedOnOperator(tc.CondExpression.Operator, GetAppropiateTypedValueAndType(value, tc.AttributeType))));
+                Expression.LessThan(transformedExpression, TransformExpressionValueBasedOnOperator(tc.CondExpression.Operator, GetAppropiateTypedValueAndType(value, tc.AttributeType))));
         }
 
-        return Expression.AndAlso(
-            containsAttributeExpr,
-            Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)),
-                expOrValues));
+        return Expression.AndAlso(containsAttributeExpr, Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)), expOrValues));
     }
 
-    private static Expression TranslateConditionExpressionLessThanOrEqual(FakeOrganizationService context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
-        Expression.Or(
-            TranslateConditionExpressionEqual(context.TimeProvider, tc, getAttributeValueExpr, containsAttributeExpr),
+    private static BinaryExpression
+        TranslateConditionExpressionLessThanOrEqual(FakeOrganizationService context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
+        Expression.Or(TranslateConditionExpressionEqual(context.TimeProvider, tc, getAttributeValueExpr, containsAttributeExpr),
             TranslateConditionExpressionLessThan(tc, getAttributeValueExpr, containsAttributeExpr));
 
-    private static Expression TranslateConditionExpressionLessThanString(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionLessThanString(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -747,17 +674,13 @@ default:
             //var compareToMethodCall = Expression.Call(transformedLeftHandSideExpression, typeof(string).GetMethod("CompareTo", new Type[] { typeof(string) })!, new[] { rightHandSideExpression });
             var compareToMethodCall = GetCompareToExpression<string>(transformedLeftHandSideExpression, rightHandSideExpression);
 
-            expOrValues = Expression.Or(expOrValues,
-                Expression.LessThan(compareToMethodCall, Expression.Constant(0)));
+            expOrValues = Expression.Or(expOrValues, Expression.LessThan(compareToMethodCall, Expression.Constant(0)));
         }
 
-        return Expression.AndAlso(
-            containsAttributeExpr,
-            Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)),
-                expOrValues));
+        return Expression.AndAlso(containsAttributeExpr, Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)), expOrValues));
     }
 
-    private static Expression TranslateConditionExpressionLike(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionLike(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -787,46 +710,31 @@ default:
                 sMethod = "StartsWith";
             }
 
-            expOrValues = Expression.Or(expOrValues, Expression.Call(
-                convertedValueToStrAndToLower,
-                typeof(string).GetMethod(sMethod, [typeof(string)])!,
+            expOrValues = Expression.Or(expOrValues, Expression.Call(convertedValueToStrAndToLower, typeof(string).GetMethod(sMethod, [typeof(string)])!,
                 Expression.Constant(strValue.ToLowerInvariant()
                     .Replace("%", "")) //Linq2CRM adds the percentage value to be executed as a LIKE operator, here we are replacing it to just use the appropiate method
             ));
         }
 
-        return Expression.AndAlso(
-            containsAttributeExpr,
-            expOrValues);
+        return Expression.AndAlso(containsAttributeExpr, expOrValues);
     }
 
-    private static Expression TranslateConditionExpressionNext(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionNext(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
         var nextDateTime = default(DateTime);
         var currentDateTime = timeProvider.GetLocalNow().DateTime;
-        switch (c.Operator)
+        nextDateTime = c.Operator switch
         {
-            case ConditionOperator.NextXHours:
-                nextDateTime = currentDateTime.AddHours((int)c.Values[0]);
-                break;
-            case ConditionOperator.NextXDays:
-                nextDateTime = currentDateTime.AddDays((int)c.Values[0]);
-                break;
-            case ConditionOperator.Next7Days:
-                nextDateTime = currentDateTime.AddDays(7);
-                break;
-            case ConditionOperator.NextXWeeks:
-                nextDateTime = currentDateTime.AddDays(7 * (int)c.Values[0]);
-                break;
-            case ConditionOperator.NextXMonths:
-                nextDateTime = currentDateTime.AddMonths((int)c.Values[0]);
-                break;
-            case ConditionOperator.NextXYears:
-                nextDateTime = currentDateTime.AddYears((int)c.Values[0]);
-                break;
-        }
+            ConditionOperator.NextXHours => currentDateTime.AddHours((int)c.Values[0]),
+            ConditionOperator.NextXDays => currentDateTime.AddDays((int)c.Values[0]),
+            ConditionOperator.Next7Days => currentDateTime.AddDays(7),
+            ConditionOperator.NextXWeeks => currentDateTime.AddDays(7 * (int)c.Values[0]),
+            ConditionOperator.NextXMonths => currentDateTime.AddMonths((int)c.Values[0]),
+            ConditionOperator.NextXYears => currentDateTime.AddYears((int)c.Values[0]),
+            _ => nextDateTime
+        };
 
         c.Values.Clear();
         c.Values.Add(currentDateTime);
@@ -836,20 +744,14 @@ default:
         return TranslateConditionExpressionBetween(tc, getAttributeValueExpr, containsAttributeExpr);
     }
 
-    private static Expression TranslateConditionExpressionNull(Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionNull(Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
-        return Expression.Or(Expression.AndAlso(
-                containsAttributeExpr,
-                Expression.Equal(
-                    getAttributeValueExpr,
-                    Expression.Constant(null))), //Attribute is null
-            Expression.AndAlso(
-                Expression.Not(containsAttributeExpr),
-                Expression.Constant(true))); //Or attribute is not defined (null)
+        return Expression.Or(Expression.AndAlso(containsAttributeExpr, Expression.Equal(getAttributeValueExpr, Expression.Constant(null))), //Attribute is null
+            Expression.AndAlso(Expression.Not(containsAttributeExpr), Expression.Constant(true))); //Or attribute is not defined (null)
     }
 
 
-    private static Expression TranslateConditionExpressionOlderThan(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionOlderThan(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
@@ -865,35 +767,23 @@ default:
 
         var toDate = default(DateTime);
         var now = timeProvider.GetLocalNow().DateTime;
-        switch (c.Operator)
+        toDate = c.Operator switch
         {
-            case ConditionOperator.OlderThanXMonths:
-                toDate = now.AddMonths(-valueToAdd);
-                break;
-            case ConditionOperator.OlderThanXMinutes:
-                toDate = now.AddMinutes(-valueToAdd);
-                break;
-            case ConditionOperator.OlderThanXHours:
-                toDate = now.AddHours(-valueToAdd);
-                break;
-            case ConditionOperator.OlderThanXDays:
-                toDate = now.AddDays(-valueToAdd);
-                break;
-            case ConditionOperator.OlderThanXWeeks:
-                toDate = now.AddDays(-7 * valueToAdd);
-                break;
-            case ConditionOperator.OlderThanXYears:
-                toDate = now.AddYears(-valueToAdd);
-                break;
-        }
+            ConditionOperator.OlderThanXMonths => now.AddMonths(-valueToAdd),
+            ConditionOperator.OlderThanXMinutes => now.AddMinutes(-valueToAdd),
+            ConditionOperator.OlderThanXHours => now.AddHours(-valueToAdd),
+            ConditionOperator.OlderThanXDays => now.AddDays(-valueToAdd),
+            ConditionOperator.OlderThanXWeeks => now.AddDays(-7 * valueToAdd),
+            ConditionOperator.OlderThanXYears => now.AddYears(-valueToAdd),
+            _ => toDate
+        };
 
         return TranslateConditionExpressionOlderThan(tc, getAttributeValueExpr, containsAttributeExpr, toDate);
     }
 
-    private static Expression TranslateConditionExpressionOlderThan(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr, DateTime olderThanDate)
+    private static BinaryExpression TranslateConditionExpressionOlderThan(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr, DateTime olderThanDate)
     {
-        var lessThanExpression = Expression.LessThan(
-            GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, olderThanDate),
+        var lessThanExpression = Expression.LessThan(GetAppropiateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, olderThanDate),
             GetAppropiateTypedValueAndType(olderThanDate, tc.AttributeType));
 
         return Expression.AndAlso(containsAttributeExpr, Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)), lessThanExpression));
@@ -964,12 +854,7 @@ default:
         //Special case => datetime is sent as a string
         if (value is string)
         {
-            if (DateTime.TryParse(value.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out _))
-            {
-                return typeof(DateTime);
-            }
-
-            return typeof(string);
+            return DateTime.TryParse(value.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out _) ? typeof(DateTime) : typeof(string);
         }
 
         return value.GetType();
@@ -1010,17 +895,15 @@ default:
         return Expression.Constant(value);
     }
 
-    private static Expression GetAppropiateCastExpressionBasedOnType(Type? t, Expression input, object? value)
+    private static ConditionalExpression GetAppropiateCastExpressionBasedOnType(Type? t, Expression input, object? value)
     {
         var typedExpression = GetAppropiateCastExpressionBasedOnAttributeTypeOrValue(input, value, t);
 
         //Now, any value (entity reference, string, int, etc,... could be wrapped in an AliasedValue object
         //So let's add this
-        var getValueFromAliasedValueExp = Expression.Call(Expression.Convert(input, typeof(AliasedValue)),
-            typeof(AliasedValue).GetMethod("get_Value")!);
+        var getValueFromAliasedValueExp = Expression.Call(Expression.Convert(input, typeof(AliasedValue)), typeof(AliasedValue).GetMethod("get_Value")!);
 
-        var exp = Expression.Condition(Expression.TypeIs(input, typeof(AliasedValue)),
-            GetAppropiateCastExpressionBasedOnAttributeTypeOrValue(getValueFromAliasedValueExp, value, t),
+        var exp = Expression.Condition(Expression.TypeIs(input, typeof(AliasedValue)), GetAppropiateCastExpressionBasedOnAttributeTypeOrValue(getValueFromAliasedValueExp, value, t),
             typedExpression //Not an aliased value
         );
 
@@ -1126,10 +1009,7 @@ default:
 
         if (int.TryParse(value?.ToString(), out _))
         {
-            return Expression.Condition(Expression.TypeIs(input, typeof(OptionSetValue)),
-                GetToStringExpression<int>(GetAppropiateCastExpressionBasedOnInt(input)),
-                defaultStringExpression
-            );
+            return Expression.Condition(Expression.TypeIs(input, typeof(OptionSetValue)), GetToStringExpression<int>(GetAppropiateCastExpressionBasedOnInt(input)), defaultStringExpression);
         }
 
         return defaultStringExpression;
@@ -1141,16 +1021,13 @@ default:
 
         if (attributeType?.IsOptionSet() == true && int.TryParse(value?.ToString(), out _))
         {
-            return Expression.Condition(Expression.TypeIs(input, typeof(OptionSetValue)),
-                GetToStringExpression<int>(GetAppropiateCastExpressionBasedOnInt(input)),
-                defaultStringExpression
-            );
+            return Expression.Condition(Expression.TypeIs(input, typeof(OptionSetValue)), GetToStringExpression<int>(GetAppropiateCastExpressionBasedOnInt(input)), defaultStringExpression);
         }
 
         return defaultStringExpression;
     }
 
-    private static Expression GetToStringExpression<T>(Expression e) => Expression.Call(e, typeof(T).GetMethod("ToString", Type.EmptyTypes)!);
+    private static MethodCallExpression GetToStringExpression<T>(Expression e) => Expression.Call(e, typeof(T).GetMethod("ToString", Type.EmptyTypes)!);
 
     private static Expression GetAppropiateCastExpressionBasedOnDateTime(Expression input, object? value)
     {
@@ -1163,80 +1040,49 @@ default:
         return input; // return directly
     }
 
-    private static Expression GetAppropiateCastExpressionDefault(Expression input, object? value) => Expression.Convert(input, value!.GetType()); //Default type conversion
+    private static UnaryExpression GetAppropiateCastExpressionDefault(Expression input, object? value) => Expression.Convert(input, value!.GetType()); //Default type conversion
 
-    private static Expression GetAppropiateCastExpressionBasedGuid(Expression input)
+    private static ConditionalExpression GetAppropiateCastExpressionBasedGuid(Expression input)
     {
-        var getIdFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)),
-            typeof(EntityReference).GetMethod("get_Id")!);
+        var getIdFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)), typeof(EntityReference).GetMethod("get_Id")!);
 
-        return Expression.Condition(
-            Expression.TypeIs(input, typeof(EntityReference)), //If input is an entity reference, compare the Guid against the Id property
-            Expression.Convert(
-                getIdFromEntityReferenceExpr,
-                typeof(Guid)),
-            Expression.Condition(Expression.TypeIs(input, typeof(Guid)), //If any other case, then just compare it as a Guid directly
-                Expression.Convert(input, typeof(Guid)),
-                Expression.Constant(Guid.Empty, typeof(Guid))));
+        return Expression.Condition(Expression.TypeIs(input, typeof(EntityReference)), //If input is an entity reference, compare the Guid against the Id property
+            Expression.Convert(getIdFromEntityReferenceExpr, typeof(Guid)), Expression.Condition(Expression.TypeIs(input, typeof(Guid)), //If any other case, then just compare it as a Guid directly
+                Expression.Convert(input, typeof(Guid)), Expression.Constant(Guid.Empty, typeof(Guid))));
     }
 
     private static Expression GetAppropiateCastExpressionBasedOnEntityReference(Expression input, object value)
     {
         if (value is string strValue && !Guid.TryParse(strValue, out _))
         {
-            var getNameFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)),
-                typeof(EntityReference).GetMethod("get_Name")!);
+            var getNameFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)), typeof(EntityReference).GetMethod("get_Name")!);
 
-            return GetCaseInsensitiveExpression(Expression.Condition(Expression.TypeIs(input, typeof(EntityReference)),
-                Expression.Convert(getNameFromEntityReferenceExpr, typeof(string)),
+            return GetCaseInsensitiveExpression(Expression.Condition(Expression.TypeIs(input, typeof(EntityReference)), Expression.Convert(getNameFromEntityReferenceExpr, typeof(string)),
                 Expression.Constant(string.Empty, typeof(string))));
         }
 
-        var getIdFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)),
-            typeof(EntityReference).GetMethod("get_Id")!);
+        var getIdFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)), typeof(EntityReference).GetMethod("get_Id")!);
 
-        return Expression.Condition(
-            Expression.TypeIs(input, typeof(EntityReference)), //If input is an entity reference, compare the Guid against the Id property
-            Expression.Convert(
-                getIdFromEntityReferenceExpr,
-                typeof(Guid)),
-            Expression.Condition(Expression.TypeIs(input, typeof(Guid)), //If any other case, then just compare it as a Guid directly
-                Expression.Convert(input, typeof(Guid)),
-                Expression.Constant(Guid.Empty, typeof(Guid))));
+        return Expression.Condition(Expression.TypeIs(input, typeof(EntityReference)), //If input is an entity reference, compare the Guid against the Id property
+            Expression.Convert(getIdFromEntityReferenceExpr, typeof(Guid)), Expression.Condition(Expression.TypeIs(input, typeof(Guid)), //If any other case, then just compare it as a Guid directly
+                Expression.Convert(input, typeof(Guid)), Expression.Constant(Guid.Empty, typeof(Guid))));
     }
 
-    private static Expression GetAppropiateCastExpressionBasedOnDecimal(Expression input) =>
-        Expression.Condition(
-            Expression.TypeIs(input, typeof(Money)),
-            Expression.Convert(
-                Expression.Call(Expression.TypeAs(input, typeof(Money)),
-                    typeof(Money).GetMethod("get_Value")!),
-                typeof(decimal)),
-            Expression.Condition(Expression.TypeIs(input, typeof(decimal)),
-                Expression.Convert(input, typeof(decimal)),
-                Expression.Constant(0.0M)));
+    private static ConditionalExpression GetAppropiateCastExpressionBasedOnDecimal(Expression input) =>
+        Expression.Condition(Expression.TypeIs(input, typeof(Money)),
+            Expression.Convert(Expression.Call(Expression.TypeAs(input, typeof(Money)), typeof(Money).GetMethod("get_Value")!), typeof(decimal)),
+            Expression.Condition(Expression.TypeIs(input, typeof(decimal)), Expression.Convert(input, typeof(decimal)), Expression.Constant(0.0M)));
 
-    private static Expression GetAppropiateCastExpressionBasedOnBoolean(Expression input) =>
-        Expression.Condition(
-            Expression.TypeIs(input, typeof(BooleanManagedProperty)),
-            Expression.Convert(
-                Expression.Call(Expression.TypeAs(input, typeof(BooleanManagedProperty)),
-                    typeof(BooleanManagedProperty).GetMethod("get_Value")!),
-                typeof(bool)),
-            Expression.Condition(Expression.TypeIs(input, typeof(bool)),
-                Expression.Convert(input, typeof(bool)),
-                Expression.Constant(false)));
+    private static ConditionalExpression GetAppropiateCastExpressionBasedOnBoolean(Expression input) =>
+        Expression.Condition(Expression.TypeIs(input, typeof(BooleanManagedProperty)),
+            Expression.Convert(Expression.Call(Expression.TypeAs(input, typeof(BooleanManagedProperty)), typeof(BooleanManagedProperty).GetMethod("get_Value")!), typeof(bool)),
+            Expression.Condition(Expression.TypeIs(input, typeof(bool)), Expression.Convert(input, typeof(bool)), Expression.Constant(false)));
 
-    private static Expression GetAppropiateCastExpressionBasedOnInt(Expression input) =>
-        Expression.Condition(
-            Expression.TypeIs(input, typeof(OptionSetValue)),
-            Expression.Convert(
-                Expression.Call(Expression.TypeAs(input, typeof(OptionSetValue)),
-                    typeof(OptionSetValue).GetMethod("get_Value")!),
-                typeof(int)),
-            Expression.Convert(input, typeof(int)));
+    private static ConditionalExpression GetAppropiateCastExpressionBasedOnInt(Expression input) =>
+        Expression.Condition(Expression.TypeIs(input, typeof(OptionSetValue)),
+            Expression.Convert(Expression.Call(Expression.TypeAs(input, typeof(OptionSetValue)), typeof(OptionSetValue).GetMethod("get_Value")!), typeof(int)), Expression.Convert(input, typeof(int)));
 
-    private static Expression GetAppropiateCastExpressionBasedOnOptionSetValueCollection(Expression input) =>
+    private static MethodCallExpression GetAppropiateCastExpressionBasedOnOptionSetValueCollection(Expression input) =>
         Expression.Call(typeof(ConditionParser).GetMethod(nameof(ConvertToHashSetOfInt))!, input, Expression.Constant(true));
 
     #endregion

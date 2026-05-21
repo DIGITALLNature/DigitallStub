@@ -52,8 +52,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     /// <summary>
     /// Checks if a record exists in the internal state without throwing.
     /// </summary>
-    internal bool EntityExists(string logicalName, Guid id)
-        => ServiceState.TryGetValue(logicalName, out var entities) && entities.ContainsKey(id);
+    internal bool EntityExists(string logicalName, Guid id) => ServiceState.TryGetValue(logicalName, out var entities) && entities.ContainsKey(id);
 
     public void AddRequest(IOrganizationRequestFake fake)
     {
@@ -165,12 +164,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     {
         var logicalName = typeof(T).GetCustomAttribute<EntityLogicalNameAttribute>()?.LogicalName;
 
-        if (string.IsNullOrWhiteSpace(logicalName))
-        {
-            throw new ArgumentException("Entity type must have EntityLogicalNameAttribute", nameof(T));
-        }
-
-        return CreateQuery<T>(logicalName);
+        return !string.IsNullOrWhiteSpace(logicalName) ? CreateQuery<T>(logicalName) : throw new ArgumentException("Entity type must have EntityLogicalNameAttribute", nameof(T));
     }
 
     public IQueryable<T> CreateQuery<T>(string entityLogicalName) where T : Entity
@@ -232,26 +226,22 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     /// <param name="logicalname">The logical name of the entity.</param>
     /// <param name="entityType">The Type of the entity if it is known, otherwise null.</param>
     /// <returns>True if the entity type is known, otherwise false.</returns>
-    public bool EntityTypeIsKnown(string logicalname, out Type? entityType)
-        => TypeResolver.EntityTypeIsKnown(logicalname, out entityType);
+    public bool EntityTypeIsKnown(string logicalname, out Type? entityType) => TypeResolver.EntityTypeIsKnown(logicalname, out entityType);
 
     /// <summary>
     ///     Checks if the specified attribute is known for the given entity.
     /// </summary>
-    public bool IsKnownAttributeForType(string entity, string attribute, out PropertyInfo? attributeInfo)
-        => TypeResolver.IsKnownAttributeForType(entity, attribute, out attributeInfo);
+    public bool IsKnownAttributeForType(string entity, string attribute, out PropertyInfo? attributeInfo) => TypeResolver.IsKnownAttributeForType(entity, attribute, out attributeInfo);
 
     /// <summary>
     ///     Throws an exception if the specified entity type is not known.
     /// </summary>
-    public void ThrowIfNotKnownEntityType(string entityType)
-        => TypeResolver.ThrowIfNotKnownEntityType(entityType);
+    public void ThrowIfNotKnownEntityType(string entityType) => TypeResolver.ThrowIfNotKnownEntityType(entityType);
 
     /// <summary>
     ///     Throws an exception if the specified attribute is not known for the given entity.
     /// </summary>
-    public void ThrowIfNotKnownAttribute(string entityLogicalName, string attributeLogicalName)
-        => TypeResolver.ThrowIfNotKnownAttribute(entityLogicalName, attributeLogicalName);
+    public void ThrowIfNotKnownAttribute(string entityLogicalName, string attributeLogicalName) => TypeResolver.ThrowIfNotKnownAttribute(entityLogicalName, attributeLogicalName);
 
     #region IOrganizationService
 
@@ -357,12 +347,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        if (OrganizationRequestFakes.TryGetValue(request.GetType(), out var fake))
-        {
-            return fake.Execute(request, this);
-        }
-
-        throw new ArgumentOutOfRangeException(nameof(request), $"No implementation found for request of type {request.GetType().Name}");
+        return OrganizationRequestFakes.TryGetValue(request.GetType(), out var fake) ? fake.Execute(request, this) : throw new ArgumentOutOfRangeException(nameof(request), $"No implementation found for request of type {request.GetType().Name}");
     }
 
     public void Associate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities)
@@ -377,52 +362,55 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
         foreach (var relatedEntityReference in relatedEntities)
         {
-            if (relationshipMetadata is ManyToManyRelationshipMetadata manyToManyRelationshipMetadata)
+            switch (relationshipMetadata)
             {
-                var isFrom1To2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
-                var fromAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
-                var toAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
-                var fromEntityName = isFrom1To2 ? manyToManyRelationshipMetadata.Entity1LogicalName : manyToManyRelationshipMetadata.Entity2LogicalName;
-                var toEntityName = isFrom1To2 ? manyToManyRelationshipMetadata.Entity2LogicalName : manyToManyRelationshipMetadata.Entity1LogicalName;
-
-                //Check records exist
-                var targetExists = CreateQuery(fromEntityName).FirstOrDefault(e => e.Id == entityId) != null;
-
-                if (!targetExists)
-                {
-                    throw new Exception($"{fromEntityName} with Id {entityId.ToString()} doesn't exist");
-                }
-
-                var relatedExists = CreateQuery(toEntityName).FirstOrDefault(e => e.Id == relatedEntityReference.Id) != null;
-
-                if (!relatedExists)
-                {
-                    throw new Exception($"{toEntityName} with Id {relatedEntityReference.Id.ToString()} doesn't exist");
-                }
-
-                var association = new Entity(manyToManyRelationshipMetadata.IntersectEntityName)
-                {
-                    Attributes = new AttributeCollection
+                case ManyToManyRelationshipMetadata manyToManyRelationshipMetadata:
                     {
-                        { $"{manyToManyRelationshipMetadata.IntersectEntityName}id", Guid.NewGuid() }, { fromAttribute, entityId }, { toAttribute, relatedEntityReference.Id }
+                        var isFrom1To2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
+                        var fromAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
+                        var toAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
+                        var fromEntityName = isFrom1To2 ? manyToManyRelationshipMetadata.Entity1LogicalName : manyToManyRelationshipMetadata.Entity2LogicalName;
+                        var toEntityName = isFrom1To2 ? manyToManyRelationshipMetadata.Entity2LogicalName : manyToManyRelationshipMetadata.Entity1LogicalName;
+
+                        //Check records exist
+                        var targetExists = CreateQuery(fromEntityName).FirstOrDefault(e => e.Id == entityId) != null;
+
+                        if (!targetExists)
+                        {
+                            throw new Exception($"{fromEntityName} with Id {entityId.ToString()} doesn't exist");
+                        }
+
+                        var relatedExists = CreateQuery(toEntityName).FirstOrDefault(e => e.Id == relatedEntityReference.Id) != null;
+
+                        if (!relatedExists)
+                        {
+                            throw new Exception($"{toEntityName} with Id {relatedEntityReference.Id.ToString()} doesn't exist");
+                        }
+
+                        var association = new Entity(manyToManyRelationshipMetadata.IntersectEntityName)
+                        {
+                            Attributes = new AttributeCollection
+                            {
+                                { $"{manyToManyRelationshipMetadata.IntersectEntityName}id", Guid.NewGuid() }, { fromAttribute, entityId }, { toAttribute, relatedEntityReference.Id }
+                            }
+                        };
+
+                        Create(association);
+                        break;
                     }
-                };
+                case OneToManyRelationshipMetadata oneToManyRelationshipMetadata:
+                    {
+                        //Get entity to update
+                        var entityToUpdate = new Entity(relatedEntityReference.LogicalName)
+                        {
+                            Id = relatedEntityReference.Id, [oneToManyRelationshipMetadata.ReferencingAttribute] = new EntityReference(entityName, entityId)
+                        };
 
-                Create(association);
-            }
-            else if (relationshipMetadata is OneToManyRelationshipMetadata oneToManyRelationshipMetadata)
-            {
-                //Get entity to update
-                var entityToUpdate = new Entity(relatedEntityReference.LogicalName)
-                {
-                    Id = relatedEntityReference.Id, [oneToManyRelationshipMetadata.ReferencingAttribute] = new EntityReference(entityName, entityId)
-                };
-
-                Update(entityToUpdate);
-            }
-            else
-            {
-                throw new ArgumentException("RelationShip Metadata is not typed correctly");
+                        Update(entityToUpdate);
+                        break;
+                    }
+                default:
+                    throw new ArgumentException("RelationShip Metadata is not typed correctly");
             }
         }
     }

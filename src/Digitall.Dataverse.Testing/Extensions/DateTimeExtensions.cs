@@ -37,7 +37,7 @@ namespace Digitall.Dataverse.Testing.Extensions;
             public DateTime ToLastDayOfMonth(int month)
             {
                 var addYears = month > 12 ? month % 12 : 0;
-                month = month - 12 * addYears;
+                month -= 12 * addYears;
                 return dateTime
                     .AddDays(CultureInfo.CurrentCulture.Calendar.GetDaysInMonth(dateTime.Year + addYears, month) - dateTime.Day)
                     .AddMonths(month - dateTime.Month).AddYears(addYears);
