@@ -179,9 +179,9 @@ public class FakeOrganizationServiceTests
 
         var createdRecord = sut.Retrieve(Account.EntityLogicalName, result, new ColumnSet(true)).ToEntity<Account>();
         await Assert.That(createdRecord.StateCode).IsNotNull();
-        await Assert.That(createdRecord.StateCode!.Value).IsEqualTo(Account.Options.StateCode.Active);
+        await Assert.That(createdRecord.StateCode.Value).IsEqualTo(Account.Options.StateCode.Active);
         await Assert.That(createdRecord.StatusCode).IsNotNull();
-        await Assert.That(createdRecord.StatusCode!.Value).IsEqualTo(Account.Options.StatusCode.Active);
+        await Assert.That(createdRecord.StatusCode.Value).IsEqualTo(Account.Options.StatusCode.Active);
     }
 
     [Test]
@@ -199,9 +199,9 @@ public class FakeOrganizationServiceTests
 
         var createdRecord = sut.Retrieve(Account.EntityLogicalName, result, new ColumnSet(true)).ToEntity<Account>();
         await Assert.That(createdRecord.StateCode).IsNotNull();
-        await Assert.That(createdRecord.StateCode!.Value).IsEqualTo(entity.StateCode.Value);
+        await Assert.That(createdRecord.StateCode.Value).IsEqualTo(entity.StateCode.Value);
         await Assert.That(createdRecord.StatusCode).IsNotNull();
-        await Assert.That(createdRecord.StatusCode!.Value).IsEqualTo(entity.StatusCode.Value);
+        await Assert.That(createdRecord.StatusCode.Value).IsEqualTo(entity.StatusCode.Value);
     }
 
     [Test]
