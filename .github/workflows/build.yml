@@ -1,0 +1,40 @@
+name: Build Digitall.Testing
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - beta
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+    steps:
+    - uses: actions/checkout@v6
+
+    - name: Restore DotNet
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.x
+        cache: true
+        cache-dependency-path: '**/packages.lock.json'
+
+    - name: Enable Automated Test Report Artifact Upload
+      uses: actions/github-script@v9
+      with:
+        script: |
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env['ACTIONS_RUNTIME_TOKEN']);
+          core.exportVariable('ACTIONS_RESULTS_URL', process.env['ACTIONS_RESULTS_URL']);
+
+    - name: Restore dependencies
+      run: dotnet restore --locked-mode
+
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+
+    - name: Run Tests
+      run: dotnet test --configuration Release --no-build -- --output Detailed

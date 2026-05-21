@@ -1,0 +1,56 @@
+<Project>
+
+  <PropertyGroup>
+    <Company>DIGITALL Nature GmbH</Company>
+    <Copyright>Copyright (c) DIGITALL Nature GmbH 2024</Copyright>
+    <Authors>Marcel Kummerow</Authors>
+    <Product>Digitall Power Testing Dataverse</Product>
+    <PackageLicenseExpression>MS-RL</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/DIGITALLNature/DigitallTesting</PackageProjectUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>https://github.com/DIGITALLNature/DigitallTesting/blob/main/CHANGELOG.md</PackageReleaseNotes>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <SignAssembly>True</SignAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+
+  </ItemGroup>
+
+  <PropertyGroup>
+    <Version>1.0.0-beta.20</Version>
+    <InformationalVersion>1.0.0-beta.20</InformationalVersion>
+    <RepositoryCommit>81f5d4e60101b3e83d61a3f3de27cf4ac963dbc5</RepositoryCommit>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)LICENSE.md" Pack="true" PackagePath=""/>
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath=""/>
+    <None Include="$(MSBuildThisFileDirectory)CHANGELOG.md" Pack="true" PackagePath=""/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
