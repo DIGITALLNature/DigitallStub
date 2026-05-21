@@ -144,7 +144,7 @@ public static class ConditionParser
                 break;
 
             case ConditionOperator.EndsWith:
-                operatorExpression = TranslateConditionExpressionEndsWith(condition, getNonBasibuteValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionEndsWith(condition, getNonBasicValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.Contains:
