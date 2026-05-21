@@ -434,6 +434,8 @@ default:
                 fromDate = fiscalYearDate;
                 toDate = fiscalYearDate.AddYears(1).AddDays(-1);
                 break;
+            default:
+                break;
         }
 
         c.Values.Add(fromDate);
@@ -558,12 +560,7 @@ default:
             ThrowFaultException($"The ConditonOperator.{c.Operator} requires 1 value/s, not {c.Values.Count(v => v != null)}. Parameter Name: {c.AttributeName}");
         }
 
-        if (tc.AttributeType == typeof(string))
-        {
-            return TranslateConditionExpressionGreaterThanString(tc, getAttributeValueExpr, containsAttributeExpr);
-        }
-
-        if (GetAppropiateTypeForValue(c.Values[0]) == typeof(string))
+        if (tc.AttributeType == typeof(string) || GetAppropiateTypeForValue(c.Values[0]) == typeof(string))
         {
             return TranslateConditionExpressionGreaterThanString(tc, getAttributeValueExpr, containsAttributeExpr);
         }
@@ -709,12 +706,7 @@ default:
             ThrowFaultException($"The ConditonOperator.{c.Operator} requires 1 value/s, not {c.Values.Count(v => v != null)}. Parameter Name: {c.AttributeName}");
         }
 
-        if (tc.AttributeType == typeof(string))
-        {
-            return TranslateConditionExpressionLessThanString(tc, getAttributeValueExpr, containsAttributeExpr);
-        }
-
-        if (GetAppropiateTypeForValue(c.Values[0]) == typeof(string))
+        if (tc.AttributeType == typeof(string) || GetAppropiateTypeForValue(c.Values[0]) == typeof(string))
         {
             return TranslateConditionExpressionLessThanString(tc, getAttributeValueExpr, containsAttributeExpr);
         }

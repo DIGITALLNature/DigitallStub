@@ -10,7 +10,7 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Logic.Queries;
 
-public class LinkedEntitiesProcessor(FakeOrganizationService state, QueryProcessor queryProcessor)
+public partial class LinkedEntitiesProcessor(FakeOrganizationService state, QueryProcessor queryProcessor)
 {
         readonly Dictionary<string, int> _linkedEntities = new();
 
@@ -49,7 +49,7 @@ public class LinkedEntitiesProcessor(FakeOrganizationService state, QueryProcess
         {
             if (!string.IsNullOrEmpty(le.EntityAlias))
             {
-                if (!Regex.IsMatch(le.EntityAlias, "^[A-Za-z_](\\w|\\.)*$", RegexOptions.ECMAScript))
+                if (!EntityAliasRegex().IsMatch(le.EntityAlias))
                 {
                     var errorMsg =
                         $"Invalid character specified for alias: {le.EntityAlias}. Only characters within the ranges [A-Z], [a-z] or [0-9] or _ are allowed.  The first character may only be in the ranges [A-Z], [a-z] or _.";
@@ -138,5 +138,8 @@ public class LinkedEntitiesProcessor(FakeOrganizationService state, QueryProcess
 
             return query;
         }
+
+        [GeneratedRegex("^[A-Za-z_](\\w|\\.)*$", RegexOptions.ECMAScript)]
+        private static partial Regex EntityAliasRegex();
 
     }

@@ -154,8 +154,6 @@ public static class XDocumentExtensions
         switch (elem.Name.LocalName)
         {
             case "filter":
-                return true;
-
             case "value":
             case "fetch":
                 return true;
