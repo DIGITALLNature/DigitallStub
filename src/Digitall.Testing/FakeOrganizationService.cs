@@ -20,6 +20,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     public FakeOrganizationServiceState State { get; } = state;
 
+    // ReSharper disable once UnusedMember.Global : Public API
     public FakeOrganizationService(FakeOrganizationServiceState state) : this(TimeProvider.System, state)
     {
     }
@@ -40,6 +41,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     /// <summary>
     /// Invalidates the type resolver cache. Call after modifying ModelAssemblies or EntityMetadata.
     /// </summary>
+    // ReSharper disable once UnusedMember.Global : Public API
     public void InvalidateTypeResolverCache()
     {
         _typeResolver = null;

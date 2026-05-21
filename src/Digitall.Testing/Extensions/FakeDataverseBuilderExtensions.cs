@@ -13,6 +13,7 @@ public static class FakeDataverseBuilderExtensions
     /// <param name="builder">builder instance</param>
     extension<TBuilder>(TBuilder builder) where TBuilder : IFakeDataverseBuilder<FakeOrganizationService>
     {
+        // ReSharper disable once UnusedMember.Global : Public API
         public TBuilder AddData(IEnumerable<Entity> records)
         {
             builder.GetOrganizationService().AddRange(records);
@@ -25,18 +26,21 @@ public static class FakeDataverseBuilderExtensions
             return builder;
         }
 
+        // ReSharper disable once UnusedMember.Global : Public API
         public TBuilder AddOrganizationRequests(IEnumerable<IOrganizationRequestFake> requests)
         {
             builder.GetOrganizationService().AddRequests(requests);
             return builder;
         }
 
+        // ReSharper disable once UnusedMember.Global : Public API
         public TBuilder AddOrganizationRequests(params IOrganizationRequestFake[] requests)
         {
             builder.GetOrganizationService().AddRequests(requests);
             return builder;
         }
 
+        // ReSharper disable once UnusedMember.Global : Public API
         public TBuilder AddEntityMetadata(IEnumerable<EntityMetadata> metadata)
         {
             builder.GetOrganizationService().AddMetadata(metadata);
@@ -49,6 +53,7 @@ public static class FakeDataverseBuilderExtensions
             return builder;
         }
 
+        // ReSharper disable once UnusedMember.Global : Public API
         public TBuilder AddRelationships(IEnumerable<RelationshipMetadataBase> relationships)
         {
             builder.GetOrganizationService().AddRelationships(relationships);
@@ -85,6 +90,7 @@ public static class FakeDataverseBuilderExtensions
         /// <param name="path">The path to load from. Can be a file path to the XML file or path to the directory containing the XML files.</param>
         /// <returns>builder instance</returns>
         /// <exception cref="InvalidOperationException">path parameter is not a valid path</exception>
+        // ReSharper disable once UnusedMember.Global : Public API
         public TBuilder LoadMetadata(string path)
         {
             var serializer = new DataContractSerializer(typeof(EntityMetadata));
