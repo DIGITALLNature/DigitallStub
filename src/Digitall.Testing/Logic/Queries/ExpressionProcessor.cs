@@ -8,7 +8,7 @@ using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Testing.Logic.Queries;
 
-public class ExpressionProcessor(FakeOrganizationService state)
+public class ExpressionProcessor(FakeOrganizationService fakeOrgService)
 {
     public IQueryable<Entity> FilterQuery(QueryExpression queryExpression, IQueryable<Entity> query)
     {
@@ -38,7 +38,7 @@ public class ExpressionProcessor(FakeOrganizationService state)
                 ConditionOperator.In,
                 ConditionOperator.NotIn
             ]
-            : (ConditionOperator[])Enum.GetValues(typeof(ConditionOperator));
+            : Enum.GetValues<ConditionOperator>();
 
         if (!supportedOperators.Contains(typedExpression.CondExpression.Operator))
         {
@@ -145,17 +145,17 @@ public class ExpressionProcessor(FakeOrganizationService state)
         if (linkedEntity.LinkCriteria != null)
         {
             // Get the attribute metadata for the linked entity
-            var attributeMetadata = state.EntityMetadata.TryGetValue(linkedEntity.LinkToEntityName, out var value) ? value.Attributes : null;
+            var attributeMetadata = fakeOrgService.State.EntityMetadata.TryGetValue(linkedEntity.LinkToEntityName, out var value) ? value.Attributes : null;
 
             // Process each condition in the link criteria
             foreach (var ce in linkedEntity.LinkCriteria.Conditions)
             {
                 // Check if the attribute is not known for the type and ends with "name"
-                if (!state.IsKnownAttributeForType(linkedEntity.LinkToEntityName, ce.AttributeName, out _) && ce.AttributeName.EndsWith("name", StringComparison.Ordinal))
+                if (!fakeOrgService.IsKnownAttributeForType(linkedEntity.LinkToEntityName, ce.AttributeName, out _) && ce.AttributeName.EndsWith("name", StringComparison.Ordinal))
                 {
                     // Special case for referencing the name of an EntityReference
-                    var slicedAttributeName = ce.AttributeName.Substring(0, ce.AttributeName.Length - 4);
-                    if (state.IsKnownAttributeForType(linkedEntity.LinkToEntityName, slicedAttributeName, out var attributeInfo) && attributeInfo!.PropertyType == typeof(EntityReference))
+                    var slicedAttributeName = ce.AttributeName[..^4];
+                    if (fakeOrgService.IsKnownAttributeForType(linkedEntity.LinkToEntityName, slicedAttributeName, out var attributeInfo) && attributeInfo!.PropertyType == typeof(EntityReference))
                     {
                         // Update the attribute name to avoid conflicts with the naming pattern
                         ce.AttributeName = slicedAttributeName;
@@ -164,7 +164,7 @@ public class ExpressionProcessor(FakeOrganizationService state)
                 else if (attributeMetadata != null && attributeMetadata.All(a => a.LogicalName != ce.AttributeName) && ce.AttributeName.EndsWith("name", StringComparison.Ordinal))
                 {
                     // Special case for referencing the name of an EntityReference
-                    var slicedAttributeName = ce.AttributeName.Substring(0, ce.AttributeName.Length - 4);
+                    var slicedAttributeName = ce.AttributeName[..^4];
                     if (attributeMetadata.Any(a => a.LogicalName == slicedAttributeName))
                     {
                         ce.AttributeName = slicedAttributeName;
@@ -221,7 +221,7 @@ public class ExpressionProcessor(FakeOrganizationService state)
             var sAttributeName = c.AttributeName;
 
             //Find the attribute type if using early bound entities
-            if (state.ModelAssemblies.Count != 0)
+            if (fakeOrgService.State.ModelAssemblies.Count != 0)
             {
                 if (c.EntityName != null)
                 {
@@ -229,7 +229,7 @@ public class ExpressionProcessor(FakeOrganizationService state)
                 }
                 else
                 {
-                    if (c.AttributeName.IndexOf(".", StringComparison.CurrentCultureIgnoreCase) >= 0)
+                    if (c.AttributeName.Contains(".", StringComparison.CurrentCultureIgnoreCase))
                     {
                         var alias = c.AttributeName.Split('.')[0];
                         cEntityName = queryExpression.GetEntityNameFromAlias(alias);
@@ -239,16 +239,16 @@ public class ExpressionProcessor(FakeOrganizationService state)
 
 
 
-                if (state.IsKnownAttributeForType(cEntityName, sAttributeName, out var propertyInfo))
+                if (fakeOrgService.IsKnownAttributeForType(cEntityName, sAttributeName, out var propertyInfo))
                 {
                     typedExpression.AttributeType = propertyInfo!.PropertyType;
 
                     // Special case when filtering on the name of a Lookup
                     if (typedExpression.AttributeType == typeof(EntityReference) &&  sAttributeName.EndsWith("name", StringComparison.Ordinal))
                     {
-                        var realAttributeName = c.AttributeName.Substring(0, c.AttributeName.Length - 4);
+                        var realAttributeName = c.AttributeName[..^4];
 
-                        if (state.IsKnownAttributeForType(cEntityName, realAttributeName, out var attributeInfo))
+                        if (fakeOrgService.IsKnownAttributeForType(cEntityName, realAttributeName, out var attributeInfo))
                         {
                             if (attributeInfo!.PropertyType == typeof(EntityReference))
                             {
@@ -263,7 +263,7 @@ public class ExpressionProcessor(FakeOrganizationService state)
             EnsureSupportedTypedExpression(typedExpression);
 
             //Build a binary expression
-            binaryExpression = logicalOperator == LogicalOperator.And ? Expression.And(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, state, typedExpression, entity)) : Expression.Or(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, state, typedExpression, entity));
+            binaryExpression = logicalOperator == LogicalOperator.And ? Expression.And(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, fakeOrgService, typedExpression, entity)) : Expression.Or(binaryExpression, ConditionParser.TranslateConditionExpression(queryExpression, fakeOrgService, typedExpression, entity));
         }
 
         return binaryExpression;

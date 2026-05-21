@@ -32,7 +32,7 @@ public class AssignRequestFake : OrganizationRequestFake<AssignRequest, AssignRe
         {
             "systemuser" => new KeyValuePair<string, object>("owninguser", assignee),
             "team" => new KeyValuePair<string, object>("owningteam", assignee),
-            _ => throw new ArgumentOutOfRangeException(nameof(assignee.LogicalName))
+            _ => throw new ArgumentOutOfRangeException(nameof(organizationRequest), $"Unknown assignee logical name: {assignee.LogicalName}")
         };
 
         var assignment = new Entity

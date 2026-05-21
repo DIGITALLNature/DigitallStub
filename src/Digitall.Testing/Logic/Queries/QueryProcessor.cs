@@ -26,10 +26,7 @@ public class QueryProcessor
 
         public IQueryable<Entity> ExecuteQueryExpression(QueryExpression queryExpression)
         {
-            if (queryExpression == null)
-            {
-                throw new ArgumentNullException(nameof(queryExpression));
-            }
+            ArgumentNullException.ThrowIfNull(queryExpression);
 
             _state.ThrowIfNotKnownEntityType(queryExpression.EntityName);
             var query = _state.CreateQuery<Entity>(queryExpression.EntityName);
@@ -45,10 +42,7 @@ public class QueryProcessor
 
         public QueryExpression ConvertXmlDocumentToQueryExpression(XDocument xmlDocument)
         {
-            if (xmlDocument == null)
-            {
-                throw new ArgumentNullException(nameof(xmlDocument));
-            }
+            ArgumentNullException.ThrowIfNull(xmlDocument);
             _fetchProcessor.ValidateXmlDocument(xmlDocument);
 
             var entityNode = RetrieveFetchXmlNode(xmlDocument, "entity");
@@ -206,7 +200,7 @@ public class QueryProcessor
 
             List<Entity> aggregateResult;
 
-            if (groups.Any())
+            if (groups.Count > 0)
             {
                 aggregateResult = ProcessGroupedAggregate(entityName, internalResult, aggregates, groups);
             }

@@ -12,7 +12,7 @@ public static class EntityExtensions
     {
         public object KeySelector(string sAttributeName)
         {
-            if (sAttributeName.Contains("."))
+            if (sAttributeName.Contains('.'))
             {
                 //Do not lowercase the alias prefix
                 var splitted = sAttributeName.Split('.');
@@ -26,7 +26,7 @@ public static class EntityExtensions
             if (!entity.Attributes.ContainsKey(sAttributeName))
             {
                 //Check if it is the primary key
-                if (sAttributeName.Contains("id") && entity.LogicalName.ToLower().Equals(sAttributeName.Substring(0, sAttributeName.Length - 2)))
+                if (sAttributeName.Contains("id") && entity.LogicalName.ToLower().Equals(sAttributeName[..^2]))
                 {
                     return entity.Id;
                 }
