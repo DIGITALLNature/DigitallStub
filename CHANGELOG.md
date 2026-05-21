@@ -1,3 +1,57 @@
+# 1.0.0 (2026-05-21)
+
+
+* feat!: remove deprecated state proxy properties from FakeOrganizationService ([cdfef89](https://github.com/DIGITALLNature/DigitallTesting/commit/cdfef892ab5161b2f295bad826a3c7acdac3f0f9))
+
+
+### Bug Fixes
+
+* add id attribute to intersect entity ([#10](https://github.com/DIGITALLNature/DigitallTesting/issues/10)) ([f477d4c](https://github.com/DIGITALLNature/DigitallTesting/commit/f477d4c26c1d4528a440e3d67ee9ff1a6b4cd4df))
+* **builder:** make UserId settable agnostically without mutating env variable ([a01cbd6](https://github.com/DIGITALLNature/DigitallTesting/commit/a01cbd65ef5c9f76d1a44464ff6239706bd078d0))
+* correct typo getNonBasibuteValueExpr -> getNonBasicValueExpr in ConditionParser ([038354c](https://github.com/DIGITALLNature/DigitallTesting/commit/038354cc2c5748186a8adc6555056964cdeae28c))
+* remove redundant code ([81f5d4e](https://github.com/DIGITALLNature/DigitallTesting/commit/81f5d4e60101b3e83d61a3f3de27cf4ac963dbc5))
+* resolve nullable reference type and code quality warnings ([a70cda2](https://github.com/DIGITALLNature/DigitallTesting/commit/a70cda2dfa012f62ff4ad05784cf08dc23697821))
+* resolve Qodana quality and performance findings ([4ebe327](https://github.com/DIGITALLNature/DigitallTesting/commit/4ebe327e074d9cd9dccb456a767c871180dc3820))
+* resolve Qodana style warnings ([910bda7](https://github.com/DIGITALLNature/DigitallTesting/commit/910bda7ae43d150d589896f0a683f1c559ed1262))
+* resolve remaining mechanical Qodana warnings (Phase 4) ([251764a](https://github.com/DIGITALLNature/DigitallTesting/commit/251764aebb003edd36e14a372c515de0852697f9))
+* resolve remaining Qodana warnings (Phase 3) ([aacec43](https://github.com/DIGITALLNature/DigitallTesting/commit/aacec4347c84539ddadddcab7fca0a40fb28cad6))
+* return orgservice in PluginExecutionContextBuilder when userid is null ([bcf818a](https://github.com/DIGITALLNature/DigitallTesting/commit/bcf818a5c47a42a9d7e23a4c8222669e9047ac5b))
+* **WhoAmIFake:** use TryParse for env var GUIDs to handle invalid values ([3774a74](https://github.com/DIGITALLNature/DigitallTesting/commit/3774a74ee6bfad930ebd38802a22070a49f6c45e))
+* wrong post entity images mock ([#8](https://github.com/DIGITALLNature/DigitallTesting/issues/8)) ([f694c4f](https://github.com/DIGITALLNature/DigitallTesting/commit/f694c4f6cdf646447d75f4109f185831607fc63f))
+
+
+### Features
+
+* add builder methods for relationships & entity metadata ([#9](https://github.com/DIGITALLNature/DigitallTesting/issues/9)) ([104069b](https://github.com/DIGITALLNature/DigitallTesting/commit/104069b7ba29422ee8c80c29452b4b9eca97ff99))
+* add Depth to PluginExecutionContextBuilder ([332cdf5](https://github.com/DIGITALLNature/DigitallTesting/commit/332cdf53b4ddbe01da66668407c4b222ddf217a1))
+* add Fake for Retrieve ([b5e4335](https://github.com/DIGITALLNature/DigitallTesting/commit/b5e4335d6057845ae0d4ce17d55fddf3399a85f2))
+* add SpyOrganizationRequestFake ([a99caec](https://github.com/DIGITALLNature/DigitallTesting/commit/a99caec776cecf374b1f4939e9ecdf87335f725f))
+* add support for IOrganizationServiceAsync2 ([#11](https://github.com/DIGITALLNature/DigitallTesting/issues/11)) ([6ccdbfe](https://github.com/DIGITALLNature/DigitallTesting/commit/6ccdbfe185c1bc8da86c2382eafb85d48de47dba))
+* add TenantId to PluginExecutionContextBuilder ([f77f5c9](https://github.com/DIGITALLNature/DigitallTesting/commit/f77f5c9b801cddea45a161c239f07ade8adb3328))
+* add WithTenantId, WithDepth and WithTracingService builder extensions ([426fc1a](https://github.com/DIGITALLNature/DigitallTesting/commit/426fc1a90172330cb62d9dac1ac8a2134a25f186))
+* allow registration of additional services in IServiceProvider ([#18](https://github.com/DIGITALLNature/DigitallTesting/issues/18)) ([4c23c38](https://github.com/DIGITALLNature/DigitallTesting/commit/4c23c38105aaf56de0bb0a74b867241154e3caac))
+* allow TimeProvider in FakedDataverseBuilder ctors ([598d345](https://github.com/DIGITALLNature/DigitallTesting/commit/598d345271f5e336e71399fcd376657e8cd428b2))
+* expose of FakeDataverse in FakeDataverseBuilder ([49d1178](https://github.com/DIGITALLNature/DigitallTesting/commit/49d117899734e24eef30dd5d36dc853e4669e17a))
+* fake for RetrieveEntity ([72c0dd8](https://github.com/DIGITALLNature/DigitallTesting/commit/72c0dd86a508061c21bab3756bb4aeed6576409f))
+* first release ([d4dc78c](https://github.com/DIGITALLNature/DigitallTesting/commit/d4dc78c648c3f41fad2455db2e1c9a9fe9a240cd))
+* for FakedDataverseBuild add method AddConfig ([da16128](https://github.com/DIGITALLNature/DigitallTesting/commit/da161282f2c35d82e55c23bdcc8d89e28b12bd2b))
+* migrate to TUnit + TUnit.Mocks + TUnit.Assertions ([942b90e](https://github.com/DIGITALLNature/DigitallTesting/commit/942b90e92e301061ccd5f23681788884b5b3a3be))
+* set default state on create ([#19](https://github.com/DIGITALLNature/DigitallTesting/issues/19)) ([30f7daa](https://github.com/DIGITALLNature/DigitallTesting/commit/30f7daa797ee4ab273b34bad75d11c567844b86b)), closes [#18](https://github.com/DIGITALLNature/DigitallTesting/issues/18)
+* support for RetrieveWithAlternateKey ([8d00ee4](https://github.com/DIGITALLNature/DigitallTesting/commit/8d00ee43a49ba3c98bbfbca7556472d6dcbaf699))
+
+
+### Performance Improvements
+
+* cache reflection lookups in EntityTypeResolver ([7d3ab89](https://github.com/DIGITALLNature/DigitallTesting/commit/7d3ab8976c8ee838bd8a9666a74b556df13c3e2a))
+
+
+### BREAKING CHANGES
+
+* use State.ModelAssemblies, State.EntityMetadata and
+State.Relationships instead of the removed proxy properties.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
+
 # [1.0.0-beta.20](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.19...v1.0.0-beta.20) (2026-05-21)
 
 
