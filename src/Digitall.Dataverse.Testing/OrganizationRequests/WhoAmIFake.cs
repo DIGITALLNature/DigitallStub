@@ -6,21 +6,18 @@ using Microsoft.Xrm.Sdk;
 
 namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
-public class WhoAmIFake: OrganizationRequestFake<WhoAmIRequest,WhoAmIResponse>
+public class WhoAmIFake : OrganizationRequestFake<WhoAmIRequest, WhoAmIResponse>
 {
     public override WhoAmIResponse Execute(WhoAmIRequest organizationRequest, FakeOrganizationService state)
     {
         var userId = Guid.TryParse(Environment.GetEnvironmentVariable("UserId"), out var parsedUserId) ? parsedUserId : Guid.Empty;
 
-        var results = new ParameterCollection {
-            { "UserId", userId }
-        };
+        var results = new ParameterCollection { { "UserId", userId } };
 
-        var user = state
-            .CreateQuery("systemuser")
-            .SingleOrDefault(u => u.Id == userId);
+        var user = state.CreateQuery("systemuser").SingleOrDefault(u => u.Id == userId);
 
-        if(user != null) {
+        if (user != null)
+        {
             var buId = GetBusinessUnitId(user);
             results.Add("BusinessUnitId", buId);
 
@@ -28,28 +25,25 @@ public class WhoAmIFake: OrganizationRequestFake<WhoAmIRequest,WhoAmIResponse>
             results.Add("OrganizationId", orgId);
         }
 
-        var response = new WhoAmIResponse
-        {
-            Results = results
-        };
+        var response = new WhoAmIResponse { Results = results };
         return response;
     }
 
-    private static Guid GetBusinessUnitId(Entity user) {
+    private static Guid GetBusinessUnitId(Entity user)
+    {
         var buRef = user.GetAttributeValue<EntityReference>("businessunitid");
         var buId = buRef?.Id ?? (Guid.TryParse(Environment.GetEnvironmentVariable("BusinessUnitId"), out var parsedBuId) ? parsedBuId : Guid.Empty);
         return buId;
     }
 
-    private static Guid GetOrganizationId(FakeOrganizationService state, Entity user, Guid buId) {
+    private static Guid GetOrganizationId(FakeOrganizationService state, Entity user, Guid buId)
+    {
         var orgId = user.GetAttributeValue<Guid?>("organizationid") ?? Guid.Empty;
-        if(orgId == Guid.Empty) {
-            var bu = state
-                .CreateQuery("businessunit")
-                .SingleOrDefault(b => b.Id == buId);
-            var orgRef = bu?.GetAttributeValue<EntityReference>("organizationid");
-            orgId = orgRef?.Id ?? Guid.Empty;
-        }
+        if (orgId != Guid.Empty) return orgId;
+
+        var bu = state.CreateQuery("businessunit").SingleOrDefault(b => b.Id == buId);
+        var orgRef = bu?.GetAttributeValue<EntityReference>("organizationid");
+        orgId = orgRef?.Id ?? Guid.Empty;
 
         return orgId;
     }

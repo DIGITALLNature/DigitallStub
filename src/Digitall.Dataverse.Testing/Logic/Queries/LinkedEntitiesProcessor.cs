@@ -95,29 +95,15 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
                 linkFromAlias += "." + le.LinkFromAttributeName;
             }
 
-            switch (le.JoinOperator)
+            query = le.JoinOperator switch
             {
-                case JoinOperator.Inner:
-                case JoinOperator.Natural:
-                    query = query.Join<Entity, Entity, object, Entity>(inner,
-                        outerKey => outerKey.KeySelector(linkFromAlias),
-                        innerKey => innerKey.KeySelector(le.LinkToAttributeName),
-                        (outerEl, innerEl) => outerEl.CloneEntity().JoinAttributes(innerEl, new ColumnSet(true), leAlias));
-
-                    break;
-                case JoinOperator.LeftOuter:
-                    query = query.GroupJoin(inner,
-                        outerKey => outerKey.KeySelector(linkFromAlias),
-                        innerKey => innerKey.KeySelector(le.LinkToAttributeName),
-                        (outerEl, innerElemsCol) => new { outerEl, innerElemsCol }).SelectMany(x => x.innerElemsCol.DefaultIfEmpty()
-                            , (x, y) => x.outerEl
-                                .JoinAttributes(y!, new ColumnSet(true), leAlias));
-
-
-                    break;
-                default: //This shouldn't be reached as there are only 3 types of Join...
-                    throw new ArgumentException($"The join operator {le.JoinOperator} is currently not supported.");
-            }
+                JoinOperator.Inner or JoinOperator.Natural => query.Join<Entity, Entity, object, Entity>(inner, outerKey => outerKey.KeySelector(linkFromAlias),
+                    innerKey => innerKey.KeySelector(le.LinkToAttributeName), (outerEl, innerEl) => outerEl.CloneEntity().JoinAttributes(innerEl, new ColumnSet(true), leAlias)),
+                JoinOperator.LeftOuter => query.GroupJoin(inner,
+                        outerKey => outerKey.KeySelector(linkFromAlias), innerKey => innerKey.KeySelector(le.LinkToAttributeName), (outerEl, innerElemsCol) => new { outerEl, innerElemsCol })
+                    .SelectMany(x => x.innerElemsCol.DefaultIfEmpty(), (x, y) => x.outerEl.JoinAttributes(y!, new ColumnSet(true), leAlias)),
+                _ => throw new ArgumentException($"The join operator {le.JoinOperator} is currently not supported.")
+            };
 
             // Process nested linked entities recursively
             foreach (var nestedLinkedEntity in le.LinkEntities)

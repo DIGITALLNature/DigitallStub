@@ -60,13 +60,12 @@ public static class EntityExtensions
             {
                 state.ThrowIfNotKnownAttribute(entity.LogicalName, attKey);
 
-                if (entity.Attributes.ContainsKey(attKey) && entity.Attributes[attKey] != null)
+                if (!entity.Attributes.ContainsKey(attKey) || entity.Attributes[attKey] == null) continue;
+
+                projected[attKey] = CloneAttribute(entity[attKey]);
+                if (entity.FormattedValues.TryGetValue(attKey, out var formattedValue))
                 {
-                    projected[attKey] = CloneAttribute(entity[attKey]);
-                    if (entity.FormattedValues.TryGetValue(attKey, out var formattedValue))
-                    {
-                        projected.FormattedValues[attKey] = formattedValue;
-                    }
+                    projected.FormattedValues[attKey] = formattedValue;
                 }
             }
 
@@ -89,13 +88,12 @@ public static class EntityExtensions
             {
                 state.ThrowIfNotKnownAttribute(entity.LogicalName, attKey);
 
-                if (entity.Attributes.ContainsKey(attKey) && entity.Attributes[attKey] != null)
+                if (!entity.Attributes.ContainsKey(attKey) || entity.Attributes[attKey] == null) continue;
+
+                projected[attKey] = CloneAttribute(entity[attKey]);
+                if (entity.FormattedValues.TryGetValue(attKey, out var formattedValue))
                 {
-                    projected[attKey] = CloneAttribute(entity[attKey]);
-                    if (entity.FormattedValues.TryGetValue(attKey, out var formattedValue))
-                    {
-                        projected.FormattedValues[attKey] = formattedValue;
-                    }
+                    projected.FormattedValues[attKey] = formattedValue;
                 }
             }
 
@@ -177,13 +175,12 @@ public static class EntityExtensions
                     var clonedReference = new EntityReference(reference.LogicalName, reference.Id) { Name = (string?)CloneAttribute(reference.Name) };
 
                     // If the reference has key attributes, clone them.
-                    if (reference.KeyAttributes != null)
-                    {
-                        var clonedKeyAttributes = new KeyAttributeCollection();
-                        clonedKeyAttributes.AddRange(reference.KeyAttributes.Select(kvp => new KeyValuePair<string, object?>(kvp.Key, CloneAttribute(kvp.Value))).ToArray());
+                    if (reference.KeyAttributes == null) return clonedReference;
 
-                        clonedReference.KeyAttributes = clonedKeyAttributes;
-                    }
+                    var clonedKeyAttributes = new KeyAttributeCollection();
+                    clonedKeyAttributes.AddRange(reference.KeyAttributes.Select(kvp => new KeyValuePair<string, object?>(kvp.Key, CloneAttribute(kvp.Value))).ToArray());
+
+                    clonedReference.KeyAttributes = clonedKeyAttributes;
 
                     return clonedReference;
                 }

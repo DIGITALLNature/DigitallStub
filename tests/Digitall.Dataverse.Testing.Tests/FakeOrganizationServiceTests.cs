@@ -201,7 +201,7 @@ public class FakeOrganizationServiceTests
         var createdRecord = sut.Retrieve(Account.EntityLogicalName, result, new ColumnSet(true)).ToEntity<Account>();
         await Assert.That(createdRecord.StateCode).IsNotNull();
         await Assert.That(createdRecord.StateCode.Value).IsEqualTo(entity.StateCode.Value);
-        await Assert.That(createdRecord.StatusCode).IsNotNull<OptionSetValue>();
+        await Assert.That(createdRecord.StatusCode).IsNotNull();
         await Assert.That(createdRecord.StatusCode.Value).IsEqualTo(entity.StatusCode.Value);
     }
 

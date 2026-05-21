@@ -54,7 +54,7 @@ public class OrganizationRequestFakeTests
     }
 
     [Test]
-    public async Task DeleteFake_Should_RemoveRecord()
+    public Task DeleteFake_Should_RemoveRecord()
     {
         _sut.AddRequest(new DeleteFake());
         var id = Guid.NewGuid();
@@ -66,6 +66,7 @@ public class OrganizationRequestFakeTests
 
         void Action() => _sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
         Assert.Throws<FaultException<OrganizationServiceFault>>(Action);
+        return Task.CompletedTask;
     }
 
     [Test]

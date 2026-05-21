@@ -3,7 +3,6 @@
 
 using Digitall.Dataverse.Testing.Tests.Fixtures;
 using Microsoft.Crm.Sdk.Messages;
-using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 
 namespace Digitall.Dataverse.Testing.Tests.OrganizationRequests;
@@ -148,6 +147,6 @@ public class SpyOrganizationRequestFakeTests
         service.Execute(new CreateRequest { Target = account });
 
         await Assert.That(sut.ReceivedRequests).Count().IsEqualTo(1);
-        await Assert.That(sut.ReceivedRequests[0].Target).IsEqualTo<Entity>(account);
+        await Assert.That(sut.ReceivedRequests[0].Target).IsEqualTo(account);
     }
 }

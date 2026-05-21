@@ -23,12 +23,11 @@ public static class Validators
         }
 
         // Recursively validate the linked entities in the link entity
-        if (linkEntity.LinkEntities != null)
+        if (linkEntity.LinkEntities == null) return;
+
+        foreach (var innerLink in linkEntity.LinkEntities)
         {
-            foreach (var innerLink in linkEntity.LinkEntities)
-            {
-                ValidateLinkedAliases(queryExpression, innerLink);
-            }
+            ValidateLinkedAliases(queryExpression, innerLink);
         }
     }
 
@@ -49,15 +48,14 @@ public static class Validators
         }
 
         // Validate the conditions in the filter expression
-        if (filterExpression.Conditions != null)
+        if (filterExpression.Conditions == null) return;
+
+        foreach (var condition in filterExpression.Conditions)
         {
-            foreach (var condition in filterExpression.Conditions)
+            // Validate the condition only if it has an entity name
+            if (!string.IsNullOrEmpty(condition.EntityName))
             {
-                // Validate the condition only if it has an entity name
-                if (!string.IsNullOrEmpty(condition.EntityName))
-                {
-                    ValidateConditionAliases(queryExpression, condition);
-                }
+                ValidateConditionAliases(queryExpression, condition);
             }
         }
     }
@@ -75,38 +73,36 @@ public static class Validators
         // If there are multiple matches, throw an exception
         if (matches > 1)
         {
-            throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault(),
-                $"Table {conditionExpression.EntityName} is not unique amongst all top-level table and join aliases");
+            throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault(), $"Table {conditionExpression.EntityName} is not unique amongst all top-level table and join aliases");
         }
 
         // If there are no matches, check if there is a matching entity in the query expression's link entities
+        if (matches != 0) return;
+
+        if (queryExpression.LinkEntities != null)
+        {
+            matches = MatchByEntity(conditionExpression, queryExpression.LinkEntities);
+        }
+
+        // If there are multiple matches, throw an exception
+        if (matches > 1)
+        {
+            throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault(), $"There's more than one LinkEntity expressions with name={conditionExpression.EntityName}");
+        }
+
+        // If there are no matches, check if the condition's entity name matches the query expression's entity name
         if (matches == 0)
         {
-            if (queryExpression.LinkEntities != null)
+            if (conditionExpression.EntityName == queryExpression.EntityName)
             {
-                matches = MatchByEntity(conditionExpression, queryExpression.LinkEntities);
+                return;
             }
 
-            // If there are multiple matches, throw an exception
-            if (matches > 1)
-            {
-                throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault(), $"There's more than one LinkEntity expressions with name={conditionExpression.EntityName}");
-            }
-
-            // If there are no matches, check if the condition's entity name matches the query expression's entity name
-            if (matches == 0)
-            {
-                if (conditionExpression.EntityName == queryExpression.EntityName)
-                {
-                    return;
-                }
-
-                throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault(), $"LinkEntity with name or alias {conditionExpression.EntityName} is not found");
-            }
-
-            // If there is a match, append "1" to the condition's entity name
-            conditionExpression.EntityName += "1";
+            throw new FaultException<OrganizationServiceFault>(new OrganizationServiceFault(), $"LinkEntity with name or alias {conditionExpression.EntityName} is not found");
         }
+
+        // If there is a match, append "1" to the condition's entity name
+        conditionExpression.EntityName += "1";
     }
 
     /// <summary>
