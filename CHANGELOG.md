@@ -1,3 +1,10 @@
+# [1.0.0-beta.17](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.16...v1.0.0-beta.17) (2026-05-21)
+
+
+### Features
+
+* allow registration of additional services in IServiceProvider ([#18](https://github.com/DIGITALLNature/DigitallTesting/issues/18)) ([4c23c38](https://github.com/DIGITALLNature/DigitallTesting/commit/4c23c38105aaf56de0bb0a74b867241154e3caac))
+
 # [1.0.0-beta.16](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0-beta.15...v1.0.0-beta.16) (2026-05-21)
 
 
