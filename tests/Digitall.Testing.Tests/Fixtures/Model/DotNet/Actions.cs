@@ -1,6 +1,6 @@
 
 
 // ReSharper disable All
-namespace Digitall.Testing.Tests.Fixtures
+namespace Digitall.Dataverse.Testing.Tests.Fixtures
 {
 }

@@ -16,7 +16,7 @@ profile:
   name: qodana.recommended
 
 dotnet:
-  solution: ./Digitall.Testing.slnx
+  solution: ./Digitall.Dataverse.Testing.slnx
   configuration: Debug
 
 #Enable inspections
@@ -31,7 +31,7 @@ exclude:
       - README.md
 
 #Execute shell command before Qodana execution (Applied in CI/CD pipeline)
-bootstrap: dotnet restore ./Digitall.Testing.slnx && dotnet build ./Digitall.Testing.slnx --configuration Debug
+bootstrap: dotnet restore ./Digitall.Dataverse.Testing.slnx && dotnet build ./Digitall.Dataverse.Testing.slnx --configuration Debug
 
 #Install IDE plugins before Qodana execution (Applied in CI/CD pipeline)
 #plugins:
