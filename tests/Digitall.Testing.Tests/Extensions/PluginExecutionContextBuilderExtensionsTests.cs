@@ -218,6 +218,59 @@ public class PluginExecutionContextBuilderExtensionsTests
     }
 
     [Test]
+    public async Task WithUserId_ShouldSetUserIdAndReturnSameBuilder()
+    {
+        var userId = Guid.NewGuid();
+        var builder = new PluginExecutionContextBuilder();
+
+        var result = builder.WithUserId(userId);
+
+        await Assert.That(result).IsSameReferenceAs(builder);
+        await Assert.That(builder.UserId).IsEqualTo(userId);
+    }
+
+    [Test]
+    public async Task WithUserId_ShouldTakePrecedenceOverEnvVariable()
+    {
+        var originalUserId = Environment.GetEnvironmentVariable("UserId");
+        var explicitUserId = Guid.NewGuid();
+        var envUserId = Guid.NewGuid();
+
+        try
+        {
+            Environment.SetEnvironmentVariable("UserId", envUserId.ToString());
+
+            var builder = new PluginExecutionContextBuilder().WithUserId(explicitUserId);
+
+            await Assert.That(builder.UserId).IsEqualTo(explicitUserId);
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("UserId", originalUserId);
+        }
+    }
+
+    [Test]
+    public async Task WithUserId_ShouldNotModifyEnvironmentVariable()
+    {
+        var originalUserId = Environment.GetEnvironmentVariable("UserId");
+        var explicitUserId = Guid.NewGuid();
+
+        try
+        {
+            Environment.SetEnvironmentVariable("UserId", null);
+
+            new PluginExecutionContextBuilder().WithUserId(explicitUserId);
+
+            await Assert.That(Environment.GetEnvironmentVariable("UserId")).IsNull();
+        }
+        finally
+        {
+            Environment.SetEnvironmentVariable("UserId", originalUserId);
+        }
+    }
+
+    [Test]
     public async Task WithCorrelationId_ShouldSetCorrelationIdAndReturnSameBuilder()
     {
         var correlationId = Guid.NewGuid();
@@ -317,6 +370,7 @@ public class PluginExecutionContextBuilderExtensionsTests
         var entityTarget = new Entity("account", Guid.NewGuid());
         var preImage = new Entity("account", Guid.NewGuid());
         var postImage = new Entity("account", Guid.NewGuid());
+        var userId = Guid.NewGuid();
         var initiatingUserId = Guid.NewGuid();
         var correlationId = Guid.NewGuid();
         var tenantId = Guid.NewGuid();
@@ -331,6 +385,7 @@ public class PluginExecutionContextBuilderExtensionsTests
             .WithInputParameter("in", 1)
             .WithOutputParameter("out", 2)
             .WithSharedVariable("shared", 3)
+            .WithUserId(userId)
             .WithInitiatingUserId(initiatingUserId)
             .WithCorrelationId(correlationId)
             .WithMessageName("Create")
@@ -346,6 +401,7 @@ public class PluginExecutionContextBuilderExtensionsTests
         await Assert.That(builder.InputParameters.ContainsKey("in")).IsTrue();
         await Assert.That(builder.OutputParameters.ContainsKey("out")).IsTrue();
         await Assert.That(builder.SharedVariables.ContainsKey("shared")).IsTrue();
+        await Assert.That(builder.UserId).IsEqualTo(userId);
         await Assert.That(builder.InitiatingUserId).IsEqualTo(initiatingUserId);
         await Assert.That(builder.CorrelationId).IsEqualTo(correlationId);
         await Assert.That(builder.MessageName).IsEqualTo("Create");
