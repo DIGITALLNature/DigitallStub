@@ -7,7 +7,6 @@ using Digitall.Dataverse.Testing.Errors;
 using Digitall.Dataverse.Testing.Extensions;
 using Digitall.Dataverse.Testing.OrganizationRequests;
 using Microsoft.Xrm.Sdk;
-using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
