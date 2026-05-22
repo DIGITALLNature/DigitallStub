@@ -109,7 +109,36 @@ public static class EntityExtensions
 
         public Entity CloneEntity()
         {
-            var cloned = entity.DeepClone();
+            // Bewusst eine echte Entity-Instanz erzeugen (kein DeepClone des Laufzeittyps),
+            // damit der RuntimeType immer Entity ist und keine typisierten Proxy-Klassen leaken.
+            var cloned = new Entity(entity.LogicalName)
+            {
+                Id = entity.Id,
+                EntityState = entity.EntityState,
+                RowVersion = entity.RowVersion,
+            };
+
+            foreach (var attribute in entity.Attributes)
+            {
+                cloned.Attributes[attribute.Key] = CloneAttribute(attribute.Value);
+            }
+
+            foreach (var formattedValue in entity.FormattedValues)
+            {
+                cloned.FormattedValues[formattedValue.Key] = formattedValue.Value;
+            }
+
+            foreach (var keyAttribute in entity.KeyAttributes)
+            {
+                cloned.KeyAttributes[keyAttribute.Key] = CloneAttribute(keyAttribute.Value);
+            }
+
+            foreach (var relatedEntity in entity.RelatedEntities)
+            {
+                cloned.RelatedEntities[relatedEntity.Key] =
+                    new EntityCollection(relatedEntity.Value.Entities.Select(e => e.CloneEntity()).ToList());
+            }
+
             return cloned;
         }
 
