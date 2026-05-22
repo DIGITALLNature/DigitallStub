@@ -95,6 +95,32 @@ public class FakeOrganizationServiceTests
     }
 
     [Test]
+    public async Task ThrowIfNotKnownEntityType_DoesNotThrow_WhenEntityTypeHasMetadataButNoProxyType()
+    {
+        // Entities registered only via AddMetadata (e.g. intersect entities) must be accepted.
+        var dataverse = new FakeOrganizationService();
+        dataverse.AddMetadata(new EntityMetadata { LogicalName = "custom_intersect" });
+
+        void Action() => dataverse.ThrowIfNotKnownEntityType("custom_intersect");
+
+        await Assert.That(Action).ThrowsNothing();
+    }
+
+    [Test]
+    public async Task Retrieve_ThrowsObjectDoesNotExist_WhenEntityHasMetadataButNoRecords()
+    {
+        // Before the fix this would throw QueryBuilderNoEntity ("not in MetadataCache").
+        // With metadata registered the correct error is ObjectDoesNotExist.
+        var dataverse = new FakeOrganizationService();
+        dataverse.AddMetadata(new EntityMetadata { LogicalName = "custom_intersect" });
+
+        void Action() => dataverse.Retrieve("custom_intersect", Guid.NewGuid(), new ColumnSet(true));
+
+        var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(Action);
+        await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.ObjectDoesNotExist);
+    }
+
+    [Test]
     public async Task ThrowIfNotKnownAttribute_ThrowsFaultException_WhenAttributeIsNotKnown()
     {
         var sut = new FakeOrganizationService();
