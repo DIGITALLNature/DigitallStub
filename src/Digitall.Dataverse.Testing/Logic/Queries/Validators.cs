@@ -36,7 +36,7 @@ public static class Validators
     /// </summary>
     /// <param name="queryExpression">The query expression to validate.</param>
     /// <param name="filterExpression">The filter expression to validate.</param>
-    public static void ValidateFilterExpressionAliases(QueryExpression queryExpression, FilterExpression filterExpression)
+    public static void ValidateFilterExpressionAliases(QueryExpression queryExpression, FilterExpression? filterExpression)
     {
         if (filterExpression == null) return;
 
