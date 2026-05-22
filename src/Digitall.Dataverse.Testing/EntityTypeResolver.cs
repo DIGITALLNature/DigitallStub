@@ -1,6 +1,7 @@
 // Copyright (c) DIGITALL Nature. All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
+using System.Linq.Expressions;
 using System.Reflection;
 using Digitall.Dataverse.Testing.Errors;
 using Microsoft.Xrm.Sdk;
@@ -145,13 +146,15 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
     {
         var cache = new Dictionary<string, Func<Entity, Entity>>(StringComparer.OrdinalIgnoreCase);
         var toEntityMethod = typeof(Entity).GetMethod(nameof(Entity.ToEntity))!;
+        var param = Expression.Parameter(typeof(Entity), "entity");
 
         foreach (var (logicalName, type) in EntityTypeCache)
         {
             if (type == typeof(Entity)) continue;
 
-            var genericMethod = toEntityMethod.MakeGenericMethod(type);
-            cache[logicalName] = entity => (Entity)genericMethod.Invoke(entity, null)!;
+            var call = Expression.Call(param, toEntityMethod.MakeGenericMethod(type));
+            var cast = Expression.Convert(call, typeof(Entity));
+            cache[logicalName] = Expression.Lambda<Func<Entity, Entity>>(cast, param).Compile();
         }
 
         return cache;
@@ -159,7 +162,7 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
 
     /// <summary>
     /// Converts a plain Entity to its registered proxy type (if known).
-    /// Uses cached delegates — no per-call reflection overhead.
+    /// Uses compiled delegates — no per-call reflection overhead.
     /// </summary>
     public Entity ConvertToProxyType(Entity entity)
     {
