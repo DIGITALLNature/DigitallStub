@@ -35,7 +35,7 @@ public class RetrieveAllEntitiesTests
 
         var response = (RetrieveAllEntitiesResponse)sut.Execute(new RetrieveAllEntitiesRequest());
 
-        await Assert.That(response.EntityMetadata).HasCount(2);
+        await Assert.That(response.EntityMetadata).Count().IsEqualTo(2);
         await Assert.That(response.EntityMetadata.Select(m => m.LogicalName)).Contains("account");
         await Assert.That(response.EntityMetadata.Select(m => m.LogicalName)).Contains("contact");
     }
@@ -51,7 +51,7 @@ public class RetrieveAllEntitiesTests
 
         var response = (RetrieveAllEntitiesResponse)sut.Execute(new RetrieveAllEntitiesRequest());
 
-        await Assert.That(response.EntityMetadata).HasCount(1);
+        await Assert.That(response.EntityMetadata).Count().IsEqualTo(1);
         await Assert.That(response.EntityMetadata[0]).IsSameReferenceAs(metadata);
     }
 
@@ -72,6 +72,6 @@ public class RetrieveAllEntitiesTests
 
         var response = (RetrieveAllEntitiesResponse)sut.Execute(request);
 
-        await Assert.That(response.EntityMetadata).HasCount(2);
+        await Assert.That(response.EntityMetadata).Count().IsEqualTo(2);
     }
 }

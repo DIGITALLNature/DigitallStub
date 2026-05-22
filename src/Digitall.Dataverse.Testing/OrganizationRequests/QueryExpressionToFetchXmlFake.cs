@@ -5,7 +5,6 @@ using System.Globalization;
 using System.Text;
 using System.Xml;
 using Microsoft.Crm.Sdk.Messages;
-using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Dataverse.Testing.OrganizationRequests;
@@ -18,7 +17,8 @@ public class QueryExpressionToFetchXmlFake : OrganizationRequestFake<QueryExpres
 
         if (organizationRequest.Query is not QueryExpression query)
         {
-            throw new ArgumentException($"Query type {organizationRequest.Query?.GetType().Name ?? "null"} is not supported. Only {nameof(QueryExpression)} is supported.", nameof(organizationRequest));
+            throw new ArgumentException($"Query type {organizationRequest.Query?.GetType().Name ?? "null"} is not supported. Only {nameof(QueryExpression)} is supported.",
+                nameof(organizationRequest));
         }
 
         var fetchXml = ConvertToFetchXml(query);
@@ -80,8 +80,13 @@ public class QueryExpressionToFetchXmlFake : OrganizationRequestFake<QueryExpres
                 writer.WriteAttributeString("paging-cookie", query.PageInfo.PagingCookie);
             }
 
+            if (string.IsNullOrWhiteSpace(query.EntityName))
+            {
+                throw new ArgumentException($"{nameof(QueryExpression.EntityName)} is required to produce valid FetchXml.", nameof(query));
+            }
+
             writer.WriteStartElement("entity");
-            writer.WriteAttributeString("name", query.EntityName ?? string.Empty);
+            writer.WriteAttributeString("name", query.EntityName);
 
             WriteColumnSet(writer, query.ColumnSet);
 
@@ -107,125 +112,6 @@ public class QueryExpressionToFetchXmlFake : OrganizationRequestFake<QueryExpres
         return sb.ToString();
     }
 
-    private static bool HasContent(FilterExpression filter) =>
-        filter.Conditions.Count > 0 || filter.Filters.Any(HasContent);
-
-    private static void WriteColumnSet(XmlWriter writer, ColumnSet? columnSet)
-    {
-        if (columnSet == null)
-        {
-            return;
-        }
-
-        if (columnSet.AllColumns)
-        {
-            writer.WriteStartElement("all-attributes");
-            writer.WriteEndElement();
-            return;
-        }
-
-        foreach (var column in columnSet.Columns)
-        {
-            writer.WriteStartElement("attribute");
-            writer.WriteAttributeString("name", column);
-            writer.WriteEndElement();
-        }
-    }
-
-    private static void WriteOrder(XmlWriter writer, OrderExpression order)
-    {
-        writer.WriteStartElement("order");
-        writer.WriteAttributeString("attribute", order.AttributeName);
-        writer.WriteAttributeString("descending", (order.OrderType == OrderType.Descending).ToString().ToLowerInvariant());
-        writer.WriteEndElement();
-    }
-
-    private static void WriteFilter(XmlWriter writer, FilterExpression filter)
-    {
-        writer.WriteStartElement("filter");
-        writer.WriteAttributeString("type", filter.FilterOperator == LogicalOperator.Or ? "or" : "and");
-
-        foreach (var condition in filter.Conditions)
-        {
-            WriteCondition(writer, condition);
-        }
-
-        foreach (var nested in filter.Filters)
-        {
-            if (HasContent(nested))
-            {
-                WriteFilter(writer, nested);
-            }
-        }
-
-        writer.WriteEndElement();
-    }
-
-    private static void WriteCondition(XmlWriter writer, ConditionExpression condition)
-    {
-        writer.WriteStartElement("condition");
-
-        if (!string.IsNullOrEmpty(condition.EntityName))
-        {
-            writer.WriteAttributeString("entityname", condition.EntityName);
-        }
-
-        writer.WriteAttributeString("attribute", condition.AttributeName);
-        writer.WriteAttributeString("operator", MapOperator(condition.Operator));
-
-        var values = condition.Values?.Where(v => v != null).ToList() ?? new List<object>();
-
-        if (values.Count == 1)
-        {
-            writer.WriteAttributeString("value", FormatValue(values[0]));
-        }
-        else if (values.Count > 1)
-        {
-            foreach (var value in values)
-            {
-                writer.WriteStartElement("value");
-                writer.WriteString(FormatValue(value));
-                writer.WriteEndElement();
-            }
-        }
-
-        writer.WriteEndElement();
-    }
-
-    private static void WriteLinkEntity(XmlWriter writer, LinkEntity link)
-    {
-        writer.WriteStartElement("link-entity");
-        writer.WriteAttributeString("name", link.LinkToEntityName);
-        writer.WriteAttributeString("from", link.LinkToAttributeName);
-        writer.WriteAttributeString("to", link.LinkFromAttributeName);
-
-        if (!string.IsNullOrEmpty(link.EntityAlias))
-        {
-            writer.WriteAttributeString("alias", link.EntityAlias);
-        }
-
-        writer.WriteAttributeString("link-type", link.JoinOperator == JoinOperator.LeftOuter ? "outer" : "inner");
-
-        WriteColumnSet(writer, link.Columns);
-
-        foreach (var order in link.Orders)
-        {
-            WriteOrder(writer, order);
-        }
-
-        if (link.LinkCriteria != null && HasContent(link.LinkCriteria))
-        {
-            WriteFilter(writer, link.LinkCriteria);
-        }
-
-        foreach (var nested in link.LinkEntities)
-        {
-            WriteLinkEntity(writer, nested);
-        }
-
-        writer.WriteEndElement();
-    }
-
     private static string FormatValue(object value) =>
         value switch
         {
@@ -236,6 +122,9 @@ public class QueryExpressionToFetchXmlFake : OrganizationRequestFake<QueryExpres
             IFormattable formattable => formattable.ToString(null, CultureInfo.InvariantCulture),
             _ => value.ToString() ?? string.Empty
         };
+
+    private static bool HasContent(FilterExpression filter) =>
+        filter.Conditions.Count > 0 || filter.Filters.Any(HasContent);
 
     private static string MapOperator(ConditionOperator op) =>
         op switch
@@ -302,4 +191,120 @@ public class QueryExpressionToFetchXmlFake : OrganizationRequestFake<QueryExpres
             ConditionOperator.DoesNotContainValues => "not-contain-values",
             _ => op.ToString().ToLowerInvariant()
         };
+
+    private static void WriteColumnSet(XmlWriter writer, ColumnSet? columnSet)
+    {
+        if (columnSet == null)
+        {
+            return;
+        }
+
+        if (columnSet.AllColumns)
+        {
+            writer.WriteStartElement("all-attributes");
+            writer.WriteEndElement();
+            return;
+        }
+
+        foreach (var column in columnSet.Columns)
+        {
+            writer.WriteStartElement("attribute");
+            writer.WriteAttributeString("name", column);
+            writer.WriteEndElement();
+        }
+    }
+
+    private static void WriteCondition(XmlWriter writer, ConditionExpression condition)
+    {
+        writer.WriteStartElement("condition");
+
+        if (!string.IsNullOrEmpty(condition.EntityName))
+        {
+            writer.WriteAttributeString("entityname", condition.EntityName);
+        }
+
+        writer.WriteAttributeString("attribute", condition.AttributeName);
+        writer.WriteAttributeString("operator", MapOperator(condition.Operator));
+
+        var values = condition.Values?.Where(v => v != null).ToList() ?? new List<object>();
+
+        if (values.Count == 1)
+        {
+            writer.WriteAttributeString("value", FormatValue(values[0]));
+        }
+        else if (values.Count > 1)
+        {
+            foreach (var value in values)
+            {
+                writer.WriteStartElement("value");
+                writer.WriteString(FormatValue(value));
+                writer.WriteEndElement();
+            }
+        }
+
+        writer.WriteEndElement();
+    }
+
+    private static void WriteFilter(XmlWriter writer, FilterExpression filter)
+    {
+        writer.WriteStartElement("filter");
+        writer.WriteAttributeString("type", filter.FilterOperator == LogicalOperator.Or ? "or" : "and");
+
+        foreach (var condition in filter.Conditions)
+        {
+            WriteCondition(writer, condition);
+        }
+
+        foreach (var nested in filter.Filters)
+        {
+            if (HasContent(nested))
+            {
+                WriteFilter(writer, nested);
+            }
+        }
+
+        writer.WriteEndElement();
+    }
+
+    private static void WriteLinkEntity(XmlWriter writer, LinkEntity link)
+    {
+        writer.WriteStartElement("link-entity");
+        writer.WriteAttributeString("name", link.LinkToEntityName);
+        writer.WriteAttributeString("from", link.LinkToAttributeName);
+        writer.WriteAttributeString("to", link.LinkFromAttributeName);
+
+        if (!string.IsNullOrEmpty(link.EntityAlias))
+        {
+            writer.WriteAttributeString("alias", link.EntityAlias);
+        }
+
+        writer.WriteAttributeString("link-type", link.JoinOperator == JoinOperator.LeftOuter ? "outer" : "inner");
+
+        WriteColumnSet(writer, link.Columns);
+
+        foreach (var order in link.Orders)
+        {
+            WriteOrder(writer, order);
+        }
+
+        if (link.LinkCriteria != null && HasContent(link.LinkCriteria))
+        {
+            WriteFilter(writer, link.LinkCriteria);
+        }
+
+        foreach (var nested in link.LinkEntities)
+        {
+            WriteLinkEntity(writer, nested);
+        }
+
+        writer.WriteEndElement();
+    }
+
+    private static void WriteOrder(XmlWriter writer, OrderExpression order)
+    {
+        writer.WriteStartElement("order");
+        writer.WriteAttributeString("attribute", order.AttributeName);
+        writer.WriteAttributeString("descending", (order.OrderType == OrderType.Descending).ToString().ToLowerInvariant());
+        writer.WriteEndElement();
+    }
 }
