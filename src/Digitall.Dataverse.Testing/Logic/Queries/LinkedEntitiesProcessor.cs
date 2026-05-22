@@ -101,7 +101,7 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
                     innerKey => innerKey.KeySelector(le.LinkToAttributeName), (outerEl, innerEl) => outerEl.CloneEntity().JoinAttributes(innerEl, new ColumnSet(true), leAlias)),
                 JoinOperator.LeftOuter => query.GroupJoin(inner,
                         outerKey => outerKey.KeySelector(linkFromAlias), innerKey => innerKey.KeySelector(le.LinkToAttributeName), (outerEl, innerElemsCol) => new { outerEl, innerElemsCol })
-                    .SelectMany(x => x.innerElemsCol.DefaultIfEmpty(), (x, y) => x.outerEl.JoinAttributes(y!, new ColumnSet(true), leAlias)),
+                    .SelectMany(x => x.innerElemsCol.DefaultIfEmpty(), (x, y) => x.outerEl.JoinAttributes(y, new ColumnSet(true), leAlias)),
                 _ => throw new ArgumentException($"The join operator {le.JoinOperator} is currently not supported.")
             };
 
