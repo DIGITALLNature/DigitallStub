@@ -129,6 +129,18 @@ public class ExpressionProcessor(FakeOrganizationService fakeOrgService)
         // Initialize list to store linked entity query expressions
         var linkedEntitiesQueryExpressions = new List<Expression>();
 
+        // EXISTS-style operators apply LinkCriteria inside the subquery in LinkedEntitiesProcessor,
+        // so we must not re-evaluate them here as a post-join filter.
+        if (linkedEntity.JoinOperator is JoinOperator.Any or JoinOperator.NotAny or JoinOperator.Exists or JoinOperator.In)
+        {
+            foreach (var nestedLinkedEntity in linkedEntity.LinkEntities)
+            {
+                linkedEntitiesQueryExpressions.AddRange(TranslateLinkedEntityFilterExpressionToExpression(queryExpression, nestedLinkedEntity, expression));
+            }
+
+            return linkedEntitiesQueryExpressions;
+        }
+
         // Check if there are link criteria for the linked entity
         if (linkedEntity.LinkCriteria != null)
         {
