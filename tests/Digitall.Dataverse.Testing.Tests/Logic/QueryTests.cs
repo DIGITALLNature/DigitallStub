@@ -267,6 +267,53 @@ public class QueryTests
         await Assert.That(queryResult).Count().IsEqualTo(1);
     }
 
+    [Test]
+    public async Task GenerateQuery_EqualUserId_LateBound_MatchesRecord()
+    {
+        var userId = Guid.NewGuid();
+        var id = Guid.NewGuid();
+
+        // Use a custom entity with no proxy type: AttributeType will be null (truly late-bound)
+        var entity = new Entity("custom_entity", id);
+        entity["ownerid"] = new EntityReference("systemuser", userId);
+
+        var query = new QueryExpression("custom_entity");
+        query.Criteria.AddCondition("ownerid", ConditionOperator.EqualUserId);
+
+        var dataverse = new FakeOrganizationService();
+        dataverse.Add(entity);
+        dataverse.Options.UserId = userId;
+        var sut = new ExpressionProcessor(dataverse);
+
+        var result = sut.Generate(query);
+        var queryResult = dataverse.CreateQuery<Entity>("custom_entity").Where(result).ToList();
+
+        await Assert.That(queryResult).Count().IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task GenerateQuery_EqualBusinessId_LateBound_MatchesRecord()
+    {
+        var businessUnitId = Guid.NewGuid();
+        var id = Guid.NewGuid();
+
+        var entity = new Entity("custom_entity", id);
+        entity["owningbusinessunit"] = new EntityReference("businessunit", businessUnitId);
+
+        var query = new QueryExpression("custom_entity");
+        query.Criteria.AddCondition("owningbusinessunit", ConditionOperator.EqualBusinessId);
+
+        var dataverse = new FakeOrganizationService();
+        dataverse.Add(entity);
+        dataverse.Options.BusinessUnitId = businessUnitId;
+        var sut = new ExpressionProcessor(dataverse);
+
+        var result = sut.Generate(query);
+        var queryResult = dataverse.CreateQuery<Entity>("custom_entity").Where(result).ToList();
+
+        await Assert.That(queryResult).Count().IsEqualTo(1);
+    }
+
     #endregion
 
     #region not equal

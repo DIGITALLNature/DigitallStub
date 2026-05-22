@@ -491,8 +491,8 @@ public static class ConditionParser
             ConditionOperator.Today => today,
             ConditionOperator.Yesterday => today.AddDays(-1),
             ConditionOperator.Tomorrow => today.AddDays(1),
-            ConditionOperator.EqualUserId or ConditionOperator.NotEqualUserId => organizationService.Options.UserId.ToString(),
-            ConditionOperator.EqualBusinessId or ConditionOperator.NotEqualBusinessId => organizationService.Options.BusinessUnitId.ToString(),
+            ConditionOperator.EqualUserId or ConditionOperator.NotEqualUserId => organizationService.Options.UserId,
+            ConditionOperator.EqualBusinessId or ConditionOperator.NotEqualBusinessId => organizationService.Options.BusinessUnitId,
             _ => unaryOperatorValue
         };
 
