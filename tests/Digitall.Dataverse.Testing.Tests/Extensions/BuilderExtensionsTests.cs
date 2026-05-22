@@ -68,6 +68,33 @@ public class BuilderExtensionsTests
     }
 
     [Test]
+    public async Task FakeDataverseBuilderExtensions_WithMaxRetrieveCount_ShouldSetOption()
+    {
+        var builder = new FakeDataverseBuilder();
+
+        builder.WithMaxRetrieveCount(500);
+
+        var service = builder.GetOrganizationService();
+        await Assert.That(service.Options.MaxRetrieveCount).IsEqualTo(500);
+    }
+
+    [Test]
+    public async Task FakeDataverseBuilderExtensions_WithMaxRetrieveCount_Zero_ShouldThrow()
+    {
+        var builder = new FakeDataverseBuilder();
+
+        await Assert.That(() => builder.WithMaxRetrieveCount(0)).Throws<ArgumentOutOfRangeException>();
+    }
+
+    [Test]
+    public async Task FakeDataverseBuilderExtensions_WithMaxRetrieveCount_Negative_ShouldThrow()
+    {
+        var builder = new FakeDataverseBuilder();
+
+        await Assert.That(() => builder.WithMaxRetrieveCount(-1)).Throws<ArgumentOutOfRangeException>();
+    }
+
+    [Test]
     public async Task FakeDataverseBuilderExtensions_AddConfig_ShouldAddEnvironmentVariables()
     {
         var builder = new FakeDataverseBuilder();

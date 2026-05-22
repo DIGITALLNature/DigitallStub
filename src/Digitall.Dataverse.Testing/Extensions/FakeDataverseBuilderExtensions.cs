@@ -89,6 +89,7 @@ public static class FakeDataverseBuilderExtensions
 
         public TBuilder WithMaxRetrieveCount(int maxRetrieveCount)
         {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxRetrieveCount);
             var service = builder.GetOrganizationService();
             service.Options.MaxRetrieveCount = maxRetrieveCount;
             return builder;
