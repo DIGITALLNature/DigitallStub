@@ -107,8 +107,8 @@ public static class EntityExtensions
 
         public Entity CloneEntity()
         {
-            // Bewusst eine echte Entity-Instanz erzeugen (kein DeepClone des Laufzeittyps),
-            // damit der RuntimeType immer Entity ist und keine typisierten Proxy-Klassen leaken.
+            // Intentionally create a plain Entity instance (no deep-clone of the runtime type)
+            // so the result is always Entity, never a typed proxy subclass.
             var cloned = new Entity(entity.LogicalName)
             {
                 Id = entity.Id,
