@@ -454,8 +454,14 @@ internal class FetchProcessor(FakeOrganizationService state)
         {
             linkEntity.JoinOperator = el.GetAttribute("link-type")!.Value switch
             {
-                "outer" => JoinOperator.LeftOuter,
-                _ => JoinOperator.Inner
+                "outer"   => JoinOperator.LeftOuter,
+                "any"     => JoinOperator.Any,
+                "not-any" => JoinOperator.NotAny,
+                "all"     => JoinOperator.All,
+                "not-all" => JoinOperator.NotAll,
+                "exists"  => JoinOperator.Exists,
+                "in"      => JoinOperator.In,
+                _         => JoinOperator.Inner
             };
         }
 

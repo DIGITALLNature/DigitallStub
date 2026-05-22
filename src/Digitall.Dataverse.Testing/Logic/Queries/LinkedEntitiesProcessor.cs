@@ -68,17 +68,21 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
             }
 
             IQueryable<Entity> inner;
-            if (le.JoinOperator == JoinOperator.LeftOuter)
+            if (le.JoinOperator is JoinOperator.LeftOuter or JoinOperator.Any or JoinOperator.Exists or JoinOperator.In or JoinOperator.NotAny)
             {
                 //filters are applied in the inner query and then ignored during filter evaluation
-                var outerQueryExpression = new QueryExpression
+                var innerQueryExpression = new QueryExpression
                 {
                     EntityName = le.LinkToEntityName,
-                    Criteria = le.LinkCriteria,
                     ColumnSet = new ColumnSet(true)
                 };
+                // LinkCriteria can be null (e.g. when parsed from FetchXml with no <filter> element)
+                if (le.LinkCriteria != null)
+                {
+                    innerQueryExpression.Criteria = le.LinkCriteria;
+                }
 
-                inner = queryProcessor.ExecuteQueryExpression(outerQueryExpression);
+                inner = queryProcessor.ExecuteQueryExpression(innerQueryExpression);
             }
             else
             {
@@ -102,6 +106,10 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
                 JoinOperator.LeftOuter => query.GroupJoin(inner,
                         outerKey => outerKey.KeySelector(linkFromAlias), innerKey => innerKey.KeySelector(le.LinkToAttributeName), (outerEl, innerElemsCol) => new { outerEl, innerElemsCol })
                     .SelectMany(x => x.innerElemsCol.DefaultIfEmpty(), (x, y) => x.outerEl.CloneEntity().JoinAttributes(y, new ColumnSet(true), leAlias)),
+                JoinOperator.Any or JoinOperator.Exists or JoinOperator.In =>
+                    ExistsFilter(query, inner, linkFromAlias, le.LinkToAttributeName, negate: false),
+                JoinOperator.NotAny =>
+                    ExistsFilter(query, inner, linkFromAlias, le.LinkToAttributeName, negate: true),
                 _ => throw new ArgumentException($"The join operator {le.JoinOperator} is currently not supported.")
             };
 
@@ -127,4 +135,25 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
         [GeneratedRegex(@"^[A-Za-z_](\w|\.)*$", RegexOptions.ECMAScript)]
         private static partial Regex EntityAliasRegex();
 
+        private static IQueryable<Entity> ExistsFilter(
+            IQueryable<Entity> query,
+            IQueryable<Entity> inner,
+            string linkFromAlias,
+            string linkToAttributeName,
+            bool negate)
+        {
+            // Materialize the inner sequence once so we don't re-enumerate it per outer row.
+            var innerList = inner.ToList();
+            // AsEnumerable is required because statement-body lambdas cannot be converted to
+            // expression trees (IQueryable requires expression trees, IEnumerable does not).
+            return query
+                .AsEnumerable()
+                .Where(outer =>
+                {
+                    var outerKey = outer.KeySelector(linkFromAlias);
+                    var hasMatch = innerList.Any(innerEl => Equals(outerKey, innerEl.KeySelector(linkToAttributeName)));
+                    return negate ? !hasMatch : hasMatch;
+                })
+                .AsQueryable();
+        }
     }

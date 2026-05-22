@@ -38,6 +38,8 @@ public static class Validators
     /// <param name="filterExpression">The filter expression to validate.</param>
     public static void ValidateFilterExpressionAliases(QueryExpression queryExpression, FilterExpression filterExpression)
     {
+        if (filterExpression == null) return;
+
         // Recursively validate the filters in the filter expression
         if (filterExpression.Filters != null)
         {
