@@ -1,3 +1,10 @@
+# [1.1.0-beta.2](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.1...v1.1.0-beta.2) (2026-05-22)
+
+
+### Bug Fixes
+
+* **query:** match primary id attribute against Entity.Id in RetrieveMultiple ([a66b55f](https://github.com/DIGITALLNature/DigitallTesting/commit/a66b55f8fbb1ada6b174a0d62b784f7dc8315348))
+
 # [1.1.0-beta.1](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0...v1.1.0-beta.1) (2026-05-22)
 
 
