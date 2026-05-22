@@ -243,6 +243,21 @@ public class FakeOrganizationServiceTests
     }
 
     [Test]
+    public async Task Create_DoesNotSetOwner_WhenProxyTypeHasNoOwnerIdAttribute()
+    {
+        // ServiceEndpoint has no OwnerId in the early-bound model.
+        // Without any metadata registered, ownerid must NOT be defaulted.
+        var userId = Guid.NewGuid();
+        var entity = new ServiceEndpoint { Name = nameof(Create_DoesNotSetOwner_WhenProxyTypeHasNoOwnerIdAttribute) };
+        var sut = new FakeOrganizationService { Options = { UserId = userId } };
+
+        var result = sut.Create(entity);
+
+        var createdRecord = sut.Retrieve(ServiceEndpoint.EntityLogicalName, result, new ColumnSet(true)).ToEntity<ServiceEndpoint>();
+        await Assert.That(createdRecord.Attributes).DoesNotContain(a => a.Key == "ownerid");
+    }
+
+    [Test]
     public async Task Create_SetsCreatedOnAndModifiedOn_FromTimeProvider()
     {
         var fakeTime = new FakeTimeProvider();
