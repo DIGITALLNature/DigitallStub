@@ -328,6 +328,19 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             }
         }
 
+        var now = TimeProvider.GetUtcNow().UtcDateTime;
+        if (!clone.Contains("createdon"))  clone["createdon"]  = now;
+        if (!clone.Contains("modifiedon")) clone["modifiedon"] = now;
+
+        if (Options.UserId != Guid.Empty)
+        {
+            var userRef = new EntityReference("systemuser", Options.UserId);
+            if (!clone.Contains("createdby"))  clone["createdby"]  = userRef;
+            if (!clone.Contains("modifiedby")) clone["modifiedby"] = userRef;
+        }
+
+        clone.RowVersion ??= TimeProvider.GetUtcNow().Ticks.ToString();
+
         try
         {
             Add(clone);
@@ -383,6 +396,14 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
         foreach (var ka in entity.KeyAttributes)
             merged.KeyAttributes[ka.Key] = ka.Value;
+
+        foreach (var re in entity.RelatedEntities)
+            merged.RelatedEntities[re.Key] = re.Value;
+
+        merged["modifiedon"] = TimeProvider.GetUtcNow().UtcDateTime;
+        if (Options.UserId != Guid.Empty)
+            merged["modifiedby"] = new EntityReference("systemuser", Options.UserId);
+        merged.RowVersion = TimeProvider.GetUtcNow().Ticks.ToString();
 
         value[entity.Id] = merged;
     }
