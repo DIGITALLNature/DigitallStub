@@ -1,3 +1,21 @@
+# [1.1.0-beta.5](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.4...v1.1.0-beta.5) (2026-05-22)
+
+
+### Bug Fixes
+
+* merge attributes on Update instead of replacing the entire entity ([68dab94](https://github.com/DIGITALLNature/DigitallTesting/commit/68dab943354b841e068fd374b0c6682a20ca9153))
+* **query:** pass Guid directly for EqualUserId/EqualBusinessId conditions ([ccc49fa](https://github.com/DIGITALLNature/DigitallTesting/commit/ccc49fa75f135953c06652fa24c237a66348f259))
+* **query:** use fiscalYear from condition as year for InFiscalYear date range ([dcbd230](https://github.com/DIGITALLNature/DigitallTesting/commit/dcbd2308193c77a1e6deeb1f88ab4cba47fd9651))
+* **query:** use TimeOnly.MaxValue for end-of-day upper bound in date range operators ([93f273f](https://github.com/DIGITALLNature/DigitallTesting/commit/93f273f2fe44b6c41ebdd7d83369424b38edb910))
+* skip ownerid default when proxy type has no ownerid attribute ([6118674](https://github.com/DIGITALLNature/DigitallTesting/commit/611867400290b2ae6b0e00f479f4d6c22744fc7a))
+* validate maxRetrieveCount argument in WithMaxRetrieveCount ([fdd5417](https://github.com/DIGITALLNature/DigitallTesting/commit/fdd5417d589418c102d89ce27d23d101be15973b))
+
+
+### Features
+
+* set audit fields and RowVersion on Create and Update ([13212f4](https://github.com/DIGITALLNature/DigitallTesting/commit/13212f43e04bb55cb65bcbcf55a5197e6c288917))
+* use Options class for explicit configuration ([a7d9497](https://github.com/DIGITALLNature/DigitallTesting/commit/a7d949776b7e76ca8fcec3486e108826aec217c5))
+
 # [1.1.0-beta.4](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.3...v1.1.0-beta.4) (2026-05-22)
 
 
