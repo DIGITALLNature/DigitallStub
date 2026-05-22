@@ -429,4 +429,265 @@ public class ExistsJoinTests
     }
 
     #endregion
+
+    #region Combined: outer Criteria + EXISTS join
+
+    /// <summary>
+    /// An outer QueryExpression filter combined with an Any join must respect both conditions
+    /// independently: the outer filter narrows the outer set, the Any join then keeps only
+    /// those that have at least one matching related entity.
+    /// This verifies that the ExpressionProcessor guard does not suppress the outer Criteria.
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_AnyJoin_WithOuterCriteria_AppliesBothFilters()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        // Outer filter: Name = "B Corp" (matches only corpB)
+        // Any join: must have at least one contact
+        // Expected: corpB qualifies on both counts → 1 result
+        var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            Criteria = new FilterExpression
+            {
+                Conditions =
+                {
+                    new ConditionExpression(Account.LogicalNames.Name, ConditionOperator.Equal, "B Corp")
+                }
+            },
+            LinkEntities =
+            {
+                new LinkEntity(
+                    Account.EntityLogicalName, Contact.EntityLogicalName,
+                    Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
+                    JoinOperator.Any)
+            }
+        });
+
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
+    }
+
+    /// <summary>
+    /// Outer criteria that matches no account combined with Any join must return empty,
+    /// even when the Any condition would have been satisfied for some accounts.
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_AnyJoin_WithOuterCriteriaThatMatchesNone_ReturnsEmpty()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            Criteria = new FilterExpression
+            {
+                Conditions =
+                {
+                    new ConditionExpression(Account.LogicalNames.Name, ConditionOperator.Equal, "No Such Corp")
+                }
+            },
+            LinkEntities =
+            {
+                new LinkEntity(
+                    Account.EntityLogicalName, Contact.EntityLogicalName,
+                    Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
+                    JoinOperator.Any)
+            }
+        });
+
+        await Assert.That(result.Entities).IsEmpty();
+    }
+
+    #endregion
+
+    #region JoinOperator.NotAny + LinkCriteria
+
+    /// <summary>
+    /// NotAny with LinkCriteria must return accounts that have NO contact satisfying the criteria.
+    /// corpA has no contacts at all → included.
+    /// corpB has contacts but none named "Nobody" → included.
+    /// Both qualify because neither has a contact with FirstName="Nobody".
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_NotAnyJoin_WithLinkCriteria_ReturnsAccountsWithNoMatchingContact()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            LinkEntities =
+            {
+                new LinkEntity(
+                    Account.EntityLogicalName, Contact.EntityLogicalName,
+                    Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
+                    JoinOperator.NotAny)
+                {
+                    LinkCriteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression(Contact.LogicalNames.FirstName, ConditionOperator.Equal, "Nobody")
+                        }
+                    }
+                }
+            }
+        });
+
+        // Neither account has a contact called "Nobody", so both pass the NOT EXISTS check
+        await Assert.That(result.Entities).Count().IsEqualTo(2);
+    }
+
+    /// <summary>
+    /// NotAny with LinkCriteria for "John B" must exclude corpB (has "John B") and include
+    /// corpA (has no contacts, so definitely no "John B").
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_NotAnyJoin_WithLinkCriteria_ExcludesAccountsWithMatchingContact()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            LinkEntities =
+            {
+                new LinkEntity(
+                    Account.EntityLogicalName, Contact.EntityLogicalName,
+                    Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
+                    JoinOperator.NotAny)
+                {
+                    LinkCriteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression(Contact.LogicalNames.FirstName, ConditionOperator.Equal, "John B")
+                        }
+                    }
+                }
+            }
+        });
+
+        // corpB has "John B" → excluded. corpA has no contacts → included.
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpAId);
+    }
+
+    #endregion
+
+    #region FetchXml: link-type="in" parsing + Any with filter E2E
+
+    /// <summary>
+    /// FetchXml link-type="in" must be parsed as JoinOperator.In.
+    /// </summary>
+    [Test]
+    public async Task FetchXml_InLinkType_IsParsedAsJoinOperatorIn()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRequest(new FetchXmlToQueryExpressionFake());
+
+        const string fetchXml = """
+            <fetch>
+              <entity name="account">
+                <attribute name="name" />
+                <link-entity name="contact" from="contactid" to="accountid" alias="c" link-type="in">
+                </link-entity>
+              </entity>
+            </fetch>
+            """;
+
+        var response = (FetchXmlToQueryExpressionResponse)sut.Execute(
+            new FetchXmlToQueryExpressionRequest { FetchXml = fetchXml });
+
+        var link = response.Query.LinkEntities[0];
+        await Assert.That(link.JoinOperator).IsEqualTo(JoinOperator.In);
+    }
+
+    /// <summary>
+    /// End-to-end: FetchXml with link-type="any" and a &lt;filter&gt; inside the link-entity
+    /// must apply the filter as a subquery constraint.
+    /// Only corpB has a contact with FirstName="John B", so only corpB is returned.
+    /// </summary>
+    [Test]
+    public async Task FetchXml_AnyJoin_WithFilter_AppliesSubqueryFilter()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        const string fetchXml = """
+            <fetch>
+              <entity name="account">
+                <attribute name="name" />
+                <link-entity name="contact" from="parentcustomerid" to="accountid" link-type="any">
+                  <filter>
+                    <condition attribute="firstname" operator="eq" value="John B" />
+                  </filter>
+                </link-entity>
+              </entity>
+            </fetch>
+            """;
+
+        var result = sut.RetrieveMultiple(new FetchExpression(fetchXml));
+
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
+    }
+
+    #endregion
+
+    #region Unsupported operators (All, NotAll) — must throw ArgumentException
+
+    /// <summary>
+    /// JoinOperator.All is parsed from FetchXml but not yet implemented in LinkedEntitiesProcessor.
+    /// It must throw a clear ArgumentException rather than a NullReferenceException or silent wrong result.
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_AllJoin_ThrowsArgumentException()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        await Assert.That(() => sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            LinkEntities =
+            {
+                new LinkEntity(
+                    Account.EntityLogicalName, Contact.EntityLogicalName,
+                    Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
+                    JoinOperator.All)
+            }
+        })).Throws<ArgumentException>();
+    }
+
+    /// <summary>
+    /// JoinOperator.NotAll is parsed from FetchXml but not yet implemented.
+    /// It must throw a clear ArgumentException.
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_NotAllJoin_ThrowsArgumentException()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        await Assert.That(() => sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            LinkEntities =
+            {
+                new LinkEntity(
+                    Account.EntityLogicalName, Contact.EntityLogicalName,
+                    Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
+                    JoinOperator.NotAll)
+            }
+        })).Throws<ArgumentException>();
+    }
+
+    #endregion
 }
