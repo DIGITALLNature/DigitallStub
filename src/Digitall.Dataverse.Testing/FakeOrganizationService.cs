@@ -7,6 +7,7 @@ using Digitall.Dataverse.Testing.Errors;
 using Digitall.Dataverse.Testing.Extensions;
 using Digitall.Dataverse.Testing.OrganizationRequests;
 using Microsoft.Xrm.Sdk;
+using Microsoft.Xrm.Sdk.Client;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
@@ -162,7 +163,11 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     public IQueryable<T> CreateQuery<T>() where T : Entity
     {
         var logicalName = TypeResolver.GetLogicalName(typeof(T))
-                          ?? throw new ArgumentException("Entity type must have EntityLogicalNameAttribute", nameof(T));
+                          ?? typeof(T).GetCustomAttribute<EntityLogicalNameAttribute>()?.LogicalName
+                          ?? throw new ArgumentException(
+                              $"Entity type '{typeof(T).Name}' could not be resolved to a logical name. " +
+                              "Ensure the type is annotated with [EntityLogicalName] and its assembly is registered " +
+                              "as a ProxyTypesAssembly or added to ModelAssemblies.", nameof(T));
 
         return CreateQuery<T>(logicalName);
     }
