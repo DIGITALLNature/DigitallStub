@@ -12,7 +12,6 @@ namespace Digitall.Dataverse.Testing.Tests.OrganizationRequests;
 /// <summary>
 /// Tests that verify IOrganizationService façade methods (Create, Update, Delete, Retrieve,
 /// Associate, Disassociate) route through Execute so that registered request fakes can intercept them.
-/// These tests should FAIL until the pipeline unification refactoring is implemented.
 /// </summary>
 public class ExecutePipelineRoutingTests
 {
