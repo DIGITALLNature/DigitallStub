@@ -4,7 +4,6 @@
 using Digitall.Dataverse.Testing.OrganizationRequests;
 using Digitall.Dataverse.Testing.Tests.Fixtures;
 using Microsoft.Crm.Sdk.Messages;
-using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Dataverse.Testing.Tests.OrganizationRequests;
