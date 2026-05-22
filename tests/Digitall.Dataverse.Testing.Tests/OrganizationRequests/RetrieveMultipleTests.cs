@@ -332,6 +332,123 @@ public class RetrieveMultipleTests
     }
     #endregion
 
+    #region LeftOuter Join
+
+    /// <summary>
+    /// Regression test: a LeftOuter join must return the outer (left-side) entity even when no
+    /// matching inner entity exists. The TestData contains <c>corpA</c> which has no contacts
+    /// linked via <c>parentcustomerid</c>; it must appear in the result without any aliased
+    /// contact attributes.
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_LeftOuterJoin_OuterEntityReturnedWhenNoRelatedEntityExists()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        // corpA has no contacts; corpB has two contacts
+        var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            LinkEntities =
+            {
+                new LinkEntity(Account.EntityLogicalName, Contact.EntityLogicalName,
+                    Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
+                    JoinOperator.LeftOuter)
+                {
+                    EntityAlias = "c",
+                    Columns = new ColumnSet(Contact.LogicalNames.FirstName)
+                }
+            }
+        });
+
+        await Assert.That(result).IsNotNull();
+
+        var corpARows = result.Entities
+            .Where(e => e.Id == Guid.Parse("00000000-0000-0000-0001-000000000001"))
+            .ToList();
+
+        // corpA must appear at least once despite having no linked contact
+        await Assert.That(corpARows).IsNotEmpty();
+
+        // The unmatched row must not carry aliased contact attributes
+        var unmatchedRow = corpARows.Single();
+        await Assert.That(unmatchedRow.Attributes.ContainsKey("c." + Contact.LogicalNames.FirstName)).IsFalse();
+    }
+
+    /// <summary>
+    /// Regression test: a LeftOuter join must produce one result row per matching inner entity.
+    /// <c>corpB</c> has two contacts so it must appear twice in the result set.
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_LeftOuterJoin_MultipleRelatedEntitiesProduceMultipleRows()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            LinkEntities =
+            {
+                new LinkEntity(Account.EntityLogicalName, Contact.EntityLogicalName,
+                    Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
+                    JoinOperator.LeftOuter)
+                {
+                    EntityAlias = "c",
+                    Columns = new ColumnSet(Contact.LogicalNames.FirstName)
+                }
+            }
+        });
+
+        await Assert.That(result).IsNotNull();
+
+        var corpBRows = result.Entities
+            .Where(e => e.Id == Guid.Parse("00000000-0000-0000-0001-000000000002"))
+            .ToList();
+
+        // corpB must appear once for each of its two contacts
+        await Assert.That(corpBRows).Count().IsEqualTo(2);
+    }
+
+    /// <summary>
+    /// Regression test: a LeftOuter join must return more rows than the equivalent Inner join
+    /// because unmatched outer rows are preserved. With TestData.Default:
+    /// <list type="bullet">
+    ///   <item>Inner join: 2 rows (corpB × conB, corpB × conC)</item>
+    ///   <item>LeftOuter join: 3 rows (corpA × null, corpB × conB, corpB × conC)</item>
+    /// </list>
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_LeftOuterJoin_ReturnsMoreRowsThanInnerJoin()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        var linkEntity = new LinkEntity(Account.EntityLogicalName, Contact.EntityLogicalName,
+            Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
+            JoinOperator.Inner);
+
+        var innerResult = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            LinkEntities = { linkEntity }
+        });
+
+        linkEntity.JoinOperator = JoinOperator.LeftOuter;
+
+        var outerResult = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            LinkEntities = { linkEntity }
+        });
+
+        await Assert.That(innerResult.Entities).Count().IsEqualTo(2);
+        await Assert.That(outerResult.Entities).Count().IsEqualTo(3);
+    }
+
+    #endregion
+
     #region PrimaryId filter
 
     /// <summary>
