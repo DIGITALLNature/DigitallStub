@@ -186,6 +186,28 @@ public class OrganizationRequestFakeTests
     }
 
     [Test]
+    public async Task AssignRequestFake_Should_PreserveExistingAttributes()
+    {
+        _sut.AddRequest(new AssignRequestFake());
+        var id = Guid.NewGuid();
+        _sut.Add(new Account(id) { Name = "My Account", Description = "Some Description" });
+        var userId = Guid.NewGuid();
+        var userRef = new EntityReference("systemuser", userId);
+
+        var request = new AssignRequest
+        {
+            Target = new EntityReference(Account.EntityLogicalName, id),
+            Assignee = userRef
+        };
+
+        _sut.Execute(request);
+
+        var updated = _sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(updated.GetAttributeValue<string>("name")).IsEqualTo("My Account");
+        await Assert.That(updated.GetAttributeValue<string>("description")).IsEqualTo("Some Description");
+    }
+
+    [Test]
     public async Task AssociateFake_Should_CallStateAssociate()
     {
         _sut.AddRequest(new AssociateFake());

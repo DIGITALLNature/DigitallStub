@@ -344,6 +344,22 @@ public class FakeOrganizationServiceTests
     }
 
     [Test]
+    public async Task Update_MergesAttributes_PreservesExistingAttributesNotInUpdate()
+    {
+        var sut = new FakeOrganizationService();
+        var id = Guid.NewGuid();
+        sut.Add(new Account(id) { Name = "Original Name", Description = "Original Description" });
+
+        var partial = new Entity(Account.EntityLogicalName, id);
+        partial["description"] = "New Description";
+        sut.Update(partial);
+
+        var retrieved = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(retrieved.GetAttributeValue<string>("name")).IsEqualTo("Original Name");
+        await Assert.That(retrieved.GetAttributeValue<string>("description")).IsEqualTo("New Description");
+    }
+
+    [Test]
     public async Task Update_ClonesInput_MutatingOriginalDoesNotAffectStore()
     {
         var sut = new FakeOrganizationService();
