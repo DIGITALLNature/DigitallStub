@@ -553,4 +553,35 @@ public class RetrieveMultipleTests
     }
 
     #endregion
+
+    #region ConvertToProxyType
+
+    /// <summary>
+    /// Verifies that <c>RetrieveMultiple</c> converts stored base <see cref="Entity"/> instances
+    /// to their early-bound proxy types. The entity is deliberately added as a plain (upcasted)
+    /// <see cref="Entity"/> — confirmed via <c>Retrieve</c>, which returns the raw stored type —
+    /// while <c>RetrieveMultiple</c> must expose the concrete proxy type <see cref="Account"/>.
+    /// </summary>
+    [Test]
+    public async Task RetrieveMultiple_ReturnsProxyTypedEntities_WhenStoredAsBaseEntity()
+    {
+        var sut = new FakeOrganizationService();
+        var id = Guid.NewGuid();
+
+        // Deliberately store a plain Entity (not Account) to force the ConvertToProxyType path
+        sut.Add(new Entity(Account.EntityLogicalName, id) { [Account.LogicalNames.Name] = "Proxy Test" });
+
+        // Retrieve bypasses ConvertToProxyType — confirms state holds a plain Entity
+        var stored = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(stored.GetType()).IsEqualTo(typeof(Entity));
+
+        // RetrieveMultiple must convert it to the proxy type
+        var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true) });
+
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
+        await Assert.That(result.Entities[0]).IsTypeOf<Account>();
+        await Assert.That(result.Entities[0].Id).IsEqualTo(id);
+    }
+
+    #endregion
 }
