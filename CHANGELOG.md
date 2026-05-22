@@ -1,3 +1,22 @@
+# [1.1.0-beta.4](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.3...v1.1.0-beta.4) (2026-05-22)
+
+
+### Bug Fixes
+
+* deep-clone OptionSetValue instances inside OptionSetValueCollection ([8620cca](https://github.com/DIGITALLNature/DigitallTesting/commit/8620cca484e63f69462c69dbacd530b771ec2162))
+* ensure CloneEntity returns base Entity runtime type ([78d9383](https://github.com/DIGITALLNature/DigitallTesting/commit/78d9383e7d7513742d04fc8d7d66f612d17ecc8b))
+* fall back to EntityLogicalNameAttribute in CreateQuery<T> when type is not in resolver cache ([d2b7350](https://github.com/DIGITALLNature/DigitallTesting/commit/d2b73503cd792efe460e3c5d05bfe4279982dadc))
+* **query:** clone outer entity per row in LeftOuter join ([26ba3a0](https://github.com/DIGITALLNature/DigitallTesting/commit/26ba3a0604d391c363c5ccd8419c5291100f7590))
+* replace Activator.CreateInstance with plain Entity in ProjectAttributes ([1567b6b](https://github.com/DIGITALLNature/DigitallTesting/commit/1567b6bae4c325756632bce265471bfc2d97b839))
+
+
+### Performance Improvements
+
+* cache EntityLogicalNameAttribute lookup in CreateQuery<T> ([11c7fb6](https://github.com/DIGITALLNature/DigitallTesting/commit/11c7fb618bbd995ced0132148a532e94a0342646))
+* cache MethodInfo lookups in ConditionParser as static readonly fields ([863b8a2](https://github.com/DIGITALLNature/DigitallTesting/commit/863b8a235e1393b4c929a9b251c0a13fb5399b99))
+* compile proxy converter delegates via expression trees ([14cd064](https://github.com/DIGITALLNature/DigitallTesting/commit/14cd064ea2653ec3a2b09024f58f8407174142d6))
+* use pattern matching in XrmOrderByAttributeComparer ([f078747](https://github.com/DIGITALLNature/DigitallTesting/commit/f07874744a67ad8b7b42806c89d0a87a093cfbdb))
+
 # [1.1.0-beta.3](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.2...v1.1.0-beta.3) (2026-05-22)
 
 
