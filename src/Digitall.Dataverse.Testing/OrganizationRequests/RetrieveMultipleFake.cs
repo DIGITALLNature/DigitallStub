@@ -142,7 +142,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
         recordsToReturn.ForEach(e => PatchDateFormat(e, state));
         recordsToReturn.ForEach(FillFormattedValues);
 
-        recordsToReturn = recordsToReturn.Select(e => ToProxyType(e, state)).ToList();
+        recordsToReturn = recordsToReturn.Select(state.ConvertToProxyType).ToList();
 
         var response = new RetrieveMultipleResponse
         {
@@ -232,17 +232,6 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
                 record.FormattedValues.Add(attributeName, formattedValue);
             }
         }
-    }
-
-    private static Entity ToProxyType(Entity entity, FakeOrganizationService state)
-    {
-        if (!state.EntityTypeIsKnown(entity.LogicalName, out var proxyType) || proxyType is null || proxyType == typeof(Entity))
-        {
-            return entity;
-        }
-
-        var toEntity = typeof(Entity).GetMethod(nameof(Entity.ToEntity))!.MakeGenericMethod(proxyType);
-        return (Entity)toEntity.Invoke(entity, null)!;
     }
 
     private static bool TryGetFormattedValueForValue(object value, out string formattedValue)
