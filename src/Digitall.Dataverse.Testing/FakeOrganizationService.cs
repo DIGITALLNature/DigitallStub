@@ -322,7 +322,10 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             var isOrganizationOwned = State.EntityMetadata.TryGetValue(clone.LogicalName, out var metadata)
                                       && metadata.OwnershipType == OwnershipTypes.OrganizationOwned;
 
-            if (!isOrganizationOwned && Options.UserId != Guid.Empty)
+            var entityTypeIsKnown = EntityTypeIsKnown(clone.LogicalName, out _);
+            var ownerIdExistsOnType = IsKnownAttributeForType(clone.LogicalName, "ownerid", out _);
+
+            if (!isOrganizationOwned && Options.UserId != Guid.Empty && (!entityTypeIsKnown || ownerIdExistsOnType))
             {
                 clone["ownerid"] = new EntityReference("systemuser", Options.UserId);
             }
