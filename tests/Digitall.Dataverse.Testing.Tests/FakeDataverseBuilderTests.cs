@@ -74,6 +74,42 @@ public class FakeDataverseBuilderTests
     }
 
     [Test]
+    public async Task WithUserId_Should_Set_UserId_On_OrganizationService()
+    {
+        var userId = Guid.NewGuid();
+
+        var service = new FakeDataverseBuilder()
+            .WithUserId(userId)
+            .GetOrganizationService();
+
+        await Assert.That(service.Options.UserId).IsEqualTo(userId);
+    }
+
+    [Test]
+    public async Task WithBusinessUnitId_Should_Set_BusinessUnitId_On_OrganizationService()
+    {
+        var businessUnitId = Guid.NewGuid();
+
+        var service = new FakeDataverseBuilder()
+            .WithBusinessUnitId(businessUnitId)
+            .GetOrganizationService();
+
+        await Assert.That(service.Options.BusinessUnitId).IsEqualTo(businessUnitId);
+    }
+
+    [Test]
+    public async Task WithFiscalYearStart_Should_Set_FiscalYearStart_On_OrganizationService()
+    {
+        var fiscalYearStart = new DateOnly(2024, 4, 1);
+
+        var service = new FakeDataverseBuilder()
+            .WithFiscalYearStart(fiscalYearStart)
+            .GetOrganizationService();
+
+        await Assert.That(service.Options.FiscalYearStart).IsEqualTo(fiscalYearStart);
+    }
+
+    [Test]
     public async Task AddEntityMetadata_And_Relationships_Should_BeStored_In_Service()
     {
         var accountMetadata = new EntityMetadata
