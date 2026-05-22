@@ -25,6 +25,7 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
     {
         _entityTypeCache = null;
         _attributeCache = null;
+        _proxyConverterCache = null;
     }
 
     private Dictionary<string, Type> EntityTypeCache => _entityTypeCache ??= BuildEntityTypeCache();
@@ -111,5 +112,36 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
         {
             ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoAttribute, $"The attribute {attributeLogicalName} does not exist on this entity.");
         }
+    }
+
+    private Dictionary<string, Func<Entity, Entity>>? _proxyConverterCache;
+
+    private Dictionary<string, Func<Entity, Entity>> ProxyConverterCache => _proxyConverterCache ??= BuildProxyConverterCache();
+
+    private Dictionary<string, Func<Entity, Entity>> BuildProxyConverterCache()
+    {
+        var cache = new Dictionary<string, Func<Entity, Entity>>(StringComparer.OrdinalIgnoreCase);
+        var toEntityMethod = typeof(Entity).GetMethod(nameof(Entity.ToEntity))!;
+
+        foreach (var (logicalName, type) in EntityTypeCache)
+        {
+            if (type == typeof(Entity)) continue;
+
+            var genericMethod = toEntityMethod.MakeGenericMethod(type);
+            cache[logicalName] = entity => (Entity)genericMethod.Invoke(entity, null)!;
+        }
+
+        return cache;
+    }
+
+    /// <summary>
+    /// Converts a plain Entity to its registered proxy type (if known).
+    /// Uses cached delegates — no per-call reflection overhead.
+    /// </summary>
+    public Entity ConvertToProxyType(Entity entity)
+    {
+        return ProxyConverterCache.TryGetValue(entity.LogicalName, out var converter)
+            ? converter(entity)
+            : entity;
     }
 }

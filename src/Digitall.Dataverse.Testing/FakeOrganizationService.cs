@@ -273,6 +273,11 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     /// </summary>
     public void ThrowIfNotKnownAttribute(string entityLogicalName, string attributeLogicalName) => TypeResolver.ThrowIfNotKnownAttribute(entityLogicalName, attributeLogicalName);
 
+    /// <summary>
+    ///     Converts a plain Entity to its registered proxy type using cached delegates.
+    /// </summary>
+    public Entity ConvertToProxyType(Entity entity) => TypeResolver.ConvertToProxyType(entity);
+
     #region IOrganizationService
 
     /// <summary>
