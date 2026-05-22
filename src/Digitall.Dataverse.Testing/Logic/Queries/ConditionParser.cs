@@ -25,7 +25,7 @@ public static class ConditionParser
     private static readonly MethodInfo DateTimeGetDate = typeof(DateTime).GetMethod("get_Date")!;
     private static readonly MethodInfo IntToString = typeof(int).GetMethod("ToString", Type.EmptyTypes)!;
     private static readonly MethodInfo HashSetIntOverlaps = typeof(HashSet<int>).GetMethod("Overlaps")!;
-    private static readonly MethodInfo HashSetIntSetEquals = typeof(HashSet<int>).GetMethod(nameof(HashSet<int>.SetEquals))!;
+    private static readonly MethodInfo HashSetIntSetEquals = typeof(HashSet<int>).GetMethod(nameof(HashSet<>.SetEquals))!;
     private static readonly MethodInfo AttributeCollectionContainsKey = typeof(AttributeCollection).GetMethod(nameof(AttributeCollection.ContainsKey), [typeof(string)])!;
     private static readonly MethodInfo AliasedValueGetValue = typeof(AliasedValue).GetMethod("get_Value")!;
     private static readonly MethodInfo EntityReferenceGetId = typeof(EntityReference).GetMethod("get_Id")!;
@@ -313,7 +313,7 @@ public static class ConditionParser
 
     private static MethodCallExpression GetCaseInsensitiveExpression(Expression e) => Expression.Call(e, StringToLowerInvariant);
 
-    private static MethodCallExpression GetCompareToExpression<T>(Expression left, Expression right) => Expression.Call(left, StringCompareTo, right);
+    private static MethodCallExpression GetCompareToExpression(Expression left, Expression right) => Expression.Call(left, StringCompareTo, right);
 
 
     private static object GetSingleConditionValue(TypedConditionExpression c)
@@ -571,7 +571,7 @@ public static class ConditionParser
 
             var right = TransformExpressionValueBasedOnOperator(tc.CondExpression.Operator, GetAppropriateTypedValueAndType(value, tc.AttributeType));
 
-            var methodCallExpr = GetCompareToExpression<string>(transformedExpression, right);
+            var methodCallExpr = GetCompareToExpression(transformedExpression, right);
 
             expOrValues = Expression.Or(expOrValues, Expression.GreaterThan(methodCallExpr, Expression.Constant(0)));
         }
@@ -688,7 +688,7 @@ public static class ConditionParser
             var rightHandSideExpression = TransformExpressionValueBasedOnOperator(tc.CondExpression.Operator, GetAppropriateTypedValueAndType(value, tc.AttributeType));
 
             //var compareToMethodCall = Expression.Call(transformedLeftHandSideExpression, typeof(string).GetMethod("CompareTo", new Type[] { typeof(string) })!, new[] { rightHandSideExpression });
-            var compareToMethodCall = GetCompareToExpression<string>(transformedLeftHandSideExpression, rightHandSideExpression);
+            var compareToMethodCall = GetCompareToExpression(transformedLeftHandSideExpression, rightHandSideExpression);
 
             expOrValues = Expression.Or(expOrValues, Expression.LessThan(compareToMethodCall, Expression.Constant(0)));
         }
@@ -993,7 +993,7 @@ public static class ConditionParser
 
         if (int.TryParse(value?.ToString(), out _))
         {
-            return Expression.Condition(Expression.TypeIs(input, typeof(OptionSetValue)), GetToStringExpression<int>(GetAppropriateCastExpressionBasedOnInt(input)), defaultStringExpression);
+            return Expression.Condition(Expression.TypeIs(input, typeof(OptionSetValue)), GetToStringExpression(GetAppropriateCastExpressionBasedOnInt(input)), defaultStringExpression);
         }
 
         return defaultStringExpression;
@@ -1005,13 +1005,13 @@ public static class ConditionParser
 
         if (attributeType?.IsOptionSet() == true && int.TryParse(value?.ToString(), out _))
         {
-            return Expression.Condition(Expression.TypeIs(input, typeof(OptionSetValue)), GetToStringExpression<int>(GetAppropriateCastExpressionBasedOnInt(input)), defaultStringExpression);
+            return Expression.Condition(Expression.TypeIs(input, typeof(OptionSetValue)), GetToStringExpression(GetAppropriateCastExpressionBasedOnInt(input)), defaultStringExpression);
         }
 
         return defaultStringExpression;
     }
 
-    private static MethodCallExpression GetToStringExpression<T>(Expression e) => Expression.Call(e, IntToString);
+    private static MethodCallExpression GetToStringExpression(Expression e) => Expression.Call(e, IntToString);
 
     private static Expression GetAppropriateCastExpressionBasedOnDateTime(Expression input, object? value)
     {
