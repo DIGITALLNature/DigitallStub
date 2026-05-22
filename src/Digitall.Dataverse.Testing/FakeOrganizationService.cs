@@ -480,7 +480,8 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         if (DefaultFakes.Value.TryGetValue(request.GetType(), out var defaultFake))
             return defaultFake.Execute(request, this);
 
-        throw new ArgumentOutOfRangeException(nameof(request), $"No implementation found for request of type {request.GetType().Name}");
+        ErrorFactory.ThrowFault(ErrorCodes.MessageDoesNotExist, $"No implementation found for request of type {request.GetType().Name}");
+        return null!; // unreachable — ThrowFault is [DoesNotReturn]
     }
 
     public void Associate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities)

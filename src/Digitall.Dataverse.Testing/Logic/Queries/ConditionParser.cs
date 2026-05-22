@@ -252,7 +252,7 @@ public static class ConditionParser
             case ConditionOperator.Between:
                 if (condition.CondExpression.Values.Count != 2)
                 {
-                    throw new Exception("Between operator requires exactly 2 values.");
+                    ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Between operator requires exactly 2 values");
                 }
 
                 operatorExpression = TranslateConditionExpressionBetween(condition, getAttributeValueExpr, containsAttributeExpression);
@@ -261,7 +261,7 @@ public static class ConditionParser
             case ConditionOperator.NotBetween:
                 if (condition.CondExpression.Values.Count != 2)
                 {
-                    throw new Exception("Not-Between operator requires exactly 2 values.");
+                    ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Not-Between operator requires exactly 2 values");
                 }
 
                 operatorExpression = Expression.Not(TranslateConditionExpressionBetween(condition, getAttributeValueExpr, containsAttributeExpression));
@@ -299,7 +299,9 @@ public static class ConditionParser
             #endregion
 
             default:
-                throw new ArgumentOutOfRangeException($"Operator {condition.CondExpression.Operator.ToString()} not yet implemented for condition expression");
+                ErrorFactory.ThrowFault(ErrorCodes.InvalidOperatorCode, $"Operator '{condition.CondExpression.Operator}' is not yet implemented for condition expressions");
+                operatorExpression = null!; // unreachable
+                break;
         }
 
         if (condition.IsOuter)
@@ -776,12 +778,12 @@ public static class ConditionParser
 
         if (!int.TryParse(c.Values[0].ToString(), out var valueToAdd))
         {
-            throw new Exception(c.Operator + " requires an integer value in the ConditionExpression.");
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"{c.Operator} requires an integer value in the ConditionExpression");
         }
 
         if (valueToAdd <= 0)
         {
-            throw new Exception(c.Operator + " requires a value greater than 0.");
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"{c.Operator} requires a value greater than 0");
         }
 
         var toDate = default(DateTime);

@@ -39,6 +39,12 @@ public enum ErrorCodes
     /// <summary>
     /// The operator is not valid or it is not supported.
     /// </summary>
-    InvalidOperatorCode = -2147187691
+    InvalidOperatorCode = -2147187691,
+
+    /// <summary>
+    /// The message handler for the specified message was not found.
+    /// Returned when Execute is called with an unregistered request type.
+    /// </summary>
+    MessageDoesNotExist = -2147220715
 
 }

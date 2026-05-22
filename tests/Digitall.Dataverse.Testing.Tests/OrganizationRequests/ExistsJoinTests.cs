@@ -4,7 +4,9 @@
 using Digitall.Dataverse.Testing.OrganizationRequests;
 using Digitall.Dataverse.Testing.Tests.Fixtures;
 using Microsoft.Crm.Sdk.Messages;
+using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
+using System.ServiceModel;
 
 namespace Digitall.Dataverse.Testing.Tests.OrganizationRequests;
 
@@ -644,7 +646,7 @@ public class ExistsJoinTests
 
     /// <summary>
     /// JoinOperator.All is parsed from FetchXml but not yet implemented in LinkedEntitiesProcessor.
-    /// It must throw a clear ArgumentException rather than a NullReferenceException or silent wrong result.
+    /// It must throw a Dataverse-style FaultException rather than a NullReferenceException or silent wrong result.
     /// </summary>
     [Test]
     public async Task QueryExpression_AllJoin_ThrowsArgumentException()
@@ -662,12 +664,12 @@ public class ExistsJoinTests
                     Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
                     JoinOperator.All)
             }
-        })).Throws<ArgumentException>();
+        })).Throws<FaultException<OrganizationServiceFault>>();
     }
 
     /// <summary>
     /// JoinOperator.NotAll is parsed from FetchXml but not yet implemented.
-    /// It must throw a clear ArgumentException.
+    /// It must throw a Dataverse-style FaultException.
     /// </summary>
     [Test]
     public async Task QueryExpression_NotAllJoin_ThrowsArgumentException()
@@ -685,7 +687,7 @@ public class ExistsJoinTests
                     Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
                     JoinOperator.NotAll)
             }
-        })).Throws<ArgumentException>();
+        })).Throws<FaultException<OrganizationServiceFault>>();
     }
 
     #endregion

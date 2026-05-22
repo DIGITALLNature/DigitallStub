@@ -2,6 +2,7 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System.Xml.Linq;
+using Digitall.Dataverse.Testing.Errors;
 using Digitall.Dataverse.Testing.Extensions;
 using Digitall.Dataverse.Testing.Logic.Queries.FetchAggregation;
 using Microsoft.Xrm.Sdk;
@@ -84,7 +85,7 @@ public class QueryProcessor
         // and that there is exactly 1 groupby.
         if (RetrieveFetchXmlNode(xmlDoc, "all-attributes") != null)
         {
-            throw new Exception("Can't have <all-attributes /> present when using aggregate");
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Cannot use <all-attributes /> in an aggregate FetchXml query");
         }
 
         var ns = xmlDoc.Root!.Name.Namespace;
@@ -92,7 +93,7 @@ public class QueryProcessor
         var entityName = RetrieveFetchXmlNode(xmlDoc, "entity")?.GetAttribute("name")?.Value ?? throw new InvalidDataException("Invalid fetch xml: missing entity name");
         if (string.IsNullOrEmpty(entityName))
         {
-            throw new Exception("Can't find entity name for aggregate query");
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Cannot find entity name for aggregate query");
         }
 
         var aggregates = new List<FetchAggregate>();
@@ -110,12 +111,12 @@ public class QueryProcessor
 
             if (string.IsNullOrEmpty("alias"))
             {
-                throw new Exception("Missing alias for attribute in aggregate fetch xml");
+                ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderInvalidAlias, "Missing alias for attribute in aggregate FetchXml");
             }
 
             if (string.IsNullOrEmpty("name"))
             {
-                throw new Exception("Missing name for attribute in aggregate fetch xml");
+                ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Missing name for attribute in aggregate FetchXml");
             }
 
             if (attr.IsAttributeTrue("groupby"))
@@ -125,7 +126,7 @@ public class QueryProcessor
                 {
                     if (!Enum.TryParse(dategrouping, true, out DateGroupType t))
                     {
-                        throw new Exception("Unknown dategrouping value '" + dategrouping + "'");
+                        ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Unknown dategrouping value '{dategrouping}'");
                     }
 
                     groups.Add(new DateTimeGroup { Type = t, OutputAlias = alias, Attribute = logicalName });
@@ -140,7 +141,7 @@ public class QueryProcessor
                 var agrFn = attr.GetAttribute("aggregate")?.Value;
                 if (string.IsNullOrEmpty(agrFn))
                 {
-                    throw new Exception("Attributes must have be aggregated or grouped by when using aggregation");
+                    ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Attributes must be aggregated or grouped-by when using aggregation");
                 }
 
                 FetchAggregate newAgr;
@@ -179,7 +180,9 @@ public class QueryProcessor
                         break;
 
                     default:
-                        throw new Exception("Unknown aggregate function '" + agrFn + "'");
+                        ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Unknown aggregate function '{agrFn}'");
+                        newAgr = null!; // unreachable
+                        break;
                 }
 
                 newAgr.OutputAlias = alias;
@@ -300,12 +303,12 @@ public class QueryProcessor
             // These error is also thrown by CRM
             if (order.GetAttribute("attribute") != null)
             {
-                throw new Exception("An attribute cannot be specified for an order clause for an aggregate Query. Use an alias");
+                ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "An attribute cannot be specified for an order clause in an aggregate query; use an alias instead");
             }
 
             if (string.IsNullOrEmpty("alias"))
             {
-                throw new Exception("An alias is required for an order clause for an aggregate Query.");
+                ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderInvalidAlias, "An alias is required for an order clause in an aggregate query");
             }
 
             result = order.IsAttributeTrue("descending")

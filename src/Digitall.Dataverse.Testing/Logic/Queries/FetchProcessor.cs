@@ -3,6 +3,7 @@
 
 using System.Globalization;
 using System.Xml.Linq;
+using Digitall.Dataverse.Testing.Errors;
 using Digitall.Dataverse.Testing.Extensions;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
@@ -396,7 +397,9 @@ internal class FetchProcessor(FakeOrganizationService state)
                 break;
 
             default:
-                throw new ArgumentOutOfRangeException(elem.GetAttribute("operator")!.Value);
+                ErrorFactory.ThrowFault(ErrorCodes.InvalidOperatorCode, $"FetchXml operator '{elem.GetAttribute("operator")!.Value}' is not supported");
+                op = default; // unreachable
+                break;
         }
 
         //Process values
@@ -512,7 +515,8 @@ internal class FetchProcessor(FakeOrganizationService state)
             }
             catch (Exception e)
             {
-                throw new Exception($"When trying to parse value for entity {entityName} and attribute {sAttributeName}: {e.Message}");
+                ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"When trying to parse value for entity '{entityName}' attribute '{sAttributeName}': {e.Message}");
+                return null!; // unreachable
             }
         }
 
@@ -561,7 +565,7 @@ internal class FetchProcessor(FakeOrganizationService state)
 
         if (bIsNumeric || bIsDateTime)
         {
-            throw new Exception("When using arithmetic values in Fetch a ProxyTypesAssembly must be used in order to know which types to cast values to.");
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "When using arithmetic values in FetchXml a ProxyTypesAssembly must be registered so the type of the attribute can be determined");
         }
 
         //Default value
