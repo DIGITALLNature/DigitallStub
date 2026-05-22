@@ -391,30 +391,30 @@ public static class ConditionParser
         {
             case ConditionOperator.ThisYear: // From first day of this year to last day of this year
                 fromDate = new DateTime(thisYear, 1, 1, 0, 0, 0, DateTimeKind.Local);
-                toDate = new DateTime(thisYear, 12, 31, 0, 0, 0, DateTimeKind.Local);
+                toDate = new DateOnly(thisYear, 12, 31).ToDateTime(TimeOnly.MaxValue, DateTimeKind.Local);
                 break;
             case ConditionOperator.LastYear: // From first day of last year to last day of last year
                 fromDate = new DateTime(thisYear - 1, 1, 1, 0, 0, 0, DateTimeKind.Local);
-                toDate = new DateTime(thisYear - 1, 12, 31, 0, 0, 0, DateTimeKind.Local);
+                toDate = new DateOnly(thisYear - 1, 12, 31).ToDateTime(TimeOnly.MaxValue, DateTimeKind.Local);
                 break;
             case ConditionOperator.NextYear: // From first day of next year to last day of next year
                 fromDate = new DateTime(thisYear + 1, 1, 1, 0, 0, 0, DateTimeKind.Local);
-                toDate = new DateTime(thisYear + 1, 12, 31, 0, 0, 0, DateTimeKind.Local);
+                toDate = new DateOnly(thisYear + 1, 12, 31).ToDateTime(TimeOnly.MaxValue, DateTimeKind.Local);
                 break;
             case ConditionOperator.ThisMonth: // From first day of this month to last day of this month
                 fromDate = new DateTime(thisYear, thisMonth, 1, 0, 0, 0, DateTimeKind.Local);
                 // Last day of this month: Add one month to the first of this month, and then remove one day
-                toDate = new DateTime(thisYear, thisMonth, 1, 0, 0, 0, DateTimeKind.Local).AddMonths(1).AddDays(-1);
+                toDate = DateOnly.FromDateTime(new DateTime(thisYear, thisMonth, 1).AddMonths(1).AddDays(-1)).ToDateTime(TimeOnly.MaxValue, DateTimeKind.Local);
                 break;
             case ConditionOperator.LastMonth: // From first day of last month to last day of last month
                 fromDate = new DateTime(thisYear, thisMonth, 1, 0, 0, 0, DateTimeKind.Local).AddMonths(-1);
                 // Last day of last month: One day before the first of this month
-                toDate = new DateTime(thisYear, thisMonth, 1, 0, 0, 0, DateTimeKind.Local).AddDays(-1);
+                toDate = DateOnly.FromDateTime(new DateTime(thisYear, thisMonth, 1).AddDays(-1)).ToDateTime(TimeOnly.MaxValue, DateTimeKind.Local);
                 break;
             case ConditionOperator.NextMonth: // From first day of next month to last day of next month
                 fromDate = new DateTime(thisYear, thisMonth, 1, 0, 0, 0, DateTimeKind.Local).AddMonths(1);
-                // LAst day of Next Month: Add two months to the first of this month, and then go back one day
-                toDate = new DateTime(thisYear, thisMonth, 1, 0, 0, 0, DateTimeKind.Local).AddMonths(2).AddDays(-1);
+                // Last day of Next Month: Add two months to the first of this month, and then go back one day
+                toDate = DateOnly.FromDateTime(new DateTime(thisYear, thisMonth, 1).AddMonths(2).AddDays(-1)).ToDateTime(TimeOnly.MaxValue, DateTimeKind.Local);
                 break;
             case ConditionOperator.ThisWeek:
                 fromDate = today.ToFirstDayOfDeltaWeek();
@@ -436,7 +436,7 @@ public static class ConditionParser
                     ? new DateOnly(fiscalYear, fiscalStart.Value.Month, fiscalStart.Value.Day)
                     : new DateOnly(fiscalYear, 1, 1);
                 fromDate = fiscalYearDate.ToDateTime(TimeOnly.MinValue);
-                toDate = fiscalYearDate.AddYears(1).AddDays(-1).ToDateTime(TimeOnly.MinValue);
+                toDate = fiscalYearDate.AddYears(1).AddDays(-1).ToDateTime(TimeOnly.MaxValue);
                 break;
         }
 

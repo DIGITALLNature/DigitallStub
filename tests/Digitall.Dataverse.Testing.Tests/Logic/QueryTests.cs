@@ -944,6 +944,24 @@ public class QueryTests
         await Assert.That(queryResult).IsEmpty();
     }
 
+    [Test]
+    public async Task GenerateQuery_InFiscalYear_IncludesRecordOnLastDayWithTimeComponent()
+    {
+        // Record is on the last day of fiscal year 1999 but has a non-midnight time → must still match
+        var account = new Account(Guid.NewGuid()) { OverriddenCreatedOn = new DateTime(1999, 12, 31, 23, 59, 59) };
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.InFiscalYear, 1999);
+
+        var dataverse = new FakeOrganizationService();
+        dataverse.Add(account);
+        var sut = new ExpressionProcessor(dataverse);
+
+        var result = sut.Generate(query);
+        var queryResult = dataverse.CreateQuery<Account>().Where(result);
+
+        await Assert.That(queryResult).Count().IsEqualTo(1);
+    }
+
     #endregion
 
     #region Time Operations
