@@ -116,10 +116,11 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
 
     /// <summary>
     /// Throws an exception if the specified entity type is not known.
+    /// An entity type is considered known when it either has a registered proxy type or has metadata registered via <see cref="FakeOrganizationService.AddMetadata"/>.
     /// </summary>
     public void ThrowIfNotKnownEntityType(string entityType)
     {
-        if (!EntityTypeIsKnown(entityType, out _))
+        if (!EntityTypeIsKnown(entityType, out _) && !entityMetadata.ContainsKey(entityType))
         {
             ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoEntity, $"The entity with a name = '{entityType}' with namemapping = 'Logical' was not found in the MetadataCache.");
         }
@@ -132,7 +133,7 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
     {
         if (IsKnownAttributeForType(entityLogicalName, attributeLogicalName, out _)) return;
 
-        if (!entityMetadata.TryGetValue(entityLogicalName, out var metadata) || metadata.Attributes.All(a => a.LogicalName != attributeLogicalName))
+        if (!entityMetadata.TryGetValue(entityLogicalName, out var metadata) || metadata.Attributes?.All(a => a.LogicalName != attributeLogicalName) != false)
         {
             ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderNoAttribute, $"The attribute {attributeLogicalName} does not exist on this entity.");
         }
