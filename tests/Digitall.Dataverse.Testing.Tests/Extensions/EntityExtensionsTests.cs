@@ -133,6 +133,26 @@ public class EntityExtensionsTests
     }
 
     [Test]
+    public async Task CloneEntity_Should_ReturnEntityRuntimeType_WhenSourceIsDerived()
+    {
+        var derived = new DerivedEntity { Id = Guid.NewGuid(), ["name"] = "x" };
+
+        var cloned = derived.CloneEntity();
+
+        await Assert.That(cloned.GetType()).IsEqualTo(typeof(Entity));
+        await Assert.That(cloned.LogicalName).IsEqualTo("account");
+        await Assert.That(cloned.Id).IsEqualTo(derived.Id);
+        await Assert.That(cloned["name"]).IsEqualTo("x");
+    }
+
+    private sealed class DerivedEntity : Entity
+    {
+        public DerivedEntity() : base("account")
+        {
+        }
+    }
+
+    [Test]
     public async Task JoinAttributes_Should_AddAliasedValues()
     {
         var mainEntity = new Entity("account", Guid.NewGuid());
