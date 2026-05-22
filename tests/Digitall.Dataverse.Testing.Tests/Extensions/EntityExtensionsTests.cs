@@ -133,7 +133,7 @@ public class EntityExtensionsTests
     }
 
     [Test]
-    public async Task CloneEntity_Should_ReturnEntityRuntimeType_WhenSourceIsDerived()
+    public async Task CloneEntity_Should_ReturnBaseEntityType_EvenWhenSourceIsDerived()
     {
         var derived = new DerivedEntity { Id = Guid.NewGuid(), ["name"] = "x" };
 
@@ -143,6 +143,30 @@ public class EntityExtensionsTests
         await Assert.That(cloned.LogicalName).IsEqualTo("account");
         await Assert.That(cloned.Id).IsEqualTo(derived.Id);
         await Assert.That(cloned["name"]).IsEqualTo("x");
+    }
+
+    [Test]
+    public async Task CloneEntity_OptionSetValueCollection_Should_BeIndependent()
+    {
+        var original = new Entity("account", Guid.NewGuid())
+        {
+            ["category"] = new OptionSetValueCollection([new OptionSetValue(1), new OptionSetValue(2)])
+        };
+
+        var cloned = original.CloneEntity();
+
+        var originalCol = (OptionSetValueCollection)original["category"];
+        var clonedCol = (OptionSetValueCollection)cloned["category"];
+
+        // Collections must be separate instances
+        await Assert.That(clonedCol).IsNotSameReferenceAs(originalCol);
+
+        // Each OptionSetValue inside must also be a separate instance
+        await Assert.That(clonedCol[0]).IsNotSameReferenceAs(originalCol[0]);
+
+        // Mutating the clone must not affect the original
+        clonedCol[0].Value = 99;
+        await Assert.That(originalCol[0].Value).IsEqualTo(1);
     }
 
     private sealed class DerivedEntity() : Entity("account");
