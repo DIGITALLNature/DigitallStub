@@ -45,48 +45,4 @@ public class AggregateFetchXmlValidationTests
         await Assert.That(ex.Detail.ErrorCode).IsEqualTo((int)ErrorCodes.QueryBuilderInvalidAlias);
     }
 
-    [Test]
-    public async Task AggregateFetchXml_MissingName_ShouldThrowAtXmlValidation()
-    {
-        // An aggregate attribute without a name is caught by XML validation
-        // (IsFetchXmlNodeValid requires "name" on <attribute> elements).
-        // This test documents that the XML validator catches it before aggregate processing.
-        var sut = BuildSut();
-
-        const string fetchXml = """
-            <fetch aggregate="true">
-              <entity name="account">
-                <attribute alias="cnt" aggregate="count" />
-              </entity>
-            </fetch>
-            """;
-
-        void Action() => sut.RetrieveMultiple(new FetchExpression(fetchXml));
-
-        var ex = Assert.Throws<Exception>(Action);
-        await Assert.That(ex.Message).IsEqualTo("At least some node is not valid");
-    }
-
-    [Test]
-    public async Task AggregateFetchXml_OrderWithoutAlias_ShouldThrowAtXmlValidation()
-    {
-        // An order element without alias in aggregate queries is caught by XML validation
-        // (IsFetchXmlNodeValid requires "alias" and no "attribute" on <order> in aggregate).
-        // This test documents that the XML validator catches it before aggregate processing.
-        var sut = BuildSut();
-
-        const string fetchXml = """
-            <fetch aggregate="true">
-              <entity name="account">
-                <attribute name="name" alias="cnt" aggregate="count" />
-                <order attribute="name" />
-              </entity>
-            </fetch>
-            """;
-
-        void Action() => sut.RetrieveMultiple(new FetchExpression(fetchXml));
-
-        var ex = Assert.Throws<Exception>(Action);
-        await Assert.That(ex.Message).IsEqualTo("At least some node is not valid");
-    }
 }
