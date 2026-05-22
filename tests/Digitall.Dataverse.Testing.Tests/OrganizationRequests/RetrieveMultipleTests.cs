@@ -419,7 +419,7 @@ public class RetrieveMultipleTests
             .Select(e => (e.GetAttributeValue<AliasedValue>("c." + Contact.LogicalNames.FirstName)?.Value as string))
             .OrderBy(n => n)
             .ToList();
-        await Assert.That(firstNames).IsEquivalentTo(new[] { "John B", "John C" });
+        await Assert.That(firstNames).IsEquivalentTo(["John B", "John C"]);
     }
 
     /// <summary>
@@ -498,7 +498,7 @@ public class RetrieveMultipleTests
             .ToList();
 
         // Both contacts must be present with their own distinct first name
-        await Assert.That(firstNames).IsEquivalentTo(new[] { "John B", "John C" });
+        await Assert.That(firstNames).IsEquivalentTo(["John B", "John C"]);
     }
 
     #endregion
