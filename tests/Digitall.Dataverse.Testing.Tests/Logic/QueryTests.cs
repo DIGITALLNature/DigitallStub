@@ -274,8 +274,10 @@ public class QueryTests
         var id = Guid.NewGuid();
 
         // Use a custom entity with no proxy type: AttributeType will be null (truly late-bound)
-        var entity = new Entity("custom_entity", id);
-        entity["ownerid"] = new EntityReference("systemuser", userId);
+        var entity = new Entity("custom_entity", id)
+        {
+            ["ownerid"] = new EntityReference("systemuser", userId)
+        };
 
         var query = new QueryExpression("custom_entity");
         query.Criteria.AddCondition("ownerid", ConditionOperator.EqualUserId);
@@ -297,8 +299,10 @@ public class QueryTests
         var businessUnitId = Guid.NewGuid();
         var id = Guid.NewGuid();
 
-        var entity = new Entity("custom_entity", id);
-        entity["owningbusinessunit"] = new EntityReference("businessunit", businessUnitId);
+        var entity = new Entity("custom_entity", id)
+        {
+            ["owningbusinessunit"] = new EntityReference("businessunit", businessUnitId)
+        };
 
         var query = new QueryExpression("custom_entity");
         query.Criteria.AddCondition("owningbusinessunit", ConditionOperator.EqualBusinessId);
@@ -961,8 +965,13 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.InFiscalYear, 1999);
 
-        var dataverse = new FakeOrganizationService();
-        dataverse.Options.FiscalYearStart = new DateOnly(2020, 4, 1);
+        var dataverse = new FakeOrganizationService
+        {
+            Options =
+            {
+                FiscalYearStart = new DateOnly(2020, 4, 1)
+            }
+        };
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 
@@ -980,8 +989,13 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.InFiscalYear, 2000);
 
-        var dataverse = new FakeOrganizationService();
-        dataverse.Options.FiscalYearStart = new DateOnly(2020, 4, 1);
+        var dataverse = new FakeOrganizationService
+        {
+            Options =
+            {
+                FiscalYearStart = new DateOnly(2020, 4, 1)
+            }
+        };
         dataverse.AddRange(TestData.Default);
         var sut = new ExpressionProcessor(dataverse);
 

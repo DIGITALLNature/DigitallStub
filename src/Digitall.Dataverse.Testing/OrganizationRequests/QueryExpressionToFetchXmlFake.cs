@@ -226,7 +226,7 @@ public class QueryExpressionToFetchXmlFake : OrganizationRequestFake<QueryExpres
         writer.WriteAttributeString("attribute", condition.AttributeName);
         writer.WriteAttributeString("operator", MapOperator(condition.Operator));
 
-        var values = condition.Values?.Where(v => v != null).ToList() ?? new List<object>();
+        var values = condition.Values?.Where(v => v != null).ToList() ?? [];
 
         if (values.Count == 1)
         {

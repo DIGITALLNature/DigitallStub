@@ -17,15 +17,20 @@ public class BulkDeleteFakeTests
     public async Task Setup()
     {
         _userId = Guid.NewGuid();
-        _sut = new FakeOrganizationService();
-        _sut.Options.UserId = _userId;
+        _sut = new FakeOrganizationService
+        {
+            Options =
+            {
+                UserId = _userId
+            }
+        };
         _sut.AddRequest(new BulkDeleteFake());
         _sut.AddRequest(new RetrieveMultipleFake());
         await Task.CompletedTask;
     }
 
     private static BulkDeleteRequest BuildRequest(string jobName = "Test Job") =>
-        new BulkDeleteRequest
+        new()
         {
             JobName = jobName,
             QuerySet = [],

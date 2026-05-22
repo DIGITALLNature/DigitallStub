@@ -331,9 +331,12 @@ public class FakeOrganizationServiceTests
         fakeTime.SetUtcNow(new DateTimeOffset(2025, 6, 1, 12, 0, 0, TimeSpan.Zero));
         var sut = new FakeOrganizationService(fakeTime) { Options = { UserId = userId } };
 
-        var entity = new Account { Name = "Test" };
-        entity["createdon"]  = explicitTime;
-        entity["createdby"]  = new EntityReference("systemuser", explicitUser);
+        var entity = new Account
+        {
+            Name = "Test",
+            ["createdon"] = explicitTime,
+            ["createdby"] = new EntityReference("systemuser", explicitUser)
+        };
 
         var id = sut.Create(entity);
 
@@ -451,8 +454,10 @@ public class FakeOrganizationServiceTests
         var id = Guid.NewGuid();
         sut.Add(new Account(id) { Name = "Original Name", Description = "Original Description" });
 
-        var partial = new Entity(Account.EntityLogicalName, id);
-        partial["description"] = "New Description";
+        var partial = new Entity(Account.EntityLogicalName, id)
+        {
+            ["description"] = "New Description"
+        };
         sut.Update(partial);
 
         var retrieved = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));

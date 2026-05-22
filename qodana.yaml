@@ -28,6 +28,7 @@ exclude:
   - name: All
     paths:
       - README.md
+      - tests/Digitall.Dataverse.Testing.Tests/Fixtures/Model/DotNet
 
 #Execute shell command before Qodana execution (Applied in CI/CD pipeline)
 bootstrap: dotnet restore ./Digitall.Dataverse.Testing.slnx && dotnet build ./Digitall.Dataverse.Testing.slnx --configuration Debug
