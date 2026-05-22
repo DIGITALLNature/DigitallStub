@@ -1,3 +1,12 @@
+# [1.1.0-beta.3](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.2...v1.1.0-beta.3) (2026-05-22)
+
+
+### Bug Fixes
+
+* **query:** guard against null Attributes array in PatchDateFormat ([fdefc11](https://github.com/DIGITALLNature/DigitallTesting/commit/fdefc11fcc7903fcaf926b7523fe9335d44f6312))
+* **query:** handle null otherEntity in JoinAttributes for left outer joins ([1a58675](https://github.com/DIGITALLNature/DigitallTesting/commit/1a58675019e9be299fafd2589a1213690728677a))
+* **query:** materialize DateTime attributes before modifying collection in PatchDateFormat ([9b9aa2d](https://github.com/DIGITALLNature/DigitallTesting/commit/9b9aa2d98f13cb71e0001226bdf4ff0ee8ccd6ea))
+
 # [1.1.0-beta.2](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.1...v1.1.0-beta.2) (2026-05-22)
 
 
