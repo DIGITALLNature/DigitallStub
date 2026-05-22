@@ -114,10 +114,7 @@ public class QueryProcessor
                 ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderInvalidAlias, "Missing alias for attribute in aggregate FetchXml");
             }
 
-            if (string.IsNullOrEmpty(logicalName))
-            {
-                ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Missing name for attribute in aggregate FetchXml");
-            }
+            // logicalName is guaranteed non-empty by ValidateXmlDocument (requires "name" on <attribute>)
 
             if (attr.IsAttributeTrue("groupby"))
             {
@@ -306,10 +303,7 @@ public class QueryProcessor
                 ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "An attribute cannot be specified for an order clause in an aggregate query; use an alias instead");
             }
 
-            if (string.IsNullOrEmpty(alias))
-            {
-                ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderInvalidAlias, "An alias is required for an order clause in an aggregate query");
-            }
+            // alias is guaranteed present by ValidateXmlDocument (requires "alias" on <order> in aggregate)
 
             result = order.IsAttributeTrue("descending")
                 ? result.OrderByDescending(e => e.Attributes.ContainsKey(alias) ? e.Attributes[alias] : null, new XrmOrderByAttributeComparer())
