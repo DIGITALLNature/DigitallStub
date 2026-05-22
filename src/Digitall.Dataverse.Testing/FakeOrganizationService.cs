@@ -373,7 +373,18 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"Entity '{entity.LogicalName}' With Id = {entity.Id:D} Does Not Exist");
         }
 
-        value[entity.Id] = entity.CloneEntity();
+        var merged = value[entity.Id].CloneEntity();
+
+        foreach (var attr in entity.Attributes)
+            merged.Attributes[attr.Key] = attr.Value;
+
+        foreach (var fv in entity.FormattedValues)
+            merged.FormattedValues[fv.Key] = fv.Value;
+
+        foreach (var ka in entity.KeyAttributes)
+            merged.KeyAttributes[ka.Key] = ka.Value;
+
+        value[entity.Id] = merged;
     }
 
     public void Delete(string? entityName, Guid id)
