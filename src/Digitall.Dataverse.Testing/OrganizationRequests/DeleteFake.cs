@@ -9,7 +9,7 @@ public class DeleteFake : OrganizationRequestFake<DeleteRequest, DeleteResponse>
 {
     public override DeleteResponse Execute(DeleteRequest organizationRequest, FakeOrganizationService state)
     {
-        state.Delete(organizationRequest.Target.LogicalName, organizationRequest.Target.Id);
+        state.DeleteCore(organizationRequest.Target.LogicalName, organizationRequest.Target.Id);
 
         return new DeleteResponse();
     }

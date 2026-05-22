@@ -23,7 +23,7 @@ public class RetrieveFake : OrganizationRequestFake<RetrieveRequest, RetrieveRes
         }
         else
         {
-            record = state.Retrieve(organizationRequest.Target.LogicalName, organizationRequest.Target.Id, organizationRequest.ColumnSet);
+            record = state.RetrieveCore(organizationRequest.Target.LogicalName, organizationRequest.Target.Id, organizationRequest.ColumnSet);
         }
 
         if (organizationRequest.RelatedEntitiesQuery?.Count > 0)
