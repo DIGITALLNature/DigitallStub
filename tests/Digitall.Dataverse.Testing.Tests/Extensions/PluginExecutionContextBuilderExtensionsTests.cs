@@ -230,47 +230,6 @@ public class PluginExecutionContextBuilderExtensionsTests
     }
 
     [Test]
-    public async Task WithUserId_ShouldTakePrecedenceOverEnvVariable()
-    {
-        var originalUserId = Environment.GetEnvironmentVariable("UserId");
-        var explicitUserId = Guid.NewGuid();
-        var envUserId = Guid.NewGuid();
-
-        try
-        {
-            Environment.SetEnvironmentVariable("UserId", envUserId.ToString());
-
-            var builder = new PluginExecutionContextBuilder().WithUserId(explicitUserId);
-
-            await Assert.That(builder.UserId).IsEqualTo(explicitUserId);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("UserId", originalUserId);
-        }
-    }
-
-    [Test]
-    public async Task WithUserId_ShouldNotModifyEnvironmentVariable()
-    {
-        var originalUserId = Environment.GetEnvironmentVariable("UserId");
-        var explicitUserId = Guid.NewGuid();
-
-        try
-        {
-            Environment.SetEnvironmentVariable("UserId", null);
-
-            new PluginExecutionContextBuilder().WithUserId(explicitUserId);
-
-            await Assert.That(Environment.GetEnvironmentVariable("UserId")).IsNull();
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("UserId", originalUserId);
-        }
-    }
-
-    [Test]
     public async Task WithCorrelationId_ShouldSetCorrelationIdAndReturnSameBuilder()
     {
         var correlationId = Guid.NewGuid();

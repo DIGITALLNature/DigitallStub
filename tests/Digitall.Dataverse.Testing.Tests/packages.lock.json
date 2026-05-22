@@ -2,17 +2,6 @@
   "version": 1,
   "dependencies": {
     "net10.0": {
-      "DotNetEnv": {
-        "type": "Direct",
-        "requested": "[3.2.0, )",
-        "resolved": "3.2.0",
-        "contentHash": "2q+PD+aJcRW9QuRcIv4F8WbvEDxI6cwxzZJec2i45cBY4cAKCAoW4ZPkApJ7H82wr6Yfmxx/0kb1nLnRmZrGZA==",
-        "dependencies": {
-          "Microsoft.Extensions.Configuration": "1.1.2",
-          "Microsoft.Extensions.Configuration.Abstractions": "1.1.2",
-          "Superpower": "3.0.0"
-        }
-      },
       "Microsoft.PowerPlatform.Dataverse.Client": {
         "type": "Direct",
         "requested": "[1.2.10, )",
@@ -69,9 +58,9 @@
       },
       "TUnit.Mocks": {
         "type": "Direct",
-        "requested": "[1.45.22, )",
-        "resolved": "1.45.22",
-        "contentHash": "uWtP+VSBehJZiRDZjma7nwSSUck71etVUi48JyLZDPEllrKGec4WhnkIjdM2b4W0AhaIbFOz/SFRml1VCj+38w=="
+        "requested": "[1.45.29, )",
+        "resolved": "1.45.29",
+        "contentHash": "nO7ncab70585Bs8elf/Mzn53oKT5s58focRPI9193ns0wr4Psmb9uNwMijVIjFa7mUaoex5Srp0Qfa8kOyjuEQ=="
       },
       "EnumerableAsyncProcessor": {
         "type": "Transitive",
@@ -302,11 +291,6 @@
         "type": "Transitive",
         "resolved": "13.0.1",
         "contentHash": "ppPFpBcvxdsfUonNcvITKqLl3bqxWbDCZIzDWHzjpdAHRFfZe0Dw9HmA0+za13IdyrgJwpkDTDA9fHaxOrt20A=="
-      },
-      "Superpower": {
-        "type": "Transitive",
-        "resolved": "3.0.0",
-        "contentHash": "bjKbAYWePooCAvPxQq+3KnmcLfRggMyRoXmtBMlmCG71bdwBHrO6rmRJ2DRIodg5aztNcxeZXBUVWT+H+MZUhw=="
       },
       "System.Configuration.ConfigurationManager": {
         "type": "Transitive",

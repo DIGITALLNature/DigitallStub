@@ -16,7 +16,8 @@ namespace Digitall.Dataverse.Testing;
 
 public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganizationServiceState state) : IOrganizationService
 {
-    public readonly TimeProvider TimeProvider = timeProvider;
+    public TimeProvider TimeProvider { get; } = timeProvider;
+    public FakeDataverseOptions Options { get; } = new();
 
     public FakeOrganizationServiceState State { get; } = state;
 
@@ -313,6 +314,18 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         {
             var resolvedStatecode = clone.GetAttributeValue<OptionSetValue>("statecode");
             clone["statuscode"] = State.GetDefaultStatusCode(clone.LogicalName, resolvedStatecode.Value);
+        }
+
+        // Default ownerid for user-owned entities
+        if (!clone.Contains("ownerid"))
+        {
+            var isOrganizationOwned = State.EntityMetadata.TryGetValue(clone.LogicalName, out var metadata)
+                                      && metadata.OwnershipType == OwnershipTypes.OrganizationOwned;
+
+            if (!isOrganizationOwned && Options.UserId != Guid.Empty)
+            {
+                clone["ownerid"] = new EntityReference("systemuser", Options.UserId);
+            }
         }
 
         try

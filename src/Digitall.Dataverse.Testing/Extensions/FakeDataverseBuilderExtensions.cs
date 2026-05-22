@@ -66,6 +66,34 @@ public static class FakeDataverseBuilderExtensions
             return builder;
         }
 
+        public TBuilder WithUserId(Guid userId)
+        {
+            var service = builder.GetOrganizationService();
+            service.Options.UserId = userId;
+            return builder;
+        }
+
+        public TBuilder WithBusinessUnitId(Guid businessUnitId)
+        {
+            var service = builder.GetOrganizationService();
+            service.Options.BusinessUnitId = businessUnitId;
+            return builder;
+        }
+
+        public TBuilder WithFiscalYearStart(DateOnly fiscalYearStart)
+        {
+            var service = builder.GetOrganizationService();
+            service.Options.FiscalYearStart = fiscalYearStart;
+            return builder;
+        }
+
+        public TBuilder WithMaxRetrieveCount(int maxRetrieveCount)
+        {
+            var service = builder.GetOrganizationService();
+            service.Options.MaxRetrieveCount = maxRetrieveCount;
+            return builder;
+        }
+
         /// <summary>
         /// Adds an environment variable configuration entry to the builder's organization service.
         /// Optionally adds a value override on top of the default.

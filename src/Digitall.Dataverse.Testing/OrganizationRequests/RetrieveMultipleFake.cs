@@ -107,7 +107,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
         }
 
         // Handle paging
-        var maxRetrieveCount = int.Parse(Environment.GetEnvironmentVariable("MaxRetrieveCount") ?? "5000");
+        var maxRetrieveCount = state.Options.MaxRetrieveCount;
         var pageSize = maxRetrieveCount;
         var pageInfo = queryExpression.PageInfo;
         var pageNumber = 1;
