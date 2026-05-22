@@ -99,7 +99,7 @@ public static class ConditionParser
         throw new FaultException(faultReason);
     }
 
-    public static Expression TranslateConditionExpression(QueryExpression queryExpression, FakeOrganizationService context, TypedConditionExpression condition, ParameterExpression entity)
+    public static Expression TranslateConditionExpression(QueryExpression queryExpression, FakeOrganizationService organizationService, TypedConditionExpression condition, ParameterExpression entity)
     {
         Expression attributesProperty = Expression.Property(entity, "Attributes");
 
@@ -136,14 +136,14 @@ public static class ConditionParser
             case ConditionOperator.Tomorrow:
             case ConditionOperator.EqualUserId:
             case ConditionOperator.EqualBusinessId:
-                operatorExpression = TranslateConditionExpressionEqual(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionEqual(organizationService, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.NotOn:
             case ConditionOperator.NotEqual:
             case ConditionOperator.NotEqualUserId:
             case ConditionOperator.NotEqualBusinessId:
-                operatorExpression = Expression.Not(TranslateConditionExpressionEqual(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression));
+                operatorExpression = Expression.Not(TranslateConditionExpressionEqual(organizationService, condition, getAttributeValueExpr, containsAttributeExpression));
                 break;
 
             #endregion
@@ -196,7 +196,7 @@ public static class ConditionParser
                 break;
 
             case ConditionOperator.GreaterEqual:
-                operatorExpression = TranslateConditionExpressionGreaterThanOrEqual(context, condition, getAttributeValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionGreaterThanOrEqual(organizationService, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.LessThan:
@@ -204,7 +204,7 @@ public static class ConditionParser
                 break;
 
             case ConditionOperator.LessEqual:
-                operatorExpression = TranslateConditionExpressionLessThanOrEqual(context, condition, getAttributeValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionLessThanOrEqual(organizationService, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
 
             #endregion
@@ -232,7 +232,7 @@ public static class ConditionParser
             #region Time Operations
 
             case ConditionOperator.OnOrAfter:
-                operatorExpression = Expression.Or(TranslateConditionExpressionEqual(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression),
+                operatorExpression = Expression.Or(TranslateConditionExpressionEqual(organizationService, condition, getAttributeValueExpr, containsAttributeExpression),
                     TranslateConditionExpressionGreaterThan(condition, getAttributeValueExpr, containsAttributeExpression));
                 break;
             case ConditionOperator.LastXHours:
@@ -241,11 +241,11 @@ public static class ConditionParser
             case ConditionOperator.LastXWeeks:
             case ConditionOperator.LastXMonths:
             case ConditionOperator.LastXYears:
-                operatorExpression = TranslateConditionExpressionLast(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionLast(organizationService.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.OnOrBefore:
-                operatorExpression = Expression.Or(TranslateConditionExpressionEqual(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression),
+                operatorExpression = Expression.Or(TranslateConditionExpressionEqual(organizationService, condition, getAttributeValueExpr, containsAttributeExpression),
                     TranslateConditionExpressionLessThan(condition, getAttributeValueExpr, containsAttributeExpression));
                 break;
 
@@ -272,7 +272,7 @@ public static class ConditionParser
             case ConditionOperator.OlderThanXWeeks:
             case ConditionOperator.OlderThanXYears:
             case ConditionOperator.OlderThanXMonths:
-                operatorExpression = TranslateConditionExpressionOlderThan(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionOlderThan(organizationService.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
 
             case ConditionOperator.NextXHours:
@@ -281,7 +281,7 @@ public static class ConditionParser
             case ConditionOperator.NextXWeeks:
             case ConditionOperator.NextXMonths:
             case ConditionOperator.NextXYears:
-                operatorExpression = TranslateConditionExpressionNext(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionNext(organizationService.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
             case ConditionOperator.ThisYear:
             case ConditionOperator.LastYear:
@@ -293,7 +293,7 @@ public static class ConditionParser
             case ConditionOperator.ThisWeek:
             case ConditionOperator.NextWeek:
             case ConditionOperator.InFiscalYear:
-                operatorExpression = TranslateConditionExpressionBetweenDates(context.TimeProvider, condition, getAttributeValueExpr, containsAttributeExpression);
+                operatorExpression = TranslateConditionExpressionBetweenDates(organizationService, condition, getAttributeValueExpr, containsAttributeExpression);
                 break;
 
             #endregion
@@ -375,14 +375,14 @@ public static class ConditionParser
     /// <summary>
     ///     Takes a condition expression which needs translating into a 'between two dates' expression and works out the relevant dates
     /// </summary>
-    private static BinaryExpression TranslateConditionExpressionBetweenDates(TimeProvider timeProvider, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionBetweenDates(FakeOrganizationService organizationService, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var c = tc.CondExpression;
 
         DateTime? fromDate = null;
         DateTime? toDate = null;
 
-        var today = timeProvider.GetLocalNow().Date;
+        var today = organizationService.TimeProvider.GetLocalNow().Date;
         var thisYear = today.Year;
         var thisMonth = today.Month;
 
@@ -431,9 +431,9 @@ public static class ConditionParser
             case ConditionOperator.InFiscalYear:
                 var fiscalYear = (int)c.Values[0];
                 c.Values.Clear();
-                var fiscalYearDate = DateTime.Parse(Environment.GetEnvironmentVariable("FiscalYearStart") ?? $"{fiscalYear}-01-01");
-                fromDate = fiscalYearDate;
-                toDate = fiscalYearDate.AddYears(1).AddDays(-1);
+                var fiscalYearDate = organizationService.Options.FiscalYearStart ?? DateOnly.Parse($"{fiscalYear}-01-01");
+                fromDate = fiscalYearDate.ToDateTime(TimeOnly.MinValue);
+                toDate = fiscalYearDate.AddYears(1).AddDays(-1).ToDateTime(TimeOnly.MinValue);
                 break;
         }
 
@@ -476,20 +476,20 @@ public static class ConditionParser
         return TranslateConditionExpressionLike(typedComputedCondition, getAttributeValueExpr, containsAttributeExpr);
     }
 
-    private static BinaryExpression TranslateConditionExpressionEqual(TimeProvider timeProvider, TypedConditionExpression c, Expression getAttributeValueExpr, Expression containsAttributeExpr)
+    private static BinaryExpression TranslateConditionExpressionEqual(FakeOrganizationService organizationService, TypedConditionExpression c, Expression getAttributeValueExpr, Expression containsAttributeExpr)
     {
         var expOrValues = Expression.Or(Expression.Constant(false), Expression.Constant(false));
 
         object? unaryOperatorValue = null;
 
-        var today = timeProvider.GetLocalNow().Date;
+        var today = organizationService.TimeProvider.GetLocalNow().Date;
         unaryOperatorValue = c.CondExpression.Operator switch
         {
             ConditionOperator.Today => today,
             ConditionOperator.Yesterday => today.AddDays(-1),
             ConditionOperator.Tomorrow => today.AddDays(1),
-            ConditionOperator.EqualUserId or ConditionOperator.NotEqualUserId => Guid.Parse(Environment.GetEnvironmentVariable("UserId") ?? Guid.Empty.ToString()),
-            ConditionOperator.EqualBusinessId or ConditionOperator.NotEqualBusinessId => Guid.Parse(Environment.GetEnvironmentVariable("BusinessUnitId") ?? Guid.Empty.ToString()),
+            ConditionOperator.EqualUserId or ConditionOperator.NotEqualUserId => organizationService.Options.UserId.ToString(),
+            ConditionOperator.EqualBusinessId or ConditionOperator.NotEqualBusinessId => organizationService.Options.BusinessUnitId.ToString(),
             _ => unaryOperatorValue
         };
 
@@ -555,8 +555,8 @@ public static class ConditionParser
     }
 
     private static BinaryExpression
-        TranslateConditionExpressionGreaterThanOrEqual(FakeOrganizationService context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
-        Expression.Or(TranslateConditionExpressionEqual(context.TimeProvider, tc, getAttributeValueExpr, containsAttributeExpr),
+        TranslateConditionExpressionGreaterThanOrEqual(FakeOrganizationService organizationService, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
+        Expression.Or(TranslateConditionExpressionEqual(organizationService, tc, getAttributeValueExpr, containsAttributeExpr),
             TranslateConditionExpressionGreaterThan(tc, getAttributeValueExpr, containsAttributeExpr));
 
     private static BinaryExpression TranslateConditionExpressionGreaterThanString(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
@@ -671,8 +671,8 @@ public static class ConditionParser
     }
 
     private static BinaryExpression
-        TranslateConditionExpressionLessThanOrEqual(FakeOrganizationService context, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
-        Expression.Or(TranslateConditionExpressionEqual(context.TimeProvider, tc, getAttributeValueExpr, containsAttributeExpr),
+        TranslateConditionExpressionLessThanOrEqual(FakeOrganizationService organizationService, TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr) =>
+        Expression.Or(TranslateConditionExpressionEqual(organizationService, tc, getAttributeValueExpr, containsAttributeExpr),
             TranslateConditionExpressionLessThan(tc, getAttributeValueExpr, containsAttributeExpr));
 
     private static BinaryExpression TranslateConditionExpressionLessThanString(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)

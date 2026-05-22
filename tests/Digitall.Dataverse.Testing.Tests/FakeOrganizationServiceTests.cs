@@ -1,22 +1,15 @@
 using System.ServiceModel;
 using Digitall.Dataverse.Testing.Errors;
 using Digitall.Dataverse.Testing.Tests.Fixtures;
-using DotNetEnv;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Dataverse.Testing.Tests;
 
 public class FakeOrganizationServiceTests
 {
-    [Before(Class)]
-    public static async Task MyClassInitialize()
-    {
-        Env.Load();
-        await Task.CompletedTask;
-    }
-
     [Test]
     public async Task ModelIsDetected()
     {
@@ -203,6 +196,49 @@ public class FakeOrganizationServiceTests
         await Assert.That(createdRecord.StateCode.Value).IsEqualTo(entity.StateCode.Value);
         await Assert.That(createdRecord.StatusCode).IsNotNull();
         await Assert.That(createdRecord.StatusCode.Value).IsEqualTo(entity.StatusCode.Value);
+    }
+
+    [Test]
+    public async Task Create_SetsOwner_WhenOwnerIsNotProvided()
+    {
+        var userId = Guid.NewGuid();
+        var entity = new Account { Name = nameof(Create_SetsOwner_WhenOwnerIsNotProvided) };
+        var sut = new FakeOrganizationService { Options = { UserId = userId } };
+
+        var result = sut.Create(entity);
+
+        var createdRecord = sut.Retrieve(Account.EntityLogicalName, result, new ColumnSet(true)).ToEntity<Account>();
+        await Assert.That(createdRecord.OwnerId).IsNotNull();
+        await Assert.That(createdRecord.OwnerId.Id).IsEqualTo(userId);
+    }
+
+    [Test]
+    public async Task Create_DoesNotOverride_WhenOwnerIsProvided()
+    {
+        var userId = Guid.NewGuid();
+        var ownerId = Guid.NewGuid();
+        var entity = new Account { Name = nameof(Create_DoesNotOverride_WhenOwnerIsProvided), OwnerId = new EntityReference("systemuser", ownerId) };
+        var sut = new FakeOrganizationService { Options = { UserId = userId } };
+
+        var result = sut.Create(entity);
+
+        var createdRecord = sut.Retrieve(Account.EntityLogicalName, result, new ColumnSet(true)).ToEntity<Account>();
+        await Assert.That(createdRecord.OwnerId.Id).IsEqualTo(ownerId);
+    }
+
+    [Test]
+    public async Task Create_DoesNotSetOwner_WhenEntityIsOrganizationOwned()
+    {
+        var userId = Guid.NewGuid();
+        var entity = new ServiceEndpoint { Name = nameof(Create_DoesNotSetOwner_WhenEntityIsOrganizationOwned) };
+
+        var sut = new FakeOrganizationService { Options = { UserId = userId } };
+        sut.AddMetadata(new EntityMetadata { LogicalName = ServiceEndpoint.EntityLogicalName, OwnershipType = OwnershipTypes.OrganizationOwned });
+
+        var result = sut.Create(entity);
+
+        var createdRecord = sut.Retrieve(ServiceEndpoint.EntityLogicalName, result, new ColumnSet(true)).ToEntity<ServiceEndpoint>();
+        await Assert.That(createdRecord.Attributes).DoesNotContain(a => a.Key == "ownerid");
     }
 
     [Test]

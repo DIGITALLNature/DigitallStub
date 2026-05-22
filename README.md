@@ -202,7 +202,11 @@ var service = new FakeDataverseBuilder()
 - `.AddEntityMetadata(params EntityMetadata[])` — register entity metadata
 - `.AddRelationships(params RelationshipMetadataBase[])` — register relationships
 - `.LoadMetadata(string path)` — load `EntityMetadata` from XML (file or directory)
-- `.AddConfig(key, envVar, defaultValue)` — configure environment variables
+- `.AddConfig(key, defaultValue, value?)` — add Dataverse environment variable definition/value entities
+- `.WithUserId(Guid)` — set the current user ID
+- `.WithBusinessUnitId(Guid)` — set the current business unit ID
+- `.WithMaxRetrieveCount(int)` — set the max records per page
+- `.WithFiscalYearStart(DateOnly)` — set the fiscal year start date
 
 ### PluginExecutionContextBuilder
 
@@ -550,21 +554,32 @@ fakeTime.Advance(TimeSpan.FromDays(30));
 
 ## Configuration
 
-The `FakeOrganizationService` uses environment variables for configurable behavior:
+The `FakeOrganizationService` exposes a `FakeDataverseOptions` instance via the `Options` property for per-test configuration. This avoids process-global state (such as environment variables) and is safe for parallel test execution.
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `MaxRetrieveCount` | Maximum records returned by `RetrieveMultiple` | `5000` |
-| `UserId` | Current user ID (used in `WhoAmI` and `EqualUserId` filters) | `Guid.Empty` |
-| `BusinessUnitId` | Current business unit ID | `Guid.Empty` |
-| `FiscalYearStart` | Start date for fiscal year calculations | Current year start |
+| Option | Type | Description | Default |
+|--------|------|-------------|---------|
+| `UserId` | `Guid` | Current user ID (used in `WhoAmI`, `EqualUserId` filters, and default record ownership) | `Guid.Empty` |
+| `BusinessUnitId` | `Guid` | Current business unit ID (used in `WhoAmI` and `EqualBusinessId` filters) | `Guid.Empty` |
+| `FiscalYearStart` | `DateOnly?` | Start date for fiscal year calculations | `null` (defaults to Jan 1) |
+| `MaxRetrieveCount` | `int` | Maximum records returned by `RetrieveMultiple` per page | `5000` |
 
 Configure via the builder:
 
 ```csharp
 var service = new FakeDataverseBuilder()
-    .AddConfig("MaxRetrieveCount", "5000", "1000")
+    .WithUserId(userId)
+    .WithBusinessUnitId(businessUnitId)
+    .WithMaxRetrieveCount(100)
+    .WithFiscalYearStart(new DateOnly(2025, 4, 1))
     .GetOrganizationService();
+```
+
+Or set directly on the service:
+
+```csharp
+var service = new FakeOrganizationService();
+service.Options.UserId = userId;
+service.Options.MaxRetrieveCount = 100;
 ```
 
 ---
@@ -577,6 +592,7 @@ DigitallTesting/
 │   ├── FakeOrganizationService.cs              # IOrganizationService implementation
 │   ├── FakeOrganizationServiceAsync.cs         # IOrganizationServiceAsync2 implementation
 │   ├── FakeOrganizationServiceState.cs         # Internal entity store
+│   ├── FakeDataverseOptions.cs                 # Per-instance configuration options
 │   ├── FakeDataverseBuilder.cs                 # Fluent builder for service setup
 │   ├── FakePluginContextBuilder.cs             # Combined plugin + service builder
 │   ├── IFakeDataverseBuilder.cs                # Builder interface
