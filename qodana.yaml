@@ -27,7 +27,6 @@ include:
 exclude:
   - name: All
     paths:
-      - tests
       - README.md
 
 #Execute shell command before Qodana execution (Applied in CI/CD pipeline)
