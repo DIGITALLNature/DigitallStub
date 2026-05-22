@@ -869,6 +869,83 @@ public class QueryTests
 
     #endregion
 
+    #region InFiscalYear
+
+    [Test]
+    public async Task GenerateQuery_InFiscalYear_CalendarYear_MatchesRecordInYear()
+    {
+        // corpA has OverriddenCreatedOn = 1999-12-31 → should match fiscal year 1999 (Jan–Dec)
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.InFiscalYear, 1999);
+
+        var dataverse = new FakeOrganizationService();
+        dataverse.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(dataverse);
+
+        var result = sut.Generate(query);
+        var queryResult = dataverse.CreateQuery<Account>().Where(result);
+
+        await Assert.That(queryResult).Count().IsEqualTo(1);
+    }
+
+    [Test]
+    public async Task GenerateQuery_InFiscalYear_CalendarYear_ExcludesRecordOutsideYear()
+    {
+        // corpB has OverriddenCreatedOn = 2000-01-02 → must NOT match fiscal year 1999
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.InFiscalYear, 1999);
+
+        var dataverse = new FakeOrganizationService();
+        dataverse.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(dataverse);
+
+        var result = sut.Generate(query);
+        var queryResult = dataverse.CreateQuery<Account>().Where(result).ToList();
+
+        await Assert.That(queryResult.Any(a => a.Id == Guid.Parse("00000000-0000-0000-0001-000000000002"))).IsFalse();
+    }
+
+    [Test]
+    public async Task GenerateQuery_InFiscalYear_CustomStart_UsesYearFromConditionNotOption()
+    {
+        // FiscalYearStart set to 2020-04-01 (April).
+        // Fiscal year 1999 must run 1999-04-01 to 2000-03-31.
+        // corpA (1999-12-31) and corpB (2000-01-02) both fall inside that window.
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.InFiscalYear, 1999);
+
+        var dataverse = new FakeOrganizationService();
+        dataverse.Options.FiscalYearStart = new DateOnly(2020, 4, 1);
+        dataverse.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(dataverse);
+
+        var result = sut.Generate(query);
+        var queryResult = dataverse.CreateQuery<Account>().Where(result);
+
+        await Assert.That(queryResult).Count().IsEqualTo(2);
+    }
+
+    [Test]
+    public async Task GenerateQuery_InFiscalYear_CustomStart_ExcludesRecordBeforeFiscalYearStart()
+    {
+        // FiscalYearStart = April. Fiscal year 2000 runs 2000-04-01 to 2001-03-31.
+        // Neither corpA (1999-12-31) nor corpB (2000-01-02) falls inside.
+        var query = new QueryExpression(Account.EntityLogicalName);
+        query.Criteria.AddCondition(Account.LogicalNames.OverriddenCreatedOn, ConditionOperator.InFiscalYear, 2000);
+
+        var dataverse = new FakeOrganizationService();
+        dataverse.Options.FiscalYearStart = new DateOnly(2020, 4, 1);
+        dataverse.AddRange(TestData.Default);
+        var sut = new ExpressionProcessor(dataverse);
+
+        var result = sut.Generate(query);
+        var queryResult = dataverse.CreateQuery<Account>().Where(result);
+
+        await Assert.That(queryResult).IsEmpty();
+    }
+
+    #endregion
+
     #region Time Operations
     /*
      * case ConditionOperator.OnOrAfter:

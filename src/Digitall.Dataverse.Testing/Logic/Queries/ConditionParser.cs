@@ -431,7 +431,10 @@ public static class ConditionParser
             case ConditionOperator.InFiscalYear:
                 var fiscalYear = (int)c.Values[0];
                 c.Values.Clear();
-                var fiscalYearDate = organizationService.Options.FiscalYearStart ?? DateOnly.Parse($"{fiscalYear}-01-01");
+                var fiscalStart = organizationService.Options.FiscalYearStart;
+                var fiscalYearDate = fiscalStart.HasValue
+                    ? new DateOnly(fiscalYear, fiscalStart.Value.Month, fiscalStart.Value.Day)
+                    : new DateOnly(fiscalYear, 1, 1);
                 fromDate = fiscalYearDate.ToDateTime(TimeOnly.MinValue);
                 toDate = fiscalYearDate.AddYears(1).AddDays(-1).ToDateTime(TimeOnly.MinValue);
                 break;
