@@ -2,7 +2,6 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using Digitall.Dataverse.Testing.Tests.Fixtures;
-using DotNetEnv;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
@@ -10,14 +9,6 @@ namespace Digitall.Dataverse.Testing.Tests.OrganizationRequests;
 
 public class RetrieveMultipleTests
 {
-    [Before(Class)]
-    public static async Task MyClassInitialize()
-    {
-        Environment.SetEnvironmentVariable("MaxRetrieveCount", "10");
-        Env.Load();
-        await Task.CompletedTask;
-    }
-
     [Test]
     public async Task Stubs_Dispatch_Working()
     {
@@ -48,7 +39,7 @@ public class RetrieveMultipleTests
     [Test]
     public async Task QueryExpression_Paging()
     {
-        var sut = new FakeOrganizationService();
+        var sut = new FakeOrganizationService{ Options = { MaxRetrieveCount = 10 }};
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 19).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -78,7 +69,7 @@ public class RetrieveMultipleTests
     [Test]
     public async Task QueryExpression_EmptyPageOnPaging()
     {
-        var sut = new FakeOrganizationService();
+        var sut = new FakeOrganizationService{ Options = { MaxRetrieveCount = 10 }};
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -220,7 +211,7 @@ public class RetrieveMultipleTests
     [Test]
     public async Task QueryByAttribute_Paging()
     {
-        var sut = new FakeOrganizationService();
+        var sut = new FakeOrganizationService{  Options = { MaxRetrieveCount = 10 }};
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 19).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));
@@ -250,7 +241,7 @@ public class RetrieveMultipleTests
     [Test]
     public async Task QueryByAttribute_EmptyPageOnPaging()
     {
-        var sut = new FakeOrganizationService();
+        var sut = new FakeOrganizationService { Options = { MaxRetrieveCount = 10 } };
 
         var manyRecords = new List<Account>();
         Enumerable.Range(0, 200).ToList().ForEach(x => manyRecords.Add(new Account(Guid.NewGuid()){Name = $"Account {x}"}));

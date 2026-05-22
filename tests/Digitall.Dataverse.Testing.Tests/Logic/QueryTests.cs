@@ -3,7 +3,6 @@
 
 using Digitall.Dataverse.Testing.Logic.Queries;
 using Digitall.Dataverse.Testing.Tests.Fixtures;
-using DotNetEnv;
 using Microsoft.Extensions.Time.Testing;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
@@ -12,14 +11,6 @@ namespace Digitall.Dataverse.Testing.Tests.Logic;
 
 public class QueryTests
 {
-    [Before(Class)]
-    public static async Task MyClassInitialize()
-    {
-        Environment.SetEnvironmentVariable("MaxRetrieveCount", "10");
-        Env.Load();
-        await Task.CompletedTask;
-    }
-
     #region equal
 
     [Test]
@@ -245,10 +236,9 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OwningBusinessUnit, ConditionOperator.EqualBusinessId);
 
-        Environment.SetEnvironmentVariable("BusinessUnitId", TestData.BusinessUnitId.ToString("N"));
-
         var dataverse = new FakeOrganizationService(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         dataverse.AddRange(TestData.Default);
+        dataverse.Options.BusinessUnitId = TestData.BusinessUnitId;
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
@@ -264,10 +254,9 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OwnerId, ConditionOperator.EqualUserId);
 
-        Environment.SetEnvironmentVariable("UserId", TestData.UserId.ToString("N"));
-
         var dataverse = new FakeOrganizationService(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         dataverse.AddRange(TestData.Default);
+        dataverse.Options.UserId = TestData.UserId;
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
@@ -450,10 +439,9 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OwningBusinessUnit, ConditionOperator.NotEqualBusinessId);
 
-        Environment.SetEnvironmentVariable("BusinessUnitId", TestData.BusinessUnitId.ToString("N"));
-
         var dataverse = new FakeOrganizationService();
         dataverse.AddRange(TestData.Default);
+        dataverse.Options.BusinessUnitId = TestData.BusinessUnitId;
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);
@@ -469,10 +457,10 @@ public class QueryTests
         var query = new QueryExpression(Account.EntityLogicalName);
         query.Criteria.AddCondition(Account.LogicalNames.OwnerId, ConditionOperator.NotEqualUserId);
 
-        Environment.SetEnvironmentVariable("UserId", TestData.UserId.ToString("N"));
-
         var dataverse = new FakeOrganizationService(new FakeTimeProvider(new DateTime(1999, 12, 31,0,5,0, DateTimeKind.Utc).AddDays(-1)));
         dataverse.AddRange(TestData.Default);
+        dataverse.Options.UserId = TestData.UserId;
+
         var sut = new ExpressionProcessor(dataverse);
 
         var result = sut.Generate(query);

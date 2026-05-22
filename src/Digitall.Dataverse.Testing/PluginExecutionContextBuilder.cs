@@ -63,8 +63,10 @@ public class PluginExecutionContextBuilder
             if (_userId.HasValue)
                 return _userId.Value;
 
-            Guid.TryParse(Environment.GetEnvironmentVariable("UserId"), out var userId);
-            return userId;
+            if (OrganizationService is FakeOrganizationService fakeService)
+                return fakeService.Options.UserId;
+
+            return Guid.Empty;
         }
         // ReSharper disable once UnusedMember.Global : Public API
         set => _userId = value;

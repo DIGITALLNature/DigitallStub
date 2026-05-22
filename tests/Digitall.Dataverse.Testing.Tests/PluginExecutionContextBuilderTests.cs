@@ -58,9 +58,7 @@ public class PluginExecutionContextBuilderTests
     {
         var entity = new Entity("unittest", Guid.NewGuid());
 
-        var serviceProvider = new FakePluginContextBuilder()
-            .AddData(entity)
-            .BuildServiceProvider();
+        var serviceProvider = new FakePluginContextBuilder().AddData(entity).BuildServiceProvider();
 
         var organizationServiceFactory = serviceProvider.GetService(typeof(IOrganizationServiceFactory)) as IOrganizationServiceFactory;
         await Assert.That(organizationServiceFactory).IsNotNull();
@@ -77,9 +75,7 @@ public class PluginExecutionContextBuilderTests
     public async Task SettingEntityTarget_Should_SetInputParameter_And_PluginPrimaryEntity()
     {
         var target = new Entity("unittest", Guid.NewGuid());
-        var serviceProvider = new PluginExecutionContextBuilder()
-            .WithTarget(target)
-            .BuildServiceProvider();
+        var serviceProvider = new PluginExecutionContextBuilder().WithTarget(target).BuildServiceProvider();
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         await Assert.That(pluginContext).IsNotNull();
@@ -96,9 +92,7 @@ public class PluginExecutionContextBuilderTests
     public async Task SettingTargetReference_Should_SetInputParameter_And_PluginPrimaryEntity()
     {
         var target = new EntityReference("unittest", Guid.NewGuid());
-        var serviceProvider = new PluginExecutionContextBuilder()
-            .WithTarget(target)
-            .BuildServiceProvider();
+        var serviceProvider = new PluginExecutionContextBuilder().WithTarget(target).BuildServiceProvider();
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         await Assert.That(pluginContext).IsNotNull();
@@ -118,9 +112,7 @@ public class PluginExecutionContextBuilderTests
     [Arguments("custom")]
     public async Task SettingRequestType_Should_SetPluginMessageName(string messageName)
     {
-        var serviceProvider = new PluginExecutionContextBuilder()
-            .WithMessageName(messageName)
-            .BuildServiceProvider();
+        var serviceProvider = new PluginExecutionContextBuilder().WithMessageName(messageName).BuildServiceProvider();
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         await Assert.That(pluginContext).IsNotNull();
@@ -131,8 +123,7 @@ public class PluginExecutionContextBuilderTests
     public async Task SettingTracingService_Should_OverwriteDefault()
     {
         var tracingService = Mock.Of<ITracingService>();
-        var serviceProvider = new PluginExecutionContextBuilder((ITracingService)tracingService)
-            .BuildServiceProvider();
+        var serviceProvider = new PluginExecutionContextBuilder((ITracingService)tracingService).BuildServiceProvider();
 
         var tracingServiceFromContext = serviceProvider.GetService(typeof(ITracingService));
         await Assert.That(tracingServiceFromContext).IsNotNull();
@@ -165,8 +156,7 @@ public class PluginExecutionContextBuilderTests
     public Task TestPlugin_Durchstich()
     {
         var tracingServiceMock = Mock.Of<ITracingService>();
-        var serviceProvider = new PluginExecutionContextBuilder((ITracingService)tracingServiceMock)
-            .BuildServiceProvider();
+        var serviceProvider = new PluginExecutionContextBuilder((ITracingService)tracingServiceMock).BuildServiceProvider();
 
         var plugin = new TestPlugin();
         plugin.Execute(serviceProvider);
@@ -181,15 +171,8 @@ public class PluginExecutionContextBuilderTests
         var initiatingUserId = Guid.NewGuid();
         var correlationId = Guid.NewGuid();
 
-        var serviceProvider = new PluginExecutionContextBuilder
-        {
-            Mode = 1,
-            Stage = 40
-        }
-        .WithInitiatingUserId(initiatingUserId)
-        .WithCorrelationId(correlationId)
-        .WithMessageName(SdkMessageNames.Update)
-        .BuildServiceProvider();
+        var serviceProvider = new PluginExecutionContextBuilder { Mode = 1, Stage = 40 }.WithInitiatingUserId(initiatingUserId).WithCorrelationId(correlationId).WithMessageName(SdkMessageNames.Update)
+            .BuildServiceProvider();
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
 
@@ -210,13 +193,8 @@ public class PluginExecutionContextBuilderTests
         var preImages = new EntityImageCollection { ["Pre"] = new Entity("account", Guid.NewGuid()) };
         var postImages = new EntityImageCollection { ["Post"] = new Entity("account", Guid.NewGuid()) };
 
-        var serviceProvider = new PluginExecutionContextBuilder()
-            .WithInputParameters(input)
-            .WithOutputParameters(output)
-            .WithSharedVariables(shared)
-            .WithPreEntityImages(preImages)
-            .WithPostEntityImages(postImages)
-            .BuildServiceProvider();
+        var serviceProvider = new PluginExecutionContextBuilder().WithInputParameters(input).WithOutputParameters(output).WithSharedVariables(shared).WithPreEntityImages(preImages)
+            .WithPostEntityImages(postImages).BuildServiceProvider();
 
         var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
         var pluginContext7 = serviceProvider.GetService(typeof(IPluginExecutionContext7)) as IPluginExecutionContext7;
@@ -260,10 +238,8 @@ public class PluginExecutionContextBuilderTests
     [Test]
     public Task ExistingTargetParameter_Should_ThrowOnBuild_WhenTargetIsAlsoConfigured()
     {
-        void Action() => new PluginExecutionContextBuilder()
-            .WithInputParameter("Target", new Entity("contact", Guid.NewGuid()))
-            .WithTarget(new Entity("account", Guid.NewGuid()))
-            .BuildServiceProvider();
+        void Action() =>
+            new PluginExecutionContextBuilder().WithInputParameter("Target", new Entity("contact", Guid.NewGuid())).WithTarget(new Entity("account", Guid.NewGuid())).BuildServiceProvider();
 
         Assert.Throws<ArgumentException>(Action);
         return Task.CompletedTask;
@@ -298,45 +274,24 @@ public class PluginExecutionContextBuilderTests
     }
 
     [Test]
-    public async Task UserId_WhenEnvVariableSet_Should_BeUsedAsDefault()
+    public async Task UserId_WhenSet_Should_BeUsedAsDefault()
     {
-        var originalUserId = Environment.GetEnvironmentVariable("UserId");
-        var envUserId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
 
-        try
-        {
-            Environment.SetEnvironmentVariable("UserId", envUserId.ToString());
+        var serviceProvider = new PluginExecutionContextBuilder().WithUserId(userId).BuildServiceProvider();
+        var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
 
-            var serviceProvider = new PluginExecutionContextBuilder().BuildServiceProvider();
-            var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
-
-            await Assert.That(pluginContext).IsNotNull();
-            await Assert.That(pluginContext!.UserId).IsEqualTo(envUserId);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("UserId", originalUserId);
-        }
+        await Assert.That(pluginContext).IsNotNull();
+        await Assert.That(pluginContext!.UserId).IsEqualTo(userId);
     }
 
     [Test]
-    public async Task InvalidUserIdEnvVar_Should_DefaultToEmptyGuid()
+    public async Task UserId_Should_DefaultToEmptyGuid()
     {
-        var originalUserId = Environment.GetEnvironmentVariable("UserId");
+        var serviceProvider = new PluginExecutionContextBuilder().BuildServiceProvider();
+        var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
 
-        try
-        {
-            Environment.SetEnvironmentVariable("UserId", "invalid-guid");
-
-            var serviceProvider = new PluginExecutionContextBuilder().BuildServiceProvider();
-            var pluginContext = serviceProvider.GetService(typeof(IPluginExecutionContext)) as IPluginExecutionContext;
-
-            await Assert.That(pluginContext).IsNotNull();
-            await Assert.That(pluginContext!.UserId).IsEqualTo(Guid.Empty);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable("UserId", originalUserId);
-        }
+        await Assert.That(pluginContext).IsNotNull();
+        await Assert.That(pluginContext!.UserId).IsEqualTo(Guid.Empty);
     }
 }
