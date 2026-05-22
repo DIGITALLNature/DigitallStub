@@ -10,7 +10,7 @@ public class CreateFake : OrganizationRequestFake<CreateRequest, CreateResponse>
 {
     public override CreateResponse Execute(CreateRequest organizationRequest, FakeOrganizationService state)
     {
-        var guid = state.Create(organizationRequest.Target);
+        var guid = state.CreateCore(organizationRequest.Target);
 
         return new CreateResponse
         {

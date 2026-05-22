@@ -1,7 +1,10 @@
 // Copyright (c) DIGITALL Nature. All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
+using Digitall.Dataverse.Testing.Errors;
 using Microsoft.Xrm.Sdk.Messages;
+using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
@@ -9,7 +12,43 @@ public class DisassociateFake : OrganizationRequestFake<DisassociateRequest, Dis
 {
     public override DisassociateResponse Execute(DisassociateRequest organizationRequest, FakeOrganizationService state)
     {
-        state.Disassociate(organizationRequest.Target.LogicalName, organizationRequest.Target.Id, organizationRequest.Relationship, organizationRequest.RelatedEntities);
+        var entityName = organizationRequest.Target.LogicalName;
+        var entityId = organizationRequest.Target.Id;
+        var relationship = organizationRequest.Relationship;
+        var relatedEntities = organizationRequest.RelatedEntities;
+
+        var relationshipMetadata = state.GetRelationship(relationship.SchemaName);
+
+        if (relationshipMetadata == null)
+        {
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Relationship {relationship.SchemaName} does not exist in the metadata cache");
+        }
+
+        foreach (var relatedEntity in relatedEntities)
+        {
+            if (relationshipMetadata is ManyToManyRelationshipMetadata manyToManyRelationshipMetadata)
+            {
+                var isFrom1To2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
+                var fromAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
+                var toAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
+
+                var query = new QueryExpression(manyToManyRelationshipMetadata.IntersectEntityName) { ColumnSet = new ColumnSet(true), Criteria = new FilterExpression(LogicalOperator.And) };
+
+                query.Criteria.AddCondition(new ConditionExpression(fromAttribute, ConditionOperator.Equal, entityId));
+                query.Criteria.AddCondition(new ConditionExpression(toAttribute, ConditionOperator.Equal, relatedEntity.Id));
+
+                var results = state.RetrieveMultiple(query);
+
+                if (results.Entities.Count == 1)
+                {
+                    state.Delete(manyToManyRelationshipMetadata.IntersectEntityName, results.Entities.First().Id);
+                }
+            }
+            else
+            {
+                throw new ArgumentException("RelationShip Metadata is not ManyToManyRelationshipMetadata");
+            }
+        }
 
         return new DisassociateResponse();
     }

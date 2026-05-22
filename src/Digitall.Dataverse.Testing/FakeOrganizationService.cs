@@ -136,26 +136,37 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         }
     }
 
-    public void AddDefaultRequests()
+    private static readonly Lazy<Dictionary<Type, IOrganizationRequestFake>> DefaultFakes = new(() =>
     {
-        Assembly a = typeof(IOrganizationRequestFake).Assembly;
-        var requests = a.GetTypes().Where(type =>
-            type.IsClass && type is { IsAbstract: false, Namespace: "Digitall.Dataverse.Testing.OrganizationRequests" } && typeof(IOrganizationRequestFake).IsAssignableFrom(type)).ToList();
+        var assembly = typeof(IOrganizationRequestFake).Assembly;
+        var fakeTypes = assembly.GetTypes().Where(type =>
+            type.IsClass && type is { IsAbstract: false, Namespace: "Digitall.Dataverse.Testing.OrganizationRequests" }
+            && typeof(IOrganizationRequestFake).IsAssignableFrom(type));
 
-        foreach (var request in requests)
+        var result = new Dictionary<Type, IOrganizationRequestFake>();
+        foreach (var type in fakeTypes)
         {
-            if (Activator.CreateInstance(request) is IOrganizationRequestFake fake)
+            if (Activator.CreateInstance(type) is IOrganizationRequestFake fake)
             {
-                AddRequestIfNecessary(fake);
+                result.TryAdd(fake.ForType, fake);
             }
         }
-    }
+        return result;
+    });
 
-    private void AddRequestIfNecessary(IOrganizationRequestFake fake)
+    /// <summary>
+    /// Registers all built-in request fakes into the user dictionary.
+    /// No longer required — built-in fakes are automatically available as fallback.
+    /// Kept for backward compatibility.
+    /// </summary>
+    public void AddDefaultRequests()
     {
-        if (!OrganizationRequestFakes.ContainsKey(fake.ForType))
+        foreach (var (type, fake) in DefaultFakes.Value)
         {
-            AddRequest(fake);
+            if (!OrganizationRequestFakes.ContainsKey(type))
+            {
+                AddRequest(fake);
+            }
         }
     }
 
@@ -250,7 +261,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
 
     public void AddRange(IEnumerable<Entity> entities) => entities.ToList().ForEach(Add);
 
-    private RelationshipMetadataBase? GetRelationship(string relationshipSchemaName)
+    internal RelationshipMetadataBase? GetRelationship(string relationshipSchemaName)
     {
         return State.Relationships.GetValueOrDefault(relationshipSchemaName);
     }
@@ -287,14 +298,18 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     #region IOrganizationService
 
     /// <summary>
-    ///     Creates a new entity in the Dataverse.
-    ///     If the entity's Id property is Guid.Empty, a new Guid is generated and assigned to the entity's Id property.
-    ///     If the entity already exists in the Dataverse, a FaultException is thrown with an error code of ErrorCodes.DuplicateRecord.
+    ///     Creates a new entity in the Dataverse. Routes through the Execute pipeline.
     /// </summary>
     /// <param name="entity">The entity to create.</param>
     /// <returns>The Id of the created entity.</returns>
     /// <exception cref="FaultException">Thrown if the entity already exists in the Dataverse.</exception>
     public Guid Create(Entity? entity)
+        => ((CreateResponse)Execute(new CreateRequest { Target = entity! })).id;
+
+    /// <summary>
+    ///     Internal create logic. Called by <see cref="OrganizationRequests.CreateFake"/> — not part of the pipeline.
+    /// </summary>
+    internal Guid CreateCore(Entity? entity)
     {
         if (entity == null)
         {
@@ -357,6 +372,16 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     }
 
     public Entity Retrieve(string entityName, Guid id, ColumnSet columnSet)
+        => ((RetrieveResponse)Execute(new RetrieveRequest
+        {
+            Target = new EntityReference(entityName, id),
+            ColumnSet = columnSet
+        })).Entity;
+
+    /// <summary>
+    ///     Internal retrieve logic. Called by <see cref="OrganizationRequests.RetrieveFake"/> — not part of the pipeline.
+    /// </summary>
+    internal Entity RetrieveCore(string entityName, Guid id, ColumnSet columnSet)
     {
         if (!ServiceState.TryGetValue(entityName, out var value))
         {
@@ -373,6 +398,12 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     }
 
     public void Update(Entity? entity)
+        => Execute(new UpdateRequest { Target = entity! });
+
+    /// <summary>
+    ///     Internal update logic. Called by <see cref="OrganizationRequests.UpdateFake"/> — not part of the pipeline.
+    /// </summary>
+    internal void UpdateCore(Entity? entity)
     {
         if (entity == null)
         {
@@ -418,6 +449,14 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Required member 'LogicalName' missing for field 'Target'");
         }
 
+        Execute(new DeleteRequest { Target = new EntityReference(entityName, id) });
+    }
+
+    /// <summary>
+    ///     Internal delete logic. Called by <see cref="OrganizationRequests.DeleteFake"/> — not part of the pipeline.
+    /// </summary>
+    internal void DeleteCore(string entityName, Guid id)
+    {
         if (!ServiceState.TryGetValue(entityName, out var value))
         {
             ThrowIfNotKnownEntityType(entityName);
@@ -435,117 +474,34 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        return OrganizationRequestFakes.TryGetValue(request.GetType(), out var fake)
-            ? fake.Execute(request, this)
-            : throw new ArgumentOutOfRangeException(nameof(request), $"No implementation found for request of type {request.GetType().Name}");
+        if (OrganizationRequestFakes.TryGetValue(request.GetType(), out var fake))
+            return fake.Execute(request, this);
+
+        if (DefaultFakes.Value.TryGetValue(request.GetType(), out var defaultFake))
+            return defaultFake.Execute(request, this);
+
+        throw new ArgumentOutOfRangeException(nameof(request), $"No implementation found for request of type {request.GetType().Name}");
     }
 
     public void Associate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities)
-    {
-        var relationshipMetadata = GetRelationship(relationship.SchemaName);
-
-        if (relationshipMetadata == null)
+        => Execute(new AssociateRequest
         {
-            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Relationship {relationship.SchemaName} does not exist in the metadata cache");
-        }
-
-
-        foreach (var relatedEntityReference in relatedEntities)
-        {
-            switch (relationshipMetadata)
-            {
-                case ManyToManyRelationshipMetadata manyToManyRelationshipMetadata:
-                    {
-                        var isFrom1To2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
-                        var fromAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
-                        var toAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
-                        var fromEntityName = isFrom1To2 ? manyToManyRelationshipMetadata.Entity1LogicalName : manyToManyRelationshipMetadata.Entity2LogicalName;
-                        var toEntityName = isFrom1To2 ? manyToManyRelationshipMetadata.Entity2LogicalName : manyToManyRelationshipMetadata.Entity1LogicalName;
-
-                        //Check records exist
-                        var targetExists = CreateQuery(fromEntityName).FirstOrDefault(e => e.Id == entityId) != null;
-
-                        if (!targetExists)
-                        {
-                            throw new Exception($"{fromEntityName} with Id {entityId.ToString()} doesn't exist");
-                        }
-
-                        var relatedExists = CreateQuery(toEntityName).FirstOrDefault(e => e.Id == relatedEntityReference.Id) != null;
-
-                        if (!relatedExists)
-                        {
-                            throw new Exception($"{toEntityName} with Id {relatedEntityReference.Id.ToString()} doesn't exist");
-                        }
-
-                        var association = new Entity(manyToManyRelationshipMetadata.IntersectEntityName)
-                        {
-                            Attributes = new AttributeCollection
-                            {
-                                { $"{manyToManyRelationshipMetadata.IntersectEntityName}id", Guid.NewGuid() }, { fromAttribute, entityId }, { toAttribute, relatedEntityReference.Id }
-                            }
-                        };
-
-                        Create(association);
-                        break;
-                    }
-                case OneToManyRelationshipMetadata oneToManyRelationshipMetadata:
-                    {
-                        //Get entity to update
-                        var entityToUpdate = new Entity(relatedEntityReference.LogicalName)
-                        {
-                            Id = relatedEntityReference.Id, [oneToManyRelationshipMetadata.ReferencingAttribute] = new EntityReference(entityName, entityId)
-                        };
-
-                        Update(entityToUpdate);
-                        break;
-                    }
-                default:
-                    throw new ArgumentException("RelationShip Metadata is not typed correctly");
-            }
-        }
-    }
+            Target = new EntityReference(entityName, entityId),
+            Relationship = relationship,
+            RelatedEntities = relatedEntities
+        });
 
 
     public void Disassociate(string entityName, Guid entityId, Relationship relationship, EntityReferenceCollection relatedEntities)
-    {
-        var relationshipMetadata = GetRelationship(relationship.SchemaName);
-
-        if (relationshipMetadata == null)
+        => Execute(new DisassociateRequest
         {
-            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Relationship {relationship.SchemaName} does not exist in the metadata cache");
-        }
-
-
-        foreach (var relatedEntity in relatedEntities)
-        {
-            if (relationshipMetadata is ManyToManyRelationshipMetadata manyToManyRelationshipMetadata)
-            {
-                var isFrom1To2 = entityName == manyToManyRelationshipMetadata.Entity1LogicalName;
-                var fromAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity1IntersectAttribute : manyToManyRelationshipMetadata.Entity2IntersectAttribute;
-                var toAttribute = isFrom1To2 ? manyToManyRelationshipMetadata.Entity2IntersectAttribute : manyToManyRelationshipMetadata.Entity1IntersectAttribute;
-
-                var query = new QueryExpression(manyToManyRelationshipMetadata.IntersectEntityName) { ColumnSet = new ColumnSet(true), Criteria = new FilterExpression(LogicalOperator.And) };
-
-                query.Criteria.AddCondition(new ConditionExpression(fromAttribute, ConditionOperator.Equal, entityId));
-                query.Criteria.AddCondition(new ConditionExpression(toAttribute, ConditionOperator.Equal, relatedEntity.Id));
-
-                var results = RetrieveMultiple(query);
-
-                if (results.Entities.Count == 1)
-                {
-                    Delete(manyToManyRelationshipMetadata.IntersectEntityName, results.Entities.First().Id);
-                }
-            }
-            else
-            {
-                throw new ArgumentException("RelationShip Metadata is not ManyToManyRelationshipMetadata");
-            }
-        }
-    }
+            Target = new EntityReference(entityName, entityId),
+            Relationship = relationship,
+            RelatedEntities = relatedEntities
+        });
 
     public EntityCollection RetrieveMultiple(QueryBase query)
     {
-        AddRequestIfNecessary(new RetrieveMultipleFake());
         return ((RetrieveMultipleResponse)Execute(new RetrieveMultipleRequest { Query = query })).EntityCollection;
     }
 

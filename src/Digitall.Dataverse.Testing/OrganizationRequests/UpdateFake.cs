@@ -9,7 +9,7 @@ public class UpdateFake : OrganizationRequestFake<UpdateRequest, UpdateResponse>
 {
     public override UpdateResponse Execute(UpdateRequest organizationRequest, FakeOrganizationService state)
     {
-        state.Update(organizationRequest.Target);
+        state.UpdateCore(organizationRequest.Target);
 
         return new UpdateResponse();
     }
