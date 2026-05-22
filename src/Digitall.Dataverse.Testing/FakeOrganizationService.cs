@@ -175,9 +175,44 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
             return entityStateCopy.AsQueryable(); //Empty list
         }
 
-        entityStateCopy.AddRange(entityState.Values.Select(e => typeof(T) == typeof(Entity) ? (T)e.CloneEntity() : e.CloneEntity().ToEntity<T>()));
+        var primaryIdAttribute = GetPrimaryIdAttribute(entityLogicalName);
+
+        entityStateCopy.AddRange(entityState.Values.Select(e =>
+        {
+            var clone = e.CloneEntity();
+            EnsurePrimaryIdAttribute(clone, primaryIdAttribute);
+            return typeof(T) == typeof(Entity) ? (T)clone : clone.ToEntity<T>();
+        }));
 
         return entityStateCopy.AsQueryable();
+    }
+
+    /// <summary>
+    ///     Determines the primary id attribute name for the given entity.
+    ///     Uses <see cref="EntityMetadata.PrimaryIdAttribute"/> when available,
+    ///     otherwise falls back to the Dataverse convention <c>&lt;entityLogicalName&gt;id</c>.
+    /// </summary>
+    private string GetPrimaryIdAttribute(string entityLogicalName)
+    {
+        if (State.EntityMetadata.TryGetValue(entityLogicalName, out var metadata) && !string.IsNullOrWhiteSpace(metadata.PrimaryIdAttribute))
+        {
+            return metadata.PrimaryIdAttribute!;
+        }
+
+        return entityLogicalName + "id";
+    }
+
+    /// <summary>
+    ///     Ensures that the primary id attribute is present in the entity's attribute collection.
+    ///     This allows filters (e.g. <c>systemuserid == &lt;guid&gt;</c>) to match against <see cref="Entity.Id"/>
+    ///     even when the attribute was not explicitly set on the stored entity.
+    /// </summary>
+    private static void EnsurePrimaryIdAttribute(Entity entity, string primaryIdAttribute)
+    {
+        if (entity.Id == Guid.Empty) return;
+        if (entity.Attributes.ContainsKey(primaryIdAttribute)) return;
+
+        entity[primaryIdAttribute] = entity.Id;
     }
 
     public IQueryable<Entity> CreateQuery(string entityLogicalName) => CreateQuery<Entity>(entityLogicalName);
