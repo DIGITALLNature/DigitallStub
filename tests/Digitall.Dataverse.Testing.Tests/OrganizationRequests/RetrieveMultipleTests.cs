@@ -3,6 +3,7 @@
 
 using Digitall.Dataverse.Testing.Tests.Fixtures;
 using DotNetEnv;
+using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Dataverse.Testing.Tests.OrganizationRequests;
@@ -445,6 +446,49 @@ public class RetrieveMultipleTests
 
         await Assert.That(innerResult.Entities).Count().IsEqualTo(2);
         await Assert.That(outerResult.Entities).Count().IsEqualTo(3);
+    }
+
+    /// <summary>
+    /// Regression test: each row produced by a LeftOuter join must be an independent entity
+    /// instance. When the outer entity matches multiple inner entities the aliased attributes
+    /// of every result row must reflect the specific inner entity for that row, not the last
+    /// one written (i.e. no shared-mutation side-effect).
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_LeftOuterJoin_EachRowHasIndependentAliasedValues()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        // corpB matches conB (FirstName "John B") and conC (FirstName "John C")
+        var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            LinkEntities =
+            {
+                new LinkEntity(Account.EntityLogicalName, Contact.EntityLogicalName,
+                    Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
+                    JoinOperator.LeftOuter)
+                {
+                    EntityAlias = "c",
+                    Columns = new ColumnSet(Contact.LogicalNames.FirstName)
+                }
+            }
+        });
+
+        var corpBRows = result.Entities
+            .Where(e => e.Id == Guid.Parse("00000000-0000-0000-0001-000000000002"))
+            .ToList();
+
+        await Assert.That(corpBRows).Count().IsEqualTo(2);
+
+        var firstNames = corpBRows
+            .Select(e => (e.GetAttributeValue<AliasedValue>("c." + Contact.LogicalNames.FirstName)?.Value as string))
+            .OrderBy(n => n)
+            .ToList();
+
+        // Both contacts must be present with their own distinct first name
+        await Assert.That(firstNames).IsEquivalentTo(new[] { "John B", "John C" });
     }
 
     #endregion
