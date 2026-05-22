@@ -410,6 +410,16 @@ public class RetrieveMultipleTests
 
         // corpB must appear once for each of its two contacts
         await Assert.That(corpBRows).Count().IsEqualTo(2);
+
+        // Each row must be an independent object instance (not the same mutated reference)
+        await Assert.That(ReferenceEquals(corpBRows[0], corpBRows[1])).IsFalse();
+
+        // Each row must carry the aliased first name of its specific contact
+        var firstNames = corpBRows
+            .Select(e => (e.GetAttributeValue<AliasedValue>("c." + Contact.LogicalNames.FirstName)?.Value as string))
+            .OrderBy(n => n)
+            .ToList();
+        await Assert.That(firstNames).IsEquivalentTo(new[] { "John B", "John C" });
     }
 
     /// <summary>
