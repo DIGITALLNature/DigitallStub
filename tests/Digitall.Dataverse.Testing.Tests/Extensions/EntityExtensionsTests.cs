@@ -145,12 +145,7 @@ public class EntityExtensionsTests
         await Assert.That(cloned["name"]).IsEqualTo("x");
     }
 
-    private sealed class DerivedEntity : Entity
-    {
-        public DerivedEntity() : base("account")
-        {
-        }
-    }
+    private sealed class DerivedEntity() : Entity("account");
 
     [Test]
     public async Task JoinAttributes_Should_AddAliasedValues()
