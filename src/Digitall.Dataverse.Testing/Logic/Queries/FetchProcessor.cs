@@ -517,6 +517,14 @@ internal class FetchProcessor(FakeOrganizationService state)
             return gOut;
         }
 
+        //Try parsing a boolean ("true"/"false", case-insensitive).
+        //Without registered metadata/ModelAssemblies, FetchXml bool conditions would otherwise
+        //leak through as strings and break equality comparisons against typed bool attributes.
+        if (bool.TryParse(value, out var bOut))
+        {
+            return bOut;
+        }
+
         //Try checking if it is a numeric value, cause, from the fetchxml it
         //would be impossible to know the real typed based on the string value only
         // ex: "123" might compared as a string, or, as an int, it will depend on the attribute
