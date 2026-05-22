@@ -113,8 +113,13 @@ public static class EntityExtensions
             return cloned;
         }
 
-        public Entity JoinAttributes(Entity otherEntity, ColumnSet columnSet, string alias)
+        public Entity JoinAttributes(Entity? otherEntity, ColumnSet columnSet, string alias)
         {
+            if (otherEntity == null)
+            {
+                return entity;
+            }
+
             otherEntity = otherEntity.CloneEntity(); //To avoid joining entities from/to the same entities, which would cause collection modified exceptions
 
             if (columnSet.AllColumns)
