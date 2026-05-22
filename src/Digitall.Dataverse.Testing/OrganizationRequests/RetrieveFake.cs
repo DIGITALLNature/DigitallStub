@@ -123,14 +123,29 @@ public class RetrieveFake : OrganizationRequestFake<RetrieveRequest, RetrieveRes
     {
         return query switch
         {
-            QueryExpression qe => qe.CloneQuery(),
-            QueryByAttribute qba => new QueryExpression(qba.EntityName ?? defaultEntityName)
-            {
-                ColumnSet = qba.ColumnSet,
-                TopCount  = qba.TopCount,
-                PageInfo  = qba.PageInfo
-            },
-            _ => new QueryExpression(defaultEntityName) { ColumnSet = new ColumnSet(true) }
+            QueryExpression qe       => qe.CloneQuery(),
+            QueryByAttribute qba     => TranslateQueryByAttribute(qba, defaultEntityName),
+            _                        => new QueryExpression(defaultEntityName) { ColumnSet = new ColumnSet(true) }
         };
+    }
+
+    private static QueryExpression TranslateQueryByAttribute(QueryByAttribute qba, string defaultEntityName)
+    {
+        var qe = new QueryExpression(qba.EntityName ?? defaultEntityName)
+        {
+            ColumnSet = qba.ColumnSet,
+            TopCount  = qba.TopCount,
+            PageInfo  = qba.PageInfo,
+            Criteria  = new FilterExpression()
+        };
+        for (var i = 0; i < qba.Attributes.Count; i++)
+        {
+            qe.Criteria.AddCondition(new ConditionExpression(qba.Attributes[i], ConditionOperator.Equal, qba.Values[i]));
+        }
+        foreach (var order in qba.Orders)
+        {
+            qe.AddOrder(order.AttributeName, order.OrderType);
+        }
+        return qe;
     }
 }
