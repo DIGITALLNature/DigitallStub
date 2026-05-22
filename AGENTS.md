@@ -144,24 +144,27 @@ This project uses **TUnit**, which does **not** support the standard MSTest/xUni
 
 > ⚠️ `dotnet test --filter "Name~Foo"` will silently run **zero tests** with TUnit — do not use it.
 
-TUnit's `--treenode-filter` matches against the tree path `/<namespace>/<class>/<method>`:
+TUnit's `--treenode-filter` matches against the tree path `/<Assembly>/<Namespace>/<Class>/<Test>`:
 
 ```bash
 # Run a single test by exact name
-dotnet test --treenode-filter "*/FakeDataverseBuilderTests/WithUserId_*"
+dotnet test --treenode-filter "/*/*/*/WithUserId_*"
 
 # Run all tests in a class
-dotnet test --treenode-filter "*/FakeDataverseBuilderTests/*"
+dotnet test --treenode-filter "/*/*/FakeDataverseBuilderTests/*"
 
 # Run all tests in a namespace
-dotnet test --treenode-filter "*/Digitall.Dataverse.Testing.Tests.OrganizationRequests/*"
+dotnet test --treenode-filter "/*/Digitall.Dataverse.Testing.Tests.OrganizationRequests/*/*"
 
 # Run tests whose method name contains a keyword (glob)
-dotnet test --treenode-filter "*/*/AddData_*"
+dotnet test --treenode-filter "/*/*/*/AddData_*"
+
+# Match-all shorthand (all tests in assembly)
+dotnet test --treenode-filter "/**"
 ```
 
-The filter uses glob patterns (`*` matches anything within one segment, `**` across segments).  
-If a filter matches nothing, the exit code is **8** (not a test failure) — double-check the class/method name.
+The filter uses glob patterns (`*` matches anything within one segment, `**` matches any depth but must appear at the end).  
+If a filter matches nothing, the exit code is **8** (not a test failure) — double-check the namespace/class/method name.
 
 ---
 
