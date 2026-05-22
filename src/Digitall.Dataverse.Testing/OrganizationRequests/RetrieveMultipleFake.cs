@@ -207,7 +207,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
     {
         if (!fakeOrganizationService.State.EntityMetadata.TryGetValue(record.LogicalName, out var entityMetadata)) return;
 
-        foreach (var dateTimeAttribute in record.Attributes.Where(a => a.Value is DateTime))
+        foreach (var dateTimeAttribute in record.Attributes.Where(a => a.Value is DateTime).ToList())
         {
             if (entityMetadata.Attributes.SingleOrDefault(a => a.LogicalName == dateTimeAttribute.Key) is not DateTimeAttributeMetadata { Format: DateTimeFormat.DateOnly }) continue;
 
