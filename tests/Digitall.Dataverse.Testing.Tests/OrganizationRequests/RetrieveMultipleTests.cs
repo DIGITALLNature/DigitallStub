@@ -331,4 +331,64 @@ public class RetrieveMultipleTests
         await Assert.That(ascItems.SequenceEqual(ascItems.OrderBy(x => x.ExchangeRate))).IsTrue();
     }
     #endregion
+
+    #region PrimaryId filter
+
+    /// <summary>
+    /// Regression test: filtering by the primary key attribute (e.g. <c>accountid</c>) must match
+    /// against <see cref="Microsoft.Xrm.Sdk.Entity.Id"/>, even when the attribute was not explicitly
+    /// set on the stored entity. This is what the SDK LINQ provider produces for <c>e.Id == guid</c>.
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_FilterByPrimaryIdAttribute_FindsEntity()
+    {
+        var sut = new FakeOrganizationService();
+
+        var targetId = Guid.NewGuid();
+        sut.AddRange([
+            new Account(Guid.NewGuid()) { Name = "Other A" },
+            new Account(targetId)       { Name = "Target" },
+            new Account(Guid.NewGuid()) { Name = "Other B" }
+        ]);
+
+        var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            Criteria = new FilterExpression
+            {
+                Conditions =
+                {
+                    new ConditionExpression(Account.LogicalNames.AccountId, ConditionOperator.Equal, targetId)
+                }
+            }
+        });
+
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(targetId);
+    }
+
+    [Test]
+    public async Task QueryByAttribute_FilterByPrimaryIdAttribute_FindsEntity()
+    {
+        var sut = new FakeOrganizationService();
+
+        var targetId = Guid.NewGuid();
+        sut.AddRange([
+            new Account(Guid.NewGuid()) { Name = "Other A" },
+            new Account(targetId)       { Name = "Target" },
+            new Account(Guid.NewGuid()) { Name = "Other B" }
+        ]);
+
+        var query = new QueryByAttribute(Account.EntityLogicalName) { ColumnSet = new ColumnSet(true) };
+        query.AddAttributeValue(Account.LogicalNames.AccountId, targetId);
+
+        var result = sut.RetrieveMultiple(query);
+
+        await Assert.That(result).IsNotNull();
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(targetId);
+    }
+
+    #endregion
 }
