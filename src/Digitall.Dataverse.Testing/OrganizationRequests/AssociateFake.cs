@@ -41,14 +41,14 @@ public class AssociateFake : OrganizationRequestFake<AssociateRequest, Associate
 
                         if (!targetExists)
                         {
-                            throw new Exception($"{fromEntityName} with Id {entityId.ToString()} doesn't exist");
+                            ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"{fromEntityName} with Id {entityId} does not exist");
                         }
 
                         var relatedExists = state.CreateQuery(toEntityName).FirstOrDefault(e => e.Id == relatedEntityReference.Id) != null;
 
                         if (!relatedExists)
                         {
-                            throw new Exception($"{toEntityName} with Id {relatedEntityReference.Id.ToString()} doesn't exist");
+                            ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"{toEntityName} with Id {relatedEntityReference.Id} does not exist");
                         }
 
                         var association = new Entity(manyToManyRelationshipMetadata.IntersectEntityName)
@@ -74,7 +74,8 @@ public class AssociateFake : OrganizationRequestFake<AssociateRequest, Associate
                         break;
                     }
                 default:
-                    throw new ArgumentException("RelationShip Metadata is not typed correctly");
+                    ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Relationship metadata type '{relationshipMetadata!.GetType().Name}' is not supported for Associate");
+                    break;
             }
         }
 

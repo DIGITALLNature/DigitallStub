@@ -2,6 +2,7 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using System.Xml.Linq;
+using Digitall.Dataverse.Testing.Errors;
 using Digitall.Dataverse.Testing.Extensions;
 using Digitall.Dataverse.Testing.Logic.Queries;
 using Microsoft.Xrm.Sdk;
@@ -22,7 +23,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
 
         // Initialize variables
         QueryExpression queryExpression;
-        string? entityName;
+        string? entityName = null;
         List<Entity> internalResult;
 
         switch (organizationRequest.Query)
@@ -83,7 +84,10 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
                     break;
                 }
             default:
-                throw new ArgumentOutOfRangeException(nameof(organizationRequest), organizationRequest.Query.GetType().Name, "Query type is unknown");
+                ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Query type '{organizationRequest.Query.GetType().Name}' is not supported");
+                queryExpression = null!; // unreachable
+                internalResult = null!;  // unreachable
+                break;
         }
 
 
@@ -181,7 +185,8 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
         catch (Exception ex)
         {
             // If parsing fails, throw an exception with a helpful error message
-            throw new Exception($"FetchXml must be a valid XML document: {ex}");
+            ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"FetchXml must be a valid XML document: {ex.Message}");
+            return null!; // unreachable
         }
     }
 

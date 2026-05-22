@@ -110,8 +110,14 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
                     ExistsFilter(query, inner, linkFromAlias, le.LinkToAttributeName, negate: false),
                 JoinOperator.NotAny =>
                     ExistsFilter(query, inner, linkFromAlias, le.LinkToAttributeName, negate: true),
-                _ => throw new ArgumentException($"The join operator {le.JoinOperator} is currently not supported.")
+                _ => ThrowUnsupportedJoinOperator(le.JoinOperator)
             };
+
+            static IQueryable<Entity> ThrowUnsupportedJoinOperator(JoinOperator op)
+            {
+                ErrorFactory.ThrowFault(ErrorCodes.InvalidOperatorCode, $"The join operator '{op}' is not supported");
+                return null!; // unreachable
+            }
 
             // Process nested linked entities recursively
             foreach (var nestedLinkedEntity in le.LinkEntities)
