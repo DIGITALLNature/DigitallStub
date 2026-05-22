@@ -248,10 +248,11 @@ public static class EntityExtensions
                     bytes.CopyTo(clonedBytes, 0);
                     return clonedBytes;
                 }
-            // If the attribute value is an OptionSetValueCollection, create a new OptionSetValueCollection with the same values.
+            // If the attribute value is an OptionSetValueCollection, create a new OptionSetValueCollection
+            // with cloned OptionSetValue instances so mutations to either collection are fully independent.
             case OptionSetValueCollection optionSetValues:
                 {
-                    var clonedOptionSetValues = new OptionSetValueCollection(optionSetValues.ToArray());
+                    var clonedOptionSetValues = new OptionSetValueCollection(optionSetValues.Select(v => new OptionSetValue(v.Value)).ToArray());
                     return clonedOptionSetValues;
                 }
             default:
