@@ -415,3 +415,4 @@ FodyWeavers.xsd
 *.private.ps1
 
 /.agent-work
+/.junie
