@@ -35,7 +35,13 @@ public class BulkDeleteFake : OrganizationRequestFake<BulkDeleteRequest, BulkDel
         // create related asyncOperation
         Entity asyncOpertation = new Entity("asyncoperation")
         {
-            Id = jobId
+            Id = jobId,
+            Attributes =
+            {
+                ["name"] = organizationRequest.JobName,
+                ["ownerid"] = new EntityReference("systemuser", state.Options.UserId),
+                ["operationtype"] = new OptionSetValue(13) // 13 = BulkDelete
+            }
         };
 
         state.Create(asyncOpertation);
