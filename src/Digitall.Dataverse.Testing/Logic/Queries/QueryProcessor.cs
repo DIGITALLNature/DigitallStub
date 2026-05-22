@@ -109,12 +109,12 @@ public class QueryProcessor
             namespacedAlias.Add(attr.GetAttribute("name")?.Value);
             var logicalName = string.Join(".", namespacedAlias);
 
-            if (string.IsNullOrEmpty("alias"))
+            if (string.IsNullOrEmpty(alias))
             {
                 ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderInvalidAlias, "Missing alias for attribute in aggregate FetchXml");
             }
 
-            if (string.IsNullOrEmpty("name"))
+            if (string.IsNullOrEmpty(logicalName))
             {
                 ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "Missing name for attribute in aggregate FetchXml");
             }
@@ -306,7 +306,7 @@ public class QueryProcessor
                 ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, "An attribute cannot be specified for an order clause in an aggregate query; use an alias instead");
             }
 
-            if (string.IsNullOrEmpty("alias"))
+            if (string.IsNullOrEmpty(alias))
             {
                 ErrorFactory.ThrowFault(ErrorCodes.QueryBuilderInvalidAlias, "An alias is required for an order clause in an aggregate query");
             }
