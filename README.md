@@ -401,7 +401,7 @@ Built-in fakes for common Dataverse operations:
 | `AssignRequest` | `AssignRequestFake` | Record ownership assignment |
 | `WhoAmIRequest` | `WhoAmIFake` | Current user identity |
 | `RetrieveEntityRequest` | `RetrieveEntityFake` | Entity metadata retrieval |
-| `RetrieveAllEntitiesRequest` | `RetrieveAllEntitiesExecutor` | Retrieve metadata for all known entities |
+| `RetrieveAllEntitiesRequest` | `RetrieveAllEntitiesFake` | Retrieve metadata for all known entities |
 | `QueryExpressionToFetchXmlRequest` | `QueryExpressionToFetchXmlFake` | Convert a `QueryExpression` to FetchXml |
 | `FetchXmlToQueryExpressionRequest` | `FetchXmlToQueryExpressionFake` | Convert FetchXml to a `QueryExpression` |
 | `ExecuteTransactionRequest` | `ExecuteTransactionFake` | Batch transaction execution |
