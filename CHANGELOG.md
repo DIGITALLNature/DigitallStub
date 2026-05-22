@@ -1,3 +1,20 @@
+# [1.1.0-beta.6](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.5...v1.1.0-beta.6) (2026-05-22)
+
+
+### Bug Fixes
+
+* **bulk-delete:** populate name, ownerid, and operationtype on asyncoperation entity ([3843fba](https://github.com/DIGITALLNature/DigitallTesting/commit/3843fbaae960f1d4cf72f188b83ef22eab9f0718))
+* **query:** validate actual values in aggregate FetchXml guards ([ef96352](https://github.com/DIGITALLNature/DigitallTesting/commit/ef96352c84579d3eca8ae18c74062a75e8cb2b18))
+* replace generic exceptions with Dataverse-style FaultException ([eadc251](https://github.com/DIGITALLNature/DigitallTesting/commit/eadc251923baf06a1206e5641f16f653ad2a55ad))
+* **retrieve:** translate QueryByAttribute Attributes/Values and Orders in RetrieveFake ([2b1ad37](https://github.com/DIGITALLNature/DigitallTesting/commit/2b1ad37f47e888c9579262f3e1521a7f8375cbdb))
+
+
+### Features
+
+* add RelatedEntitiesQuery support to RetrieveFake ([ce49f8a](https://github.com/DIGITALLNature/DigitallTesting/commit/ce49f8adbef7172662987498e2cca2fa000ebb79))
+* **query:** support EXISTS-style semi-joins via JoinOperator.Any/NotAny/Exists ([79fe312](https://github.com/DIGITALLNature/DigitallTesting/commit/79fe3126ff54174ba5c4eeb1e7399e4c3a17bae2))
+* route Create/Update/Delete/Retrieve/Associate/Disassociate through Execute pipeline ([a9346b1](https://github.com/DIGITALLNature/DigitallTesting/commit/a9346b15ea077a795e2c08d46a2423c1ee8bb8e8))
+
 # [1.1.0-beta.5](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.4...v1.1.0-beta.5) (2026-05-22)
 
 
