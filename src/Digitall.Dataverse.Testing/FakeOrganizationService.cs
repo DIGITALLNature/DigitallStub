@@ -158,22 +158,12 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         }
     }
 
-    private static readonly Dictionary<Type, string> EntityLogicalNameCache = new();
-
     #region IQueryable
 
     public IQueryable<T> CreateQuery<T>() where T : Entity
     {
-        if (!EntityLogicalNameCache.TryGetValue(typeof(T), out var logicalName))
-        {
-            logicalName = typeof(T).GetCustomAttribute<EntityLogicalNameAttribute>()?.LogicalName;
-            if (string.IsNullOrWhiteSpace(logicalName))
-            {
-                throw new ArgumentException("Entity type must have EntityLogicalNameAttribute", nameof(T));
-            }
-
-            EntityLogicalNameCache[typeof(T)] = logicalName;
-        }
+        var logicalName = TypeResolver.GetLogicalName(typeof(T))
+                          ?? throw new ArgumentException("Entity type must have EntityLogicalNameAttribute", nameof(T));
 
         return CreateQuery<T>(logicalName);
     }

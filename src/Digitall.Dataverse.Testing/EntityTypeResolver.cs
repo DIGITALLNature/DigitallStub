@@ -16,6 +16,7 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
 {
     private Dictionary<string, Type>? _entityTypeCache;
     private Dictionary<string, Dictionary<string, PropertyInfo>>? _attributeCache;
+    private Dictionary<Type, string>? _reverseEntityTypeCache;
 
     /// <summary>
     /// Invalidates the internal caches. Call when ModelAssemblies changes.
@@ -26,11 +27,25 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
         _entityTypeCache = null;
         _attributeCache = null;
         _proxyConverterCache = null;
+        _reverseEntityTypeCache = null;
     }
 
     private Dictionary<string, Type> EntityTypeCache => _entityTypeCache ??= BuildEntityTypeCache();
 
     private Dictionary<string, Dictionary<string, PropertyInfo>> AttributeCache => _attributeCache ??= BuildAttributeCache();
+
+    private Dictionary<Type, string> ReverseEntityTypeCache => _reverseEntityTypeCache ??= BuildReverseEntityTypeCache();
+
+    private Dictionary<Type, string> BuildReverseEntityTypeCache()
+    {
+        var cache = new Dictionary<Type, string>();
+        foreach (var (logicalName, type) in EntityTypeCache)
+        {
+            cache.TryAdd(type, logicalName);
+        }
+
+        return cache;
+    }
 
     private Dictionary<string, Type> BuildEntityTypeCache()
     {
@@ -79,6 +94,14 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
     public bool EntityTypeIsKnown(string logicalName, out Type? entityType)
     {
         return EntityTypeCache.TryGetValue(logicalName, out entityType);
+    }
+
+    /// <summary>
+    /// Resolves the logical name for a given entity type. Returns null if not found.
+    /// </summary>
+    public string? GetLogicalName(Type entityType)
+    {
+        return ReverseEntityTypeCache.TryGetValue(entityType, out var logicalName) ? logicalName : null;
     }
 
     /// <summary>
