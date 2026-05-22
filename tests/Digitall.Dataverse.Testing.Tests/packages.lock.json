@@ -2,6 +2,12 @@
   "version": 1,
   "dependencies": {
     "net10.0": {
+      "Microsoft.Extensions.TimeProvider.Testing": {
+        "type": "Direct",
+        "requested": "[10.6.0, )",
+        "resolved": "10.6.0",
+        "contentHash": "qQDiaYWpvIymGbu+kXaMDS8YdqfeQkv6DOxPF2GSwC+eSzIKqOOnSP34TYt7gKqvB7p8/aSptexnW6nF0CUdnw=="
+      },
       "Microsoft.PowerPlatform.Dataverse.Client": {
         "type": "Direct",
         "requested": "[1.2.10, )",
@@ -200,11 +206,6 @@
         "type": "Transitive",
         "resolved": "3.1.8",
         "contentHash": "XcIoXQhT0kwnEhOKv/LmpWR6yF6QWmBTy9Fcsz4aHuCOgTJ7Zd23ELtUA4BfwlYoFlSedavS+vURz9tNekd44g=="
-      },
-      "Microsoft.Extensions.TimeProvider.Testing": {
-        "type": "Transitive",
-        "resolved": "10.6.0",
-        "contentHash": "qQDiaYWpvIymGbu+kXaMDS8YdqfeQkv6DOxPF2GSwC+eSzIKqOOnSP34TYt7gKqvB7p8/aSptexnW6nF0CUdnw=="
       },
       "Microsoft.Identity.Client": {
         "type": "Transitive",

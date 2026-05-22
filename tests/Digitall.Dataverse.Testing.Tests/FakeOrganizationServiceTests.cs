@@ -1,6 +1,7 @@
 using System.ServiceModel;
 using Digitall.Dataverse.Testing.Errors;
 using Digitall.Dataverse.Testing.Tests.Fixtures;
+using Microsoft.Extensions.Time.Testing;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
@@ -242,6 +243,65 @@ public class FakeOrganizationServiceTests
     }
 
     [Test]
+    public async Task Create_SetsCreatedOnAndModifiedOn_FromTimeProvider()
+    {
+        var fakeTime = new FakeTimeProvider();
+        fakeTime.SetUtcNow(new DateTimeOffset(2025, 6, 1, 12, 0, 0, TimeSpan.Zero));
+        var sut = new FakeOrganizationService(fakeTime);
+
+        var id = sut.Create(new Account { Name = "Test" });
+
+        var record = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(record.GetAttributeValue<DateTime>("createdon")).IsEqualTo(new DateTime(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc));
+        await Assert.That(record.GetAttributeValue<DateTime>("modifiedon")).IsEqualTo(new DateTime(2025, 6, 1, 12, 0, 0, DateTimeKind.Utc));
+    }
+
+    [Test]
+    public async Task Create_SetsCreatedByAndModifiedBy_WhenUserIdIsSet()
+    {
+        var userId = Guid.NewGuid();
+        var sut = new FakeOrganizationService { Options = { UserId = userId } };
+
+        var id = sut.Create(new Account { Name = "Test" });
+
+        var record = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(record.GetAttributeValue<EntityReference>("createdby").Id).IsEqualTo(userId);
+        await Assert.That(record.GetAttributeValue<EntityReference>("modifiedby").Id).IsEqualTo(userId);
+    }
+
+    [Test]
+    public async Task Create_SetsRowVersion()
+    {
+        var sut = new FakeOrganizationService();
+
+        var id = sut.Create(new Account { Name = "Test" });
+
+        var record = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(record.RowVersion).IsNotNull();
+    }
+
+    [Test]
+    public async Task Create_DoesNotOverwriteAuditFields_WhenExplicitlyProvided()
+    {
+        var explicitTime = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        var explicitUser = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        var fakeTime = new FakeTimeProvider();
+        fakeTime.SetUtcNow(new DateTimeOffset(2025, 6, 1, 12, 0, 0, TimeSpan.Zero));
+        var sut = new FakeOrganizationService(fakeTime) { Options = { UserId = userId } };
+
+        var entity = new Account { Name = "Test" };
+        entity["createdon"]  = explicitTime;
+        entity["createdby"]  = new EntityReference("systemuser", explicitUser);
+
+        var id = sut.Create(entity);
+
+        var record = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(record.GetAttributeValue<DateTime>("createdon")).IsEqualTo(explicitTime);
+        await Assert.That(record.GetAttributeValue<EntityReference>("createdby").Id).IsEqualTo(explicitUser);
+    }
+
+    [Test]
     public async Task Retrieve_EntityExists_ReturnsRecord()
     {
         var sut = new FakeOrganizationService();
@@ -372,6 +432,37 @@ public class FakeOrganizationServiceTests
 
         var retrieved = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
         await Assert.That(retrieved.ToEntity<Account>().Description).IsEquivalentTo("Updated");
+    }
+
+    [Test]
+    public async Task Update_SetsModifiedOnAndRowVersion_FromTimeProvider()
+    {
+        var fakeTime = new FakeTimeProvider();
+        fakeTime.SetUtcNow(new DateTimeOffset(2025, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        var sut = new FakeOrganizationService(fakeTime);
+        var id = Guid.NewGuid();
+        sut.Add(new Account(id) { Name = "Original" });
+
+        fakeTime.SetUtcNow(new DateTimeOffset(2025, 6, 15, 10, 0, 0, TimeSpan.Zero));
+        sut.Update(new Account(id) { Name = "Updated" });
+
+        var record = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(record.GetAttributeValue<DateTime>("modifiedon")).IsEqualTo(new DateTime(2025, 6, 15, 10, 0, 0, DateTimeKind.Utc));
+        await Assert.That(record.RowVersion).IsNotNull();
+    }
+
+    [Test]
+    public async Task Update_SetsModifiedBy_WhenUserIdIsSet()
+    {
+        var userId = Guid.NewGuid();
+        var sut = new FakeOrganizationService { Options = { UserId = userId } };
+        var id = Guid.NewGuid();
+        sut.Add(new Account(id) { Name = "Original" });
+
+        sut.Update(new Account(id) { Name = "Updated" });
+
+        var record = sut.Retrieve(Account.EntityLogicalName, id, new ColumnSet(true));
+        await Assert.That(record.GetAttributeValue<EntityReference>("modifiedby").Id).IsEqualTo(userId);
     }
 
     [Test]
