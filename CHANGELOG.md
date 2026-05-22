@@ -1,3 +1,17 @@
+# [1.1.0-beta.1](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.0.0...v1.1.0-beta.1) (2026-05-22)
+
+
+### Bug Fixes
+
+* **query:** treat fetchxml bool condition values without metadata as bool ([fe18d0c](https://github.com/DIGITALLNature/DigitallTesting/commit/fe18d0c814e5bc6e27639f78e48903f0a5cb55e2))
+
+
+### Features
+
+* add FetchXmlToQueryExpression organization request fake ([de7cd6f](https://github.com/DIGITALLNature/DigitallTesting/commit/de7cd6f2e9b88b0dc071df8f3b35613f590a87ae))
+* add QueryExpressionToFetchXml organization request fake ([a18c9b3](https://github.com/DIGITALLNature/DigitallTesting/commit/a18c9b3d20d056a2583aed63e7f93f95839036da))
+* add RetrieveAllEntities organization request fake ([f826094](https://github.com/DIGITALLNature/DigitallTesting/commit/f82609456c9652636204e25ac9a9df3accb85260))
+
 # 1.0.0 (2026-05-21)
 
 
