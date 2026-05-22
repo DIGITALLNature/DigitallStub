@@ -17,23 +17,23 @@ namespace Digitall.Dataverse.Testing.Logic.Queries;
 public static class ConditionParser
 {
     // Cached MethodInfo fields — resolved once, reused across all query evaluations
-    private static readonly MethodInfo StringToLowerInvariant = typeof(string).GetMethod("ToLowerInvariant", Type.EmptyTypes)!;
-    private static readonly MethodInfo StringContains = typeof(string).GetMethod("Contains", [typeof(string)])!;
-    private static readonly MethodInfo StringStartsWith = typeof(string).GetMethod("StartsWith", [typeof(string)])!;
-    private static readonly MethodInfo StringEndsWith = typeof(string).GetMethod("EndsWith", [typeof(string)])!;
-    private static readonly MethodInfo StringCompareTo = typeof(string).GetMethod("CompareTo", [typeof(string)])!;
-    private static readonly MethodInfo DateTimeGetDate = typeof(DateTime).GetMethod("get_Date")!;
-    private static readonly MethodInfo IntToString = typeof(int).GetMethod("ToString", Type.EmptyTypes)!;
-    private static readonly MethodInfo HashSetIntOverlaps = typeof(HashSet<int>).GetMethod("Overlaps")!;
-    private static readonly MethodInfo HashSetIntSetEquals = typeof(HashSet<int>).GetMethod(nameof(HashSet<>.SetEquals))!;
-    private static readonly MethodInfo AttributeCollectionContainsKey = typeof(AttributeCollection).GetMethod(nameof(AttributeCollection.ContainsKey), [typeof(string)])!;
-    private static readonly MethodInfo AliasedValueGetValue = typeof(AliasedValue).GetMethod("get_Value")!;
-    private static readonly MethodInfo EntityReferenceGetId = typeof(EntityReference).GetMethod("get_Id")!;
-    private static readonly MethodInfo EntityReferenceGetName = typeof(EntityReference).GetMethod("get_Name")!;
-    private static readonly MethodInfo MoneyGetValue = typeof(Money).GetMethod("get_Value")!;
-    private static readonly MethodInfo BooleanManagedPropertyGetValue = typeof(BooleanManagedProperty).GetMethod("get_Value")!;
-    private static readonly MethodInfo OptionSetValueGetValue = typeof(OptionSetValue).GetMethod("get_Value")!;
-    private static readonly MethodInfo ConvertToHashSetOfIntMethod = typeof(ConditionParser).GetMethod(nameof(ConvertToHashSetOfInt))!;
+    private static readonly MethodInfo s_stringToLowerInvariant = typeof(string).GetMethod("ToLowerInvariant", Type.EmptyTypes)!;
+    private static readonly MethodInfo s_stringContains = typeof(string).GetMethod("Contains", [typeof(string)])!;
+    private static readonly MethodInfo s_stringStartsWith = typeof(string).GetMethod("StartsWith", [typeof(string)])!;
+    private static readonly MethodInfo s_stringEndsWith = typeof(string).GetMethod("EndsWith", [typeof(string)])!;
+    private static readonly MethodInfo s_stringCompareTo = typeof(string).GetMethod("CompareTo", [typeof(string)])!;
+    private static readonly MethodInfo s_dateTimeGetDate = typeof(DateTime).GetMethod("get_Date")!;
+    private static readonly MethodInfo s_intToString = typeof(int).GetMethod("ToString", Type.EmptyTypes)!;
+    private static readonly MethodInfo s_hashSetIntOverlaps = typeof(HashSet<int>).GetMethod("Overlaps")!;
+    private static readonly MethodInfo s_hashSetIntSetEquals = typeof(HashSet<int>).GetMethod(nameof(HashSet<>.SetEquals))!;
+    private static readonly MethodInfo s_attributeCollectionContainsKey = typeof(AttributeCollection).GetMethod(nameof(AttributeCollection.ContainsKey), [typeof(string)])!;
+    private static readonly MethodInfo s_aliasedValueGetValue = typeof(AliasedValue).GetMethod("get_Value")!;
+    private static readonly MethodInfo s_entityReferenceGetId = typeof(EntityReference).GetMethod("get_Id")!;
+    private static readonly MethodInfo s_entityReferenceGetName = typeof(EntityReference).GetMethod("get_Name")!;
+    private static readonly MethodInfo s_moneyGetValue = typeof(Money).GetMethod("get_Value")!;
+    private static readonly MethodInfo s_booleanManagedPropertyGetValue = typeof(BooleanManagedProperty).GetMethod("get_Value")!;
+    private static readonly MethodInfo s_optionSetValueGetValue = typeof(OptionSetValue).GetMethod("get_Value")!;
+    private static readonly MethodInfo s_convertToHashSetOfIntMethod = typeof(ConditionParser).GetMethod(nameof(ConvertToHashSetOfInt))!;
 
     public static HashSet<int> ConvertToHashSetOfInt(object input, bool isOptionSetValueCollectionAccepted)
     {
@@ -117,7 +117,7 @@ public static class ConditionParser
             attributeName = condition.CondExpression.AttributeName;
         }
 
-        Expression containsAttributeExpression = Expression.Call(attributesProperty, AttributeCollectionContainsKey,
+        Expression containsAttributeExpression = Expression.Call(attributesProperty, s_attributeCollectionContainsKey,
             Expression.Constant(attributeName));
 
         Expression getAttributeValueExpr = Expression.Property(attributesProperty, "Item", Expression.Constant(attributeName, typeof(string)));
@@ -311,9 +311,9 @@ public static class ConditionParser
         return operatorExpression;
     }
 
-    private static MethodCallExpression GetCaseInsensitiveExpression(Expression e) => Expression.Call(e, StringToLowerInvariant);
+    private static MethodCallExpression GetCaseInsensitiveExpression(Expression e) => Expression.Call(e, s_stringToLowerInvariant);
 
-    private static MethodCallExpression GetCompareToExpression(Expression left, Expression right) => Expression.Call(left, StringCompareTo, right);
+    private static MethodCallExpression GetCompareToExpression(Expression left, Expression right) => Expression.Call(left, s_stringCompareTo, right);
 
 
     private static object GetSingleConditionValue(TypedConditionExpression c)
@@ -344,7 +344,7 @@ public static class ConditionParser
         return conditionValue;
     }
 
-    private static MethodCallExpression TransformExpressionGetDateOnlyPart(Expression input) => Expression.Call(input, DateTimeGetDate);
+    private static MethodCallExpression TransformExpressionGetDateOnlyPart(Expression input) => Expression.Call(input, s_dateTimeGetDate);
 
     private static Expression TransformExpressionValueBasedOnOperator(ConditionOperator op, Expression input)
     {
@@ -462,7 +462,7 @@ public static class ConditionParser
 
         return Expression.AndAlso(containsAttributeExpr,
             Expression.AndAlso(Expression.NotEqual(getAttributeValueExpr, Expression.Constant(null)),
-                Expression.Equal(Expression.Call(leftHandSideExpression, HashSetIntOverlaps, rightHandSideExpression), Expression.Constant(true))));
+                Expression.Equal(Expression.Call(leftHandSideExpression, s_hashSetIntOverlaps, rightHandSideExpression), Expression.Constant(true))));
     }
 
     private static BinaryExpression TranslateConditionExpressionEndsWith(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
@@ -509,7 +509,7 @@ public static class ConditionParser
             var leftHandSideExpression = GetAppropriateCastExpressionBasedOnType(c.AttributeType, getAttributeValueExpr, conditionValue);
             var rightHandSideExpression = Expression.Constant(ConvertToHashSetOfInt(conditionValue, false));
 
-            expOrValues = Expression.Equal(Expression.Call(leftHandSideExpression, HashSetIntSetEquals, rightHandSideExpression), Expression.Constant(true));
+            expOrValues = Expression.Equal(Expression.Call(leftHandSideExpression, s_hashSetIntSetEquals, rightHandSideExpression), Expression.Constant(true));
         }
 
         else
@@ -591,7 +591,7 @@ public static class ConditionParser
             var leftHandSideExpression = GetAppropriateCastExpressionBasedOnType(tc.AttributeType, getAttributeValueExpr, null);
             var rightHandSideExpression = Expression.Constant(ConvertToHashSetOfInt(c.Values, false));
 
-            expOrValues = Expression.Equal(Expression.Call(leftHandSideExpression, HashSetIntSetEquals, rightHandSideExpression), Expression.Constant(true));
+            expOrValues = Expression.Equal(Expression.Call(leftHandSideExpression, s_hashSetIntSetEquals, rightHandSideExpression), Expression.Constant(true));
         }
         else
 
@@ -713,17 +713,17 @@ public static class ConditionParser
 
             if (strValue.EndsWith(sLikeOperator) && strValue.StartsWith(sLikeOperator))
             {
-                stringMethod = StringContains;
+                stringMethod = s_stringContains;
             }
 
             else if (strValue.StartsWith(sLikeOperator))
             {
-                stringMethod = StringEndsWith;
+                stringMethod = s_stringEndsWith;
             }
 
             else
             {
-                stringMethod = StringStartsWith;
+                stringMethod = s_stringStartsWith;
             }
 
             expOrValues = Expression.Or(expOrValues, Expression.Call(convertedValueToStrAndToLower, stringMethod,
@@ -901,7 +901,7 @@ public static class ConditionParser
 
         //Now, any value (entity reference, string, int, etc,... could be wrapped in an AliasedValue object
         //So let's add this
-        var getValueFromAliasedValueExp = Expression.Call(Expression.Convert(input, typeof(AliasedValue)), AliasedValueGetValue);
+        var getValueFromAliasedValueExp = Expression.Call(Expression.Convert(input, typeof(AliasedValue)), s_aliasedValueGetValue);
 
         var exp = Expression.Condition(Expression.TypeIs(input, typeof(AliasedValue)), GetAppropriateCastExpressionBasedOnAttributeTypeOrValue(getValueFromAliasedValueExp, value, t),
             typedExpression //Not an aliased value
@@ -1011,7 +1011,7 @@ public static class ConditionParser
         return defaultStringExpression;
     }
 
-    private static MethodCallExpression GetToStringExpression(Expression e) => Expression.Call(e, IntToString);
+    private static MethodCallExpression GetToStringExpression(Expression e) => Expression.Call(e, s_intToString);
 
     private static Expression GetAppropriateCastExpressionBasedOnDateTime(Expression input, object? value)
     {
@@ -1028,7 +1028,7 @@ public static class ConditionParser
 
     private static ConditionalExpression GetAppropriateCastExpressionBasedGuid(Expression input)
     {
-        var getIdFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)), EntityReferenceGetId);
+        var getIdFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)), s_entityReferenceGetId);
 
         return Expression.Condition(Expression.TypeIs(input, typeof(EntityReference)), //If input is an entity reference, compare the Guid against the Id property
             Expression.Convert(getIdFromEntityReferenceExpr, typeof(Guid)), Expression.Condition(Expression.TypeIs(input, typeof(Guid)), //If any other case, then just compare it as a Guid directly
@@ -1039,13 +1039,13 @@ public static class ConditionParser
     {
         if (value is string strValue && !Guid.TryParse(strValue, out _))
         {
-            var getNameFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)), EntityReferenceGetName);
+            var getNameFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)), s_entityReferenceGetName);
 
             return GetCaseInsensitiveExpression(Expression.Condition(Expression.TypeIs(input, typeof(EntityReference)), Expression.Convert(getNameFromEntityReferenceExpr, typeof(string)),
                 Expression.Constant(string.Empty, typeof(string))));
         }
 
-        var getIdFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)), EntityReferenceGetId);
+        var getIdFromEntityReferenceExpr = Expression.Call(Expression.TypeAs(input, typeof(EntityReference)), s_entityReferenceGetId);
 
         return Expression.Condition(Expression.TypeIs(input, typeof(EntityReference)), //If input is an entity reference, compare the Guid against the Id property
             Expression.Convert(getIdFromEntityReferenceExpr, typeof(Guid)), Expression.Condition(Expression.TypeIs(input, typeof(Guid)), //If any other case, then just compare it as a Guid directly
@@ -1054,20 +1054,20 @@ public static class ConditionParser
 
     private static ConditionalExpression GetAppropriateCastExpressionBasedOnDecimal(Expression input) =>
         Expression.Condition(Expression.TypeIs(input, typeof(Money)),
-            Expression.Convert(Expression.Call(Expression.TypeAs(input, typeof(Money)), MoneyGetValue), typeof(decimal)),
+            Expression.Convert(Expression.Call(Expression.TypeAs(input, typeof(Money)), s_moneyGetValue), typeof(decimal)),
             Expression.Condition(Expression.TypeIs(input, typeof(decimal)), Expression.Convert(input, typeof(decimal)), Expression.Constant(0.0M)));
 
     private static ConditionalExpression GetAppropriateCastExpressionBasedOnBoolean(Expression input) =>
         Expression.Condition(Expression.TypeIs(input, typeof(BooleanManagedProperty)),
-            Expression.Convert(Expression.Call(Expression.TypeAs(input, typeof(BooleanManagedProperty)), BooleanManagedPropertyGetValue), typeof(bool)),
+            Expression.Convert(Expression.Call(Expression.TypeAs(input, typeof(BooleanManagedProperty)), s_booleanManagedPropertyGetValue), typeof(bool)),
             Expression.Condition(Expression.TypeIs(input, typeof(bool)), Expression.Convert(input, typeof(bool)), Expression.Constant(false)));
 
     private static ConditionalExpression GetAppropriateCastExpressionBasedOnInt(Expression input) =>
         Expression.Condition(Expression.TypeIs(input, typeof(OptionSetValue)),
-            Expression.Convert(Expression.Call(Expression.TypeAs(input, typeof(OptionSetValue)), OptionSetValueGetValue), typeof(int)), Expression.Convert(input, typeof(int)));
+            Expression.Convert(Expression.Call(Expression.TypeAs(input, typeof(OptionSetValue)), s_optionSetValueGetValue), typeof(int)), Expression.Convert(input, typeof(int)));
 
     private static MethodCallExpression GetAppropriateCastExpressionBasedOnOptionSetValueCollection(Expression input) =>
-        Expression.Call(ConvertToHashSetOfIntMethod, input, Expression.Constant(true));
+        Expression.Call(s_convertToHashSetOfIntMethod, input, Expression.Constant(true));
 
     #endregion
 }
