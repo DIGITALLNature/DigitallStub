@@ -101,7 +101,7 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
     /// </summary>
     public string? GetLogicalName(Type entityType)
     {
-        return ReverseEntityTypeCache.TryGetValue(entityType, out var logicalName) ? logicalName : null;
+        return ReverseEntityTypeCache.GetValueOrDefault(entityType);
     }
 
     /// <summary>
