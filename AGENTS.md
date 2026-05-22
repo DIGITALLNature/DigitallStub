@@ -136,8 +136,32 @@ public async Task MethodName_Scenario_ExpectedResult()
 dotnet restore              # Restore dependencies (uses lock files)
 dotnet build                # Build the solution
 dotnet test                 # Run all tests
-dotnet test --filter "Name~Foo"  # Run filtered tests
 ```
+
+### Filtering Tests (TUnit)
+
+This project uses **TUnit**, which does **not** support the standard MSTest/xUnit `--filter` flag. Use `--treenode-filter` instead.
+
+> ⚠️ `dotnet test --filter "Name~Foo"` will silently run **zero tests** with TUnit — do not use it.
+
+TUnit's `--treenode-filter` matches against the tree path `/<namespace>/<class>/<method>`:
+
+```bash
+# Run a single test by exact name
+dotnet test --treenode-filter "*/FakeDataverseBuilderTests/WithUserId_*"
+
+# Run all tests in a class
+dotnet test --treenode-filter "*/FakeDataverseBuilderTests/*"
+
+# Run all tests in a namespace
+dotnet test --treenode-filter "*/Digitall.Dataverse.Testing.Tests.OrganizationRequests/*"
+
+# Run tests whose method name contains a keyword (glob)
+dotnet test --treenode-filter "*/*/AddData_*"
+```
+
+The filter uses glob patterns (`*` matches anything within one segment, `**` across segments).  
+If a filter matches nothing, the exit code is **8** (not a test failure) — double-check the class/method name.
 
 ---
 
