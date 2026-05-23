@@ -116,7 +116,7 @@ public class EntityTypeResolver(List<Assembly> modelAssemblies, Dictionary<strin
 
     /// <summary>
     /// Throws an exception if the specified entity type is not known.
-    /// An entity type is considered known when it either has a registered proxy type or has metadata registered via <see cref="FakeOrganizationService.AddMetadata"/>.
+    /// An entity type is considered known when it either has a registered proxy type or has metadata registered via <see cref="FakeOrganizationService.AddMetadata(EntityMetadata)"/>.
     /// </summary>
     public void ThrowIfNotKnownEntityType(string entityType)
     {
