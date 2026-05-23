@@ -110,7 +110,7 @@ public class QueryBugsTests
         // Create 100 separate queries with CompareColumns to show reflection overhead
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-        for (int i = 0; i < 100; i++)
+        for (var i = 0; i < 100; i++)
         {
             var query = new QueryExpression(Account.EntityLogicalName)
             {
