@@ -34,7 +34,7 @@ public static class ConditionParser
     private static readonly MethodInfo s_booleanManagedPropertyGetValue = typeof(BooleanManagedProperty).GetMethod("get_Value")!;
     private static readonly MethodInfo s_optionSetValueGetValue = typeof(OptionSetValue).GetMethod("get_Value")!;
     private static readonly MethodInfo s_convertToHashSetOfIntMethod = typeof(ConditionParser).GetMethod(nameof(ConvertToHashSetOfInt))!;
-    private static readonly MethodInfo s_compareColumnsHelper = typeof(ConditionParser).GetMethod(nameof(CompareColumnsHelper), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
+    private static readonly MethodInfo s_compareColumnsHelper = typeof(ConditionParser).GetMethod(nameof(CompareColumnsHelper), BindingFlags.NonPublic | BindingFlags.Static)!;
 
     public static HashSet<int> ConvertToHashSetOfInt(object input, bool isOptionSetValueCollectionAccepted)
     {
