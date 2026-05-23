@@ -281,8 +281,9 @@ Full support for `QueryExpression` including:
 - **ColumnSet** projection (specific columns or `AllColumns`)
 - **FilterExpression** with nested `And`/`Or` logical operators
 - **50+ ConditionOperators** (Equal, NotEqual, Like, In, Between, Null, fiscal year operators, etc.)
-- **LinkEntity** joins (Inner, LeftOuter, Any, NotAny, All, NotAll, Exists, In) with nested link entities
+- **LinkEntity** joins (Inner, LeftOuter, Natural, MatchFirstRowUsingCrossApply, Any, NotAny, All, NotAll, Exists, In) with nested link entities
 - **FilterExpression.AnyAllFilterLinkEntity** for EXISTS/NOT EXISTS subqueries at the filter level
+- **ConditionExpression.CompareColumns** for column-to-column comparison within the same row
 - **OrderExpression** (ascending/descending on multiple attributes)
 - **Paging** via `PageInfo` with proper `MoreRecords` and `PagingCookie` support
 - **TopCount** limiting
