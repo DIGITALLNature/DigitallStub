@@ -125,6 +125,12 @@ public static class ConditionParser
 
         Expression operatorExpression;
 
+        // CompareColumns: compare two entity attributes instead of attribute vs literal
+        if (condition.CondExpression.CompareColumns)
+        {
+            return TranslateCompareColumns(condition.CondExpression, entity, attributesProperty, attributeName);
+        }
+
         switch (condition.CondExpression.Operator)
         {
             #region equal and not equal
@@ -356,6 +362,88 @@ public static class ConditionParser
                 TransformExpressionGetDateOnlyPart(input),
             _ => input
         };
+    }
+
+    /// <summary>
+    /// Handles ConditionExpression.CompareColumns = true, comparing two columns in the same row.
+    /// </summary>
+    private static Expression TranslateCompareColumns(ConditionExpression condition, ParameterExpression entity, Expression attributesProperty, string leftAttributeName)
+    {
+        var rightAttributeName = (string)condition.Values[0];
+
+        Expression leftContains = Expression.Call(attributesProperty, s_attributeCollectionContainsKey, Expression.Constant(leftAttributeName));
+        Expression rightContains = Expression.Call(attributesProperty, s_attributeCollectionContainsKey, Expression.Constant(rightAttributeName));
+
+        Expression leftValue = Expression.Property(attributesProperty, "Item", Expression.Constant(leftAttributeName, typeof(string)));
+        Expression rightValue = Expression.Property(attributesProperty, "Item", Expression.Constant(rightAttributeName, typeof(string)));
+
+        // Helper: call CompareColumnsHelper at runtime
+        var helperMethod = typeof(ConditionParser).GetMethod(nameof(CompareColumnsHelper), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
+        Expression compareCall = Expression.Call(helperMethod,
+            attributesProperty,
+            Expression.Constant(leftAttributeName),
+            Expression.Constant(rightAttributeName),
+            Expression.Constant(condition.Operator));
+
+        return compareCall;
+    }
+
+    /// <summary>
+    /// Runtime helper for CompareColumns evaluation.
+    /// </summary>
+    private static bool CompareColumnsHelper(AttributeCollection attributes, string leftAttr, string rightAttr, ConditionOperator op)
+    {
+        var hasLeft = attributes.ContainsKey(leftAttr) && attributes[leftAttr] != null;
+        var hasRight = attributes.ContainsKey(rightAttr) && attributes[rightAttr] != null;
+
+        if (!hasLeft && !hasRight)
+        {
+            // Both null: Equal matches, NotEqual doesn't
+            return op == ConditionOperator.Equal;
+        }
+
+        if (!hasLeft || !hasRight)
+        {
+            // One is null: NotEqual matches, Equal doesn't, comparison operators don't match
+            return op == ConditionOperator.NotEqual;
+        }
+
+        var leftVal = attributes[leftAttr];
+        var rightVal = attributes[rightAttr];
+
+        // Unwrap common Dataverse types to comparable values
+        var left = UnwrapValue(leftVal);
+        var right = UnwrapValue(rightVal);
+
+        return op switch
+        {
+            ConditionOperator.Equal => Equals(left, right),
+            ConditionOperator.NotEqual => !Equals(left, right),
+            ConditionOperator.GreaterThan => Compare(left, right) > 0,
+            ConditionOperator.GreaterEqual => Compare(left, right) >= 0,
+            ConditionOperator.LessThan => Compare(left, right) < 0,
+            ConditionOperator.LessEqual => Compare(left, right) <= 0,
+            _ => false
+        };
+    }
+
+    private static object? UnwrapValue(object? val) => val switch
+    {
+        Money m => m.Value,
+        OptionSetValue osv => osv.Value,
+        EntityReference er => er.Id,
+        AliasedValue av => UnwrapValue(av.Value),
+        _ => val
+    };
+
+    private static int Compare(object? left, object? right)
+    {
+        if (left is IComparable comparable)
+        {
+            return comparable.CompareTo(right);
+        }
+
+        return string.Compare(left?.ToString(), right?.ToString(), StringComparison.Ordinal);
     }
 
     private static BinaryExpression TranslateConditionExpressionBetween(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)

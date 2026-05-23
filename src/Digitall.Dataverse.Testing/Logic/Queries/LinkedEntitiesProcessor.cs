@@ -106,6 +106,10 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
                 JoinOperator.LeftOuter => query.GroupJoin(inner,
                         outerKey => outerKey.KeySelector(linkFromAlias), innerKey => innerKey.KeySelector(le.LinkToAttributeName), (outerEl, innerElemsCol) => new { outerEl, innerElemsCol })
                     .SelectMany(x => x.innerElemsCol.DefaultIfEmpty(), (x, y) => x.outerEl.CloneEntity().JoinAttributes(y, new ColumnSet(true), leAlias)),
+                JoinOperator.MatchFirstRowUsingCrossApply => query.GroupJoin(inner,
+                        outerKey => outerKey.KeySelector(linkFromAlias), innerKey => innerKey.KeySelector(le.LinkToAttributeName), (outerEl, innerElemsCol) => new { outerEl, innerElemsCol })
+                    .Where(x => x.innerElemsCol.Any())
+                    .Select(x => x.outerEl.CloneEntity().JoinAttributes(x.innerElemsCol.First(), new ColumnSet(true), leAlias)),
                 JoinOperator.Any or JoinOperator.Exists or JoinOperator.In or JoinOperator.NotAll =>
                     ExistsFilter(query, inner, linkFromAlias, le.LinkToAttributeName, negate: false),
                 JoinOperator.NotAny =>
