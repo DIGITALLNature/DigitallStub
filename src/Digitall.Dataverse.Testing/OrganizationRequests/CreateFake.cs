@@ -10,7 +10,14 @@ public class CreateFake : OrganizationRequestFake<CreateRequest, CreateResponse>
 {
     public override CreateResponse Execute(CreateRequest organizationRequest, FakeOrganizationService state)
     {
-        var guid = state.CreateCore(organizationRequest.Target);
+        var target = organizationRequest.Target;
+        var guid = state.CreateCore(target);
+
+        // Deep insert: create sub-entities from RelatedEntities
+        if (target.RelatedEntities.Count > 0)
+        {
+            DeepInsertProcessor.Process(target.LogicalName, guid, target.RelatedEntities, state);
+        }
 
         return new CreateResponse
         {
