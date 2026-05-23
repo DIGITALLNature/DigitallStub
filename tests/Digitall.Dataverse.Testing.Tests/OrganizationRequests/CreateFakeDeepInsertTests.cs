@@ -54,7 +54,7 @@ public class CreateFakeDeepInsertTests
         account.RelatedEntities[new Relationship("contact_customer_accounts")] =
             new EntityCollection([contact1, contact2]);
 
-        var response = (CreateResponse)_sut.Execute(new CreateRequest { Target = account });
+        _sut.Execute(new CreateRequest { Target = account });
 
         var contacts = _sut.CreateQuery("contact").ToList();
         await Assert.That(contacts).Count().IsEqualTo(2);

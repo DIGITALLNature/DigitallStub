@@ -372,12 +372,6 @@ public static class ConditionParser
     {
         var rightAttributeName = (string)condition.Values[0];
 
-        Expression leftContains = Expression.Call(attributesProperty, s_attributeCollectionContainsKey, Expression.Constant(leftAttributeName));
-        Expression rightContains = Expression.Call(attributesProperty, s_attributeCollectionContainsKey, Expression.Constant(rightAttributeName));
-
-        Expression leftValue = Expression.Property(attributesProperty, "Item", Expression.Constant(leftAttributeName, typeof(string)));
-        Expression rightValue = Expression.Property(attributesProperty, "Item", Expression.Constant(rightAttributeName, typeof(string)));
-
         // Helper: call CompareColumnsHelper at runtime
         Expression compareCall = Expression.Call(s_compareColumnsHelper,
             attributesProperty,
