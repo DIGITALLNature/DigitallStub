@@ -23,10 +23,14 @@ namespace Digitall.Dataverse.Testing.Extensions;
                     , CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek) + deltaWeek, dayOfWeek);
 
             public DateTime ToLastDayOfDeltaWeek(int deltaWeek = 0)
-                => dateTime.ToDayOfDeltaWeek(deltaWeek, CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek).AddDays(6);
+                => dateTime.ToFirstDayOfDeltaWeek(deltaWeek).AddDays(6);
 
             public DateTime ToFirstDayOfDeltaWeek(int deltaWeek = 0)
-                => dateTime.ToDayOfDeltaWeek(deltaWeek, CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek);
+            {
+                var firstDayOfWeek = CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek;
+                var diff = ((int)dateTime.DayOfWeek - (int)firstDayOfWeek + 7) % 7;
+                return dateTime.Date.AddDays(-diff + 7 * deltaWeek);
+            }
 
             public DateTime ToFirstDayOfMonth(int month)
                 => dateTime.AddDays(1 - dateTime.Day).AddMonths(month - dateTime.Month);
