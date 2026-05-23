@@ -40,7 +40,9 @@ public class BulkDeleteFake : OrganizationRequestFake<BulkDeleteRequest, BulkDel
             {
                 ["name"] = organizationRequest.JobName,
                 ["ownerid"] = new EntityReference("systemuser", state.Options.UserId),
-                ["operationtype"] = new OptionSetValue(13) // 13 = BulkDelete
+                ["operationtype"] = new OptionSetValue(13), // 13 = BulkDelete
+                ["recurrencepattern"] = organizationRequest.RecurrencePattern,
+                ["recurrencestarttime"] = organizationRequest.StartDateTime
             }
         };
 
