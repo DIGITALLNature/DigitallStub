@@ -89,7 +89,7 @@ public class QueryBugsTests
         
         // Query is reusable: second execution returns same results
         var result2 = sut.RetrieveMultiple(query);
-        await Assert.That(result2.Entities).Count().IsEqualTo(result1.Entities.Count());
+        await Assert.That(result2.Entities).Count().IsEqualTo(result1.Entities.Count);
     }
 
     /// <summary>
