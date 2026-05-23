@@ -10,7 +10,6 @@ namespace Digitall.Dataverse.Testing.Tests.Logic;
 /// <summary>
 /// Tests for JoinOperator.MatchFirstRowUsingCrossApply which returns only the first
 /// matching linked entity per parent row (CROSS APPLY TOP 1 semantics).
-/// This feature is NOT YET IMPLEMENTED — these tests document the expected behavior.
 /// </summary>
 public class CrossApplyJoinTests
 {

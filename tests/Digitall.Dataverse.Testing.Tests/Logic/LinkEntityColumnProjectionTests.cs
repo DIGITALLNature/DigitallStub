@@ -9,8 +9,8 @@ namespace Digitall.Dataverse.Testing.Tests.Logic;
 
 /// <summary>
 /// Tests verifying that LinkEntity.Columns is respected during join projection.
-/// BUG: LinkedEntitiesProcessor currently always uses ColumnSet(true) regardless
-/// of what is specified on LinkEntity.Columns.
+/// The implementation uses a two-phase approach: JoinAttributes merges all columns,
+/// then ProjectLinkedEntitiesAttributes filters based on LinkEntity.Columns.
 /// </summary>
 public class LinkEntityColumnProjectionTests
 {
