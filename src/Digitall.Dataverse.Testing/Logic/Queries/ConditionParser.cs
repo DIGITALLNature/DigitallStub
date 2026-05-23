@@ -135,7 +135,7 @@ public static class ConditionParser
         // CompareColumns: compare two entity attributes instead of attribute vs literal
         if (condition.CondExpression.CompareColumns)
         {
-            return TranslateCompareColumns(condition.CondExpression, entity, attributesProperty, attributeName);
+            return TranslateCompareColumns(condition.CondExpression, attributesProperty, attributeName);
         }
 
         switch (condition.CondExpression.Operator)
@@ -368,7 +368,7 @@ public static class ConditionParser
     /// <summary>
     /// Handles ConditionExpression.CompareColumns = true, comparing two columns in the same row.
     /// </summary>
-    private static Expression TranslateCompareColumns(ConditionExpression condition, ParameterExpression entity, Expression attributesProperty, string leftAttributeName)
+    private static Expression TranslateCompareColumns(ConditionExpression condition, Expression attributesProperty, string leftAttributeName)
     {
         var rightAttributeName = (string)condition.Values[0];
 
