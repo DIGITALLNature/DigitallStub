@@ -37,7 +37,7 @@ public class LinkedEntitiesProcessorTests
         qe.AddLink("account", "parentcustomerid", "accountid", JoinOperator.Inner);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["fullname"]).IsEqualTo("Linked");
     }
 
@@ -57,7 +57,7 @@ public class LinkedEntitiesProcessorTests
         qe.AddLink("account", "parentcustomerid", "accountid", JoinOperator.LeftOuter);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -69,7 +69,7 @@ public class LinkedEntitiesProcessorTests
         qe.AddLink("account", "parentcustomerid", "accountid", JoinOperator.LeftOuter);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
     }
 
     #endregion
@@ -88,7 +88,7 @@ public class LinkedEntitiesProcessorTests
         qe.AddLink("account", "parentcustomerid", "accountid", JoinOperator.Natural);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["fullname"]).IsEqualTo("Child");
     }
 
@@ -109,7 +109,7 @@ public class LinkedEntitiesProcessorTests
         qe.AddLink("contact", "accountid", "parentcustomerid", JoinOperator.Any);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("WithContacts");
     }
 
@@ -126,7 +126,7 @@ public class LinkedEntitiesProcessorTests
         qe.AddLink("contact", "accountid", "parentcustomerid", JoinOperator.NotAny);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("NoContacts");
     }
 
@@ -158,7 +158,7 @@ public class LinkedEntitiesProcessorTests
         // Only AllInactive qualifies (has contacts but none match active=true)
         // NoContacts excluded (no linked records)
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("AllInactive");
     }
 
@@ -181,7 +181,7 @@ public class LinkedEntitiesProcessorTests
 
         // NotAll = EXISTS(matching filtered inner) → at least one contact is active
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("HasActiveContact");
     }
 
@@ -201,7 +201,7 @@ public class LinkedEntitiesProcessorTests
         qe.AddLink("contact", "accountid", "parentcustomerid", JoinOperator.MatchFirstRowUsingCrossApply);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
     }
 
     [Test]
@@ -235,7 +235,7 @@ public class LinkedEntitiesProcessorTests
         accountLink.LinkCriteria.AddCondition("name", ConditionOperator.Equal, "Acme");
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["subject"]).IsEqualTo("Follow up");
     }
 
@@ -256,7 +256,7 @@ public class LinkedEntitiesProcessorTests
         // No explicit EntityAlias set
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         // Linked entity attributes should be aliased
         var hasAliasedValue = results[0].Attributes.Values.OfType<AliasedValue>().Any(a => a.Value?.ToString() == "Parent");
         await Assert.That(hasAliasedValue).IsTrue();
@@ -280,7 +280,7 @@ public class LinkedEntitiesProcessorTests
         link2.EntityAlias = "secondary";
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
 
         var primaryName = results[0].GetAttributeValue<AliasedValue>("primary.fullname");
         var secondaryName = results[0].GetAttributeValue<AliasedValue>("secondary.fullname");

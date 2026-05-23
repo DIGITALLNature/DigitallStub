@@ -41,8 +41,8 @@ public class ExecuteTransactionFakeTests
 
         var accounts = _sut.CreateQuery("account").ToList();
         var contacts = _sut.CreateQuery("contact").ToList();
-        await Assert.That(accounts).HasCount().EqualTo(2);
-        await Assert.That(contacts).HasCount().EqualTo(1);
+        await Assert.That(accounts).Count().IsEqualTo(2);
+        await Assert.That(contacts).Count().IsEqualTo(1);
     }
 
     [Test]
@@ -60,7 +60,7 @@ public class ExecuteTransactionFakeTests
 
         var response = (ExecuteTransactionResponse)_sut.Execute(request);
 
-        await Assert.That(response.Responses).HasCount().EqualTo(2);
+        await Assert.That(response.Responses).Count().IsEqualTo(2);
         await Assert.That(response.Responses[0]).IsTypeOf<CreateResponse>();
         await Assert.That(response.Responses[1]).IsTypeOf<CreateResponse>();
     }

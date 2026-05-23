@@ -47,7 +47,7 @@ public class UpsertFakeDeepInsertTests
         await Assert.That((bool)response["RecordCreated"]).IsTrue();
 
         var contacts = _sut.CreateQuery("contact").ToList();
-        await Assert.That(contacts).HasCount().EqualTo(1);
+        await Assert.That(contacts).Count().IsEqualTo(1);
 
         var createdContact = contacts.Single();
         var parentRef = createdContact.GetAttributeValue<EntityReference>("parentcustomerid");
@@ -78,7 +78,7 @@ public class UpsertFakeDeepInsertTests
 
         // Child was created with correct FK
         var contacts = _sut.CreateQuery("contact").ToList();
-        await Assert.That(contacts).HasCount().EqualTo(1);
+        await Assert.That(contacts).Count().IsEqualTo(1);
 
         var createdContact = contacts.Single();
         var parentRef = createdContact.GetAttributeValue<EntityReference>("parentcustomerid");

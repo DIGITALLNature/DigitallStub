@@ -35,7 +35,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("name", ConditionOperator.Equal, "Match");
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("Match");
     }
 
@@ -49,7 +49,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("name", ConditionOperator.NotEqual, "Excluded");
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("Kept");
     }
 
@@ -68,7 +68,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("score", ConditionOperator.GreaterThan, 150);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -81,7 +81,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("score", ConditionOperator.LessThan, 150);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["score"]).IsEqualTo(100);
     }
 
@@ -95,7 +95,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("score", ConditionOperator.GreaterEqual, 200);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["score"]).IsEqualTo(200);
     }
 
@@ -109,7 +109,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("score", ConditionOperator.LessEqual, 100);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["score"]).IsEqualTo(100);
     }
 
@@ -127,7 +127,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("name", ConditionOperator.Like, "%Ltd");
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("Contoso Ltd");
     }
 
@@ -141,7 +141,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("name", ConditionOperator.BeginsWith, "Con");
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("Contoso Ltd");
     }
 
@@ -155,7 +155,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("name", ConditionOperator.EndsWith, "Inc");
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("Fabrikam Inc");
     }
 
@@ -169,7 +169,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("name", ConditionOperator.Contains, "oso");
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("Contoso Ltd");
     }
 
@@ -183,7 +183,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("name", ConditionOperator.DoesNotContain, "oso");
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("Fabrikam Inc");
     }
 
@@ -202,7 +202,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("customfield1", ConditionOperator.In, 1, 3);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -216,7 +216,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("customfield1", ConditionOperator.NotIn, 1, 3);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["customfield1"]).IsEqualTo(2);
     }
 
@@ -231,7 +231,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("score", ConditionOperator.Between, 100, 200);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["score"]).IsEqualTo(150);
     }
 
@@ -246,7 +246,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("score", ConditionOperator.NotBetween, 100, 200);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     #endregion
@@ -263,7 +263,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("name", ConditionOperator.Null);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0].Contains("name")).IsFalse();
     }
 
@@ -277,7 +277,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("name", ConditionOperator.NotNull);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("HasValue");
     }
 
@@ -296,7 +296,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("parentcustomerid", ConditionOperator.Equal, refId);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
     }
 
     #endregion
@@ -313,7 +313,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("statecode", ConditionOperator.Equal, 0);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
     }
 
     [Test]
@@ -327,7 +327,7 @@ public class ConditionParserTests
         qe.Criteria.AddCondition("statecode", ConditionOperator.In, 0, 2);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     #endregion
@@ -346,8 +346,8 @@ public class ConditionParserTests
         var results1 = _sut.RetrieveMultiple(qe).Entities;
         var results2 = _sut.RetrieveMultiple(qe).Entities;
 
-        await Assert.That(results1).HasCount().EqualTo(1);
-        await Assert.That(results2).HasCount().EqualTo(1);
+        await Assert.That(results1).Count().IsEqualTo(1);
+        await Assert.That(results2).Count().IsEqualTo(1);
         await Assert.That(results1[0]["name"]).IsEqualTo(results2[0]["name"]);
     }
 
