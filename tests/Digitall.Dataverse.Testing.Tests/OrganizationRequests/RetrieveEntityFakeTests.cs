@@ -53,7 +53,7 @@ public class RetrieveEntityFakeTests
         });
 
         await Assert.That(response.EntityMetadata.Attributes).IsNotNull();
-        await Assert.That(response.EntityMetadata.Attributes).HasCount().EqualTo(1);
+        await Assert.That(response.EntityMetadata.Attributes).Count().IsEqualTo(1);
         await Assert.That(response.EntityMetadata.Attributes[0].LogicalName).IsEqualTo("name");
     }
 

@@ -59,7 +59,7 @@ public class CreateFakeDeepInsertTests
         var response = (CreateResponse)_sut.Execute(new CreateRequest { Target = account });
 
         var contacts = _sut.CreateQuery("contact").ToList();
-        await Assert.That(contacts).HasCount().EqualTo(2);
+        await Assert.That(contacts).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -96,11 +96,11 @@ public class CreateFakeDeepInsertTests
 
         // Child entity was created
         var roles = _sut.CreateQuery("role").ToList();
-        await Assert.That(roles).HasCount().EqualTo(1);
+        await Assert.That(roles).Count().IsEqualTo(1);
 
         // Intersection record was created
         var intersections = _sut.CreateQuery("systemuserroles").ToList();
-        await Assert.That(intersections).HasCount().EqualTo(1);
+        await Assert.That(intersections).Count().IsEqualTo(1);
 
         var intersection = intersections.Single();
         await Assert.That(intersection.GetAttributeValue<Guid>("systemuserid")).IsEqualTo(userId);
@@ -154,9 +154,9 @@ public class CreateFakeDeepInsertTests
         var contacts = _sut.CreateQuery("contact").ToList();
         var tasks = _sut.CreateQuery("task").ToList();
 
-        await Assert.That(accounts).HasCount().EqualTo(1);
-        await Assert.That(contacts).HasCount().EqualTo(1);
-        await Assert.That(tasks).HasCount().EqualTo(1);
+        await Assert.That(accounts).Count().IsEqualTo(1);
+        await Assert.That(contacts).Count().IsEqualTo(1);
+        await Assert.That(tasks).Count().IsEqualTo(1);
 
         // Verify FK chain
         var createdContact = contacts.Single();

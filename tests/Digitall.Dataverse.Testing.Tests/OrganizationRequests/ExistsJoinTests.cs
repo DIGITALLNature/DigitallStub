@@ -667,7 +667,7 @@ public class ExistsJoinTests
             }
         });
 
-        await Assert.That(result.Entities).HasCount().EqualTo(1);
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
         await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
     }
 
@@ -740,7 +740,7 @@ public class ExistsJoinTests
         });
 
         // corpA: no contacts → excluded. corpB: contacts exist but none match "Nobody" → included.
-        await Assert.That(result.Entities).HasCount().EqualTo(1);
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
         await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
     }
 

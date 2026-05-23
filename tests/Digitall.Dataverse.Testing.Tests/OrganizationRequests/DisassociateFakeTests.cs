@@ -59,7 +59,7 @@ public class DisassociateFakeTests
 
         // Verify associated
         var before = _sut.CreateQuery("account_contact").ToList();
-        await Assert.That(before).HasCount().EqualTo(1);
+        await Assert.That(before).Count().IsEqualTo(1);
 
         // Disassociate
         _sut.Execute(new DisassociateRequest
@@ -105,7 +105,7 @@ public class DisassociateFakeTests
         });
 
         var remaining = _sut.CreateQuery("account_contact").ToList();
-        await Assert.That(remaining).HasCount().EqualTo(1);
+        await Assert.That(remaining).Count().IsEqualTo(1);
         await Assert.That(remaining[0].GetAttributeValue<Guid>("contactid")).IsEqualTo(contactId2);
     }
 
