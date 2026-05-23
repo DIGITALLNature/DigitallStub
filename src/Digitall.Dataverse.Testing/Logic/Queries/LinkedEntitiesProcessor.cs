@@ -109,7 +109,7 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
                 JoinOperator.MatchFirstRowUsingCrossApply => query.GroupJoin(inner,
                         outerKey => outerKey.KeySelector(linkFromAlias), innerKey => innerKey.KeySelector(le.LinkToAttributeName), (outerEl, innerElemsCol) => new { outerEl, innerElemsCol })
                     .Where(x => x.innerElemsCol.Any())
-                    .Select(x => x.outerEl.CloneEntity().JoinAttributes(x.innerElemsCol.First(), new ColumnSet(true), leAlias)),
+                    .Select(x => x.outerEl.CloneEntity().JoinAttributes(x.innerElemsCol.OrderBy(e => e.Id).First(), new ColumnSet(true), leAlias)),
                 JoinOperator.Any or JoinOperator.Exists or JoinOperator.In or JoinOperator.NotAll =>
                     ExistsFilter(query, inner, linkFromAlias, le.LinkToAttributeName, negate: false),
                 JoinOperator.NotAny =>
