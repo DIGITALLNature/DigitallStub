@@ -3,6 +3,7 @@
 
 using System.Linq.Expressions;
 using Digitall.Dataverse.Testing.Errors;
+using Digitall.Dataverse.Testing.Extensions;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
@@ -86,6 +87,8 @@ public class ExpressionProcessor(FakeOrganizationService fakeOrgService)
 
         BinaryExpression? conditionsLambda = null;
         BinaryExpression? filtersLambda = null;
+        Expression? anyAllLambda = null;
+
         if (fe.Conditions is { Count: > 0 })
         {
             conditionsLambda = TranslateMultipleConditionExpressions(queryExpression, sEntityName, fe.Conditions.ToList(), fe.FilterOperator, entity, bIsOuter);
@@ -97,23 +100,99 @@ public class ExpressionProcessor(FakeOrganizationService fakeOrgService)
             filtersLambda = TranslateMultipleFilterExpressions(queryExpression, sEntityName, fe.Filters.ToList(), fe.FilterOperator, entity, bIsOuter);
         }
 
-        if (conditionsLambda != null && filtersLambda != null)
+        // Process AnyAllFilterLinkEntity (EXISTS/NOT EXISTS subquery)
+        if (fe.AnyAllFilterLinkEntity != null)
         {
-            //Satisfy both
-            return fe.FilterOperator == LogicalOperator.And ? Expression.And(conditionsLambda, filtersLambda) : Expression.Or(conditionsLambda, filtersLambda);
+            anyAllLambda = TranslateAnyAllFilterLinkEntity(fe.AnyAllFilterLinkEntity, entity);
         }
 
-        if (conditionsLambda != null)
+        // Combine all parts using the FilterOperator
+        var parts = new List<Expression>();
+        if (conditionsLambda != null) parts.Add(conditionsLambda);
+        if (filtersLambda != null) parts.Add(filtersLambda);
+        if (anyAllLambda != null) parts.Add(anyAllLambda);
+
+        if (parts.Count == 0)
         {
-            return conditionsLambda;
+            return Expression.Constant(true);
         }
 
-        if (filtersLambda != null)
+        return parts.Aggregate((left, right) =>
+            fe.FilterOperator == LogicalOperator.And ? Expression.And(left, right) : Expression.Or(left, right));
+    }
+
+    /// <summary>
+    ///     Translates a <see cref="FilterExpression.AnyAllFilterLinkEntity"/> into a boolean expression
+    ///     that evaluates EXISTS/NOT EXISTS semantics against the in-memory state.
+    /// </summary>
+    private Expression TranslateAnyAllFilterLinkEntity(LinkEntity linkEntity, ParameterExpression entity)
+    {
+        // Build the inner query (with LinkCriteria applied)
+        var filteredInnerQuery = new QueryExpression
         {
-            return filtersLambda;
+            EntityName = linkEntity.LinkToEntityName,
+            ColumnSet = new ColumnSet(true)
+        };
+        if (linkEntity.LinkCriteria != null)
+        {
+            filteredInnerQuery.Criteria = linkEntity.LinkCriteria;
         }
 
-        return Expression.Constant(true); //Satisfy filter if there are no conditions nor filters
+        var queryProcessor = new QueryProcessor(fakeOrgService);
+        var filteredInner = queryProcessor.ExecuteQueryExpression(filteredInnerQuery).ToList();
+
+        var linkFromAttr = linkEntity.LinkFromAttributeName;
+        var linkToAttr = linkEntity.LinkToAttributeName;
+
+        Func<Entity, bool> predicate;
+
+        switch (linkEntity.JoinOperator)
+        {
+            case JoinOperator.Any:
+            case JoinOperator.NotAll:
+            case JoinOperator.Exists:
+            case JoinOperator.In:
+                // EXISTS: parent has at least one matching linked record
+                predicate = outer =>
+                {
+                    var outerKey = outer.KeySelector(linkFromAttr);
+                    return filteredInner.Any(inner => Equals(outerKey, inner.KeySelector(linkToAttr)));
+                };
+                break;
+
+            case JoinOperator.NotAny:
+                // NOT EXISTS: parent has no matching linked records
+                predicate = outer =>
+                {
+                    var outerKey = outer.KeySelector(linkFromAttr);
+                    return !filteredInner.Any(inner => Equals(outerKey, inner.KeySelector(linkToAttr)));
+                };
+                break;
+
+            case JoinOperator.All:
+                // ALL: linked records exist (unfiltered) but none satisfy the criteria
+                var unfilteredInner = fakeOrgService.CreateQuery<Entity>(linkEntity.LinkToEntityName).ToList();
+                predicate = outer =>
+                {
+                    var outerKey = outer.KeySelector(linkFromAttr);
+                    var hasAnyLinked = unfilteredInner.Any(inner => Equals(outerKey, inner.KeySelector(linkToAttr)));
+                    if (!hasAnyLinked) return false;
+                    var hasFilteredMatch = filteredInner.Any(inner => Equals(outerKey, inner.KeySelector(linkToAttr)));
+                    return !hasFilteredMatch;
+                };
+                break;
+
+            default:
+                ErrorFactory.ThrowFault(
+                    ErrorCodes.InvalidOperatorCode,
+                    $"The join operator '{linkEntity.JoinOperator}' is not supported for AnyAllFilterLinkEntity");
+                predicate = _ => false; // unreachable
+                break;
+        }
+
+        // Wrap the predicate as an Expression.Invoke on a compiled delegate
+        var predicateExpr = Expression.Constant(predicate);
+        return Expression.Invoke(predicateExpr, entity);
     }
 
 
@@ -131,7 +210,7 @@ public class ExpressionProcessor(FakeOrganizationService fakeOrgService)
 
         // EXISTS-style operators apply LinkCriteria inside the subquery in LinkedEntitiesProcessor,
         // so we must not re-evaluate them here as a post-join filter.
-        if (linkedEntity.JoinOperator is JoinOperator.Any or JoinOperator.NotAny or JoinOperator.Exists or JoinOperator.In)
+        if (linkedEntity.JoinOperator is JoinOperator.Any or JoinOperator.NotAny or JoinOperator.Exists or JoinOperator.In or JoinOperator.All or JoinOperator.NotAll)
         {
             foreach (var nestedLinkedEntity in linkedEntity.LinkEntities)
             {
