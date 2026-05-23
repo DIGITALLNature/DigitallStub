@@ -16,9 +16,10 @@ public class QueryBugsTests
     /// <summary>
     /// BUG #1: OrderQuery ThenByDescending missing ContainsKey guard
     /// Throws KeyNotFoundException when 2nd order attribute is missing on some entities
+    /// FIXED: Now handles missing attributes correctly
     /// </summary>
     [Test]
-    public async Task OrderQuery_MultipleOrdersDescending_ThrowsKeyNotFoundWhenAttributeMissing()
+    public async Task OrderQuery_MultipleOrdersDescending_HandlesAttributeMissing()
     {
         // Setup: accounts with different attributes present
         var account1 = new Account(Guid.NewGuid())
@@ -41,25 +42,21 @@ public class QueryBugsTests
             Orders =
             {
                 new OrderExpression(Account.LogicalNames.Name, OrderType.Ascending),
-                new OrderExpression(Account.LogicalNames.Revenue, OrderType.Descending) // BUG: missing guard
+                new OrderExpression(Account.LogicalNames.Revenue, OrderType.Descending) // FIXED: now has ContainsKey guard
             }
         };
 
-        // This should NOT throw — Dataverse treats missing attributes as null/lowest
-        await Assert.That(async () =>
-        {
-            var result = sut.RetrieveMultiple(query);
-            await Task.CompletedTask;
-        }).Throws<KeyNotFoundException>();
+        // After fix: should NOT throw — Dataverse treats missing attributes as null/lowest
+        var result = sut.RetrieveMultiple(query);
+        await Assert.That(result.Entities).Count().IsGreaterThan(0);
     }
 
     /// <summary>
     /// BUG #2: Values mutation - Last/Next/BetweenDates operators modify input QueryExpression
-    /// After executing a query with these operators, the Values array is destroyed,
-    /// breaking query reuse patterns
+    /// FIXED: Now creates temporary condition instead of mutating input
     /// </summary>
     [Test]
-    public async Task LastXDays_MutatesValuesArray_BreaksQueryReuse()
+    public async Task LastXDays_DoesNotMutateValuesArray_QueryIsReusable()
     {
         var sut = new FakeOrganizationService();
         var account = new Account(Guid.NewGuid())
@@ -81,19 +78,18 @@ public class QueryBugsTests
         await Assert.That(originalValues).Count().IsEqualTo(1);
         await Assert.That(originalValues[0]).IsEqualTo(30);
 
-        // First execution — this will mutate Values
+        // First execution — should NOT mutate Values
         var result1 = sut.RetrieveMultiple(query);
         await Assert.That(result1.Entities).Count().IsGreaterThan(0);
 
-        // BUG PROOF: Values was mutated
-        // Original was [30], now should be [beforeDateTime, currentDateTime]
-        // At minimum, Values[0] should NO LONGER be 30
-        var currentValue0 = daysCondition.Values[0];
-        var isOriginalValue = currentValue0?.Equals(30) == true;
+        // FIXED: Values should NOT be mutated anymore
+        // It should still contain the original value [30], not [beforeDate, currentDate]
+        await Assert.That(daysCondition.Values).Count().IsEqualTo(1); // Still 1, not 2!
+        await Assert.That(daysCondition.Values[0]).IsEqualTo(30); // Still 30, not a DateTime!
         
-        // This assertion proves the bug: Values[0] is still 30, meaning mutation happened
-        // (or didn't happen as expected, which is also a bug!)
-        await Assert.That(isOriginalValue).IsTrue(); // Will fail if Values was mutated correctly
+        // Query is reusable: second execution returns same results
+        var result2 = sut.RetrieveMultiple(query);
+        await Assert.That(result2.Entities).Count().IsEqualTo(result1.Entities.Count());
     }
 
     /// <summary>
@@ -144,11 +140,10 @@ public class QueryBugsTests
 
     /// <summary>
     /// BUG #4: MatchFirstRowUsingCrossApply uses non-deterministic .First()
-    /// GroupJoin has no guaranteed ordering, so .First() returns arbitrary element
-    /// Results differ based on entity insertion order, not stable sort order
+    /// FIXED: Now orders by ID before .First() for deterministic results
     /// </summary>
     [Test]
-    public async Task CrossApply_FirstIsNonDeterministic_ReturnsDifferentResultsBasedOnInsertionOrder()
+    public async Task CrossApply_FirstIsDeterministic_ReturnsSameResultsRegardlessOfInsertionOrder()
     {
         // Create two scenarios with same data but different insertion order
         var contact1 = new Contact(Guid.Parse("00000000-0000-0000-0002-000000000001"))
@@ -203,16 +198,14 @@ public class QueryBugsTests
             }
         });
 
-        // BUG: Different insertion orders produce different results
-        // Both should return the same contact (deterministically), but .First() is non-deterministic
+        // FIXED: Both insertion orders now produce the same result (deterministic by ID)
+        // Should return Alice (lower ID: 00000000-0000-0000-0002-000000000001)
         var firstName1 = result1.Entities[0].GetAttributeValue<AliasedValue>("c." + Contact.LogicalNames.FirstName)?.Value;
         var firstName2 = result2.Entities[0].GetAttributeValue<AliasedValue>("c." + Contact.LogicalNames.FirstName)?.Value;
 
-        // This assertion will fail randomly because .First() is non-deterministic
-        // Sometimes firstName1 == "Alice", sometimes "Bob"
-        // Sometimes firstName2 == "Alice", sometimes "Bob"
-        // With different insertion orders, they may differ even for the same conceptual data
+        // After fix: Should be the same (both return Alice, the one with lower ID)
         await Assert.That(firstName1).IsEqualTo(firstName2);
+        await Assert.That(firstName1).IsEqualTo("Alice"); // Verified: the lower ID entity is returned
     }
 
 }

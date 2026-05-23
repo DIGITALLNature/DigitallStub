@@ -276,7 +276,7 @@ public class QueryProcessor
             var thenOrder = qe.Orders[i];
             orderedQuery = thenOrder.OrderType == OrderType.Ascending
                 ? orderedQuery.ThenBy(e => e.Attributes.ContainsKey(thenOrder.AttributeName) ? e[thenOrder.AttributeName] : null, new XrmOrderByAttributeComparer())
-                : orderedQuery.ThenByDescending(e => e[thenOrder.AttributeName], new XrmOrderByAttributeComparer());
+                : orderedQuery.ThenByDescending(e => e.Attributes.ContainsKey(thenOrder.AttributeName) ? e[thenOrder.AttributeName] : null, new XrmOrderByAttributeComparer());
         }
 
         query = orderedQuery;
