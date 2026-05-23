@@ -393,12 +393,12 @@ Built-in fakes for common Dataverse operations:
 
 | Request Type | Fake Class | Description |
 |-------------|-----------|-------------|
-| `CreateRequest` | `CreateFake` | Entity creation with duplicate detection |
+| `CreateRequest` | `CreateFake` | Entity creation with duplicate detection and deep insert |
 | `RetrieveRequest` | `RetrieveFake` | Entity retrieval with column projection |
 | `RetrieveMultipleRequest` | `RetrieveMultipleFake` | Query execution pipeline |
 | `UpdateRequest` | `UpdateFake` | Entity updates with existence validation |
 | `DeleteRequest` | `DeleteFake` | Entity deletion |
-| `UpsertRequest` | `UpsertFake` | Create-or-update semantics |
+| `UpsertRequest` | `UpsertFake` | Create-or-update semantics with deep insert |
 | `AssociateRequest` | `AssociateFake` | Relationship association |
 | `DisassociateRequest` | `DisassociateFake` | Relationship disassociation |
 | `SetStateRequest` | `SetStateFake` | Entity state/status changes |
@@ -480,6 +480,34 @@ service.Disassociate("account", accountId,
     new Relationship("systemuser_account"),
     new EntityReferenceCollection { new EntityReference("systemuser", userId) });
 ```
+
+### Deep Insert (Create with RelatedEntities)
+
+`CreateFake` and `UpsertFake` support deep insert — creating child entities via `Entity.RelatedEntities` in a single operation. Relationship metadata must be registered beforehand.
+
+```csharp
+// Register the relationship
+service.State.Relationships["contact_customer_accounts"] = new OneToManyRelationshipMetadata
+{
+    SchemaName = "contact_customer_accounts",
+    ReferencedEntity = "account",
+    ReferencedAttribute = "accountid",
+    ReferencingEntity = "contact",
+    ReferencingAttribute = "parentcustomerid"
+};
+
+// Deep insert: create account with related contacts
+var account = new Entity("account") { Id = Guid.NewGuid(), ["name"] = "Contoso" };
+var contact = new Entity("contact") { ["lastname"] = "Smith" };
+
+account.RelatedEntities[new Relationship("contact_customer_accounts")] =
+    new EntityCollection([contact]);
+
+service.Create(account);
+// → account created, contact created with parentcustomerid = account.Id
+```
+
+Deep insert works recursively (children can have their own `RelatedEntities`) and supports both 1:N and N:N relationships. Sub-entities are always created, never updated — matching Dataverse behavior.
 
 ---
 
@@ -633,6 +661,7 @@ DigitallTesting/
 │   │   ├── IOrganizationRequestFake.cs         # Extension interface
 │   │   ├── OrganizationRequestFake.cs          # Typed base class
 │   │   ├── CreateFake.cs
+│   │   ├── DeepInsertProcessor.cs              # Deep insert helper
 │   │   ├── RetrieveFake.cs
 │   │   ├── RetrieveMultipleFake.cs
 │   │   ├── UpdateFake.cs
