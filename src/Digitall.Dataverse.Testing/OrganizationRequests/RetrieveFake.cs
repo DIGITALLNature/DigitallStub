@@ -40,11 +40,8 @@ public class RetrieveFake : OrganizationRequestFake<RetrieveRequest, RetrieveRes
 
     private static void PopulateRelatedEntities(RetrieveRequest request, Entity record, FakeOrganizationService state)
     {
-        foreach (var kvp in request.RelatedEntitiesQuery)
+        foreach (var (relationship, relatedQuery) in request.RelatedEntitiesQuery)
         {
-            var relationship = kvp.Key;
-            var relatedQuery = kvp.Value;
-
             if (!state.State.Relationships.TryGetValue(relationship.SchemaName, out var relationshipMetadata))
                 continue;
 

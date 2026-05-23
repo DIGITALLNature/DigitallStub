@@ -32,11 +32,8 @@ internal static class DeepInsertProcessor
             return;
         }
 
-        foreach (var kvp in relatedEntities)
+        foreach (var (relationship, children) in relatedEntities)
         {
-            var relationship = kvp.Key;
-            var children = kvp.Value;
-
             var relationshipMetadata = state.GetRelationship(relationship.SchemaName);
 
             if (relationshipMetadata == null)
