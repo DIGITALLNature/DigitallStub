@@ -1,7 +1,6 @@
 // Copyright (c) DIGITALL Nature. All rights reserved
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
-using Digitall.Dataverse.Testing.Logic.Queries;
 using Digitall.Dataverse.Testing.Tests.Fixtures;
 using Microsoft.Extensions.Time.Testing;
 using Microsoft.Xrm.Sdk;
