@@ -87,6 +87,47 @@ public class BulkDeleteFakeTests
     }
 
     [Test]
+    public async Task Execute_ValidRequest_AsyncOperationHasRecurrencePattern()
+    {
+        var request = new BulkDeleteRequest
+        {
+            JobName = "Recurring Delete",
+            QuerySet = [],
+            CCRecipients = [],
+            ToRecipients = [],
+            RecurrencePattern = "FREQ=DAILY;INTERVAL=1"
+        };
+
+        var response = (BulkDeleteResponse)_sut.Execute(request);
+        var jobId = (Guid)response["JobId"];
+
+        var asyncOp = _sut.Retrieve("asyncoperation", jobId, new ColumnSet(true));
+
+        await Assert.That(asyncOp.GetAttributeValue<string>("recurrencepattern")).IsEqualTo("FREQ=DAILY;INTERVAL=1");
+    }
+
+    [Test]
+    public async Task Execute_ValidRequest_AsyncOperationHasRecurrenceStartTime()
+    {
+        var startTime = new DateTime(2025, 6, 1, 8, 0, 0, DateTimeKind.Utc);
+        var request = new BulkDeleteRequest
+        {
+            JobName = "Scheduled Delete",
+            QuerySet = [],
+            CCRecipients = [],
+            ToRecipients = [],
+            StartDateTime = startTime
+        };
+
+        var response = (BulkDeleteResponse)_sut.Execute(request);
+        var jobId = (Guid)response["JobId"];
+
+        var asyncOp = _sut.Retrieve("asyncoperation", jobId, new ColumnSet(true));
+
+        await Assert.That(asyncOp.GetAttributeValue<DateTime>("recurrencestarttime")).IsEqualTo(startTime);
+    }
+
+    [Test]
     public async Task Execute_WithQuerySet_DeletesMatchingRecords()
     {
         var accountId = Guid.NewGuid();
