@@ -34,6 +34,7 @@ public static class ConditionParser
     private static readonly MethodInfo s_booleanManagedPropertyGetValue = typeof(BooleanManagedProperty).GetMethod("get_Value")!;
     private static readonly MethodInfo s_optionSetValueGetValue = typeof(OptionSetValue).GetMethod("get_Value")!;
     private static readonly MethodInfo s_convertToHashSetOfIntMethod = typeof(ConditionParser).GetMethod(nameof(ConvertToHashSetOfInt))!;
+    private static readonly MethodInfo s_compareColumnsHelper = typeof(ConditionParser).GetMethod(nameof(CompareColumnsHelper), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
 
     public static HashSet<int> ConvertToHashSetOfInt(object input, bool isOptionSetValueCollectionAccepted)
     {
@@ -378,8 +379,7 @@ public static class ConditionParser
         Expression rightValue = Expression.Property(attributesProperty, "Item", Expression.Constant(rightAttributeName, typeof(string)));
 
         // Helper: call CompareColumnsHelper at runtime
-        var helperMethod = typeof(ConditionParser).GetMethod(nameof(CompareColumnsHelper), System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!;
-        Expression compareCall = Expression.Call(helperMethod,
+        Expression compareCall = Expression.Call(s_compareColumnsHelper,
             attributesProperty,
             Expression.Constant(leftAttributeName),
             Expression.Constant(rightAttributeName),
@@ -520,7 +520,6 @@ public static class ConditionParser
                 break;
             case ConditionOperator.InFiscalYear:
                 var fiscalYear = (int)c.Values[0];
-                c.Values.Clear();
                 var fiscalStart = organizationService.Options.FiscalYearStart;
                 var fiscalYearDate = fiscalStart.HasValue
                     ? new DateOnly(fiscalYear, fiscalStart.Value.Month, fiscalStart.Value.Day)
@@ -530,10 +529,11 @@ public static class ConditionParser
                 break;
         }
 
-        c.Values.Add(fromDate);
-        c.Values.Add(toDate);
+        // Don't mutate the input condition; create a temporary condition with the calculated dates
+        var tempCondition = new ConditionExpression(c.AttributeName, ConditionOperator.Between, fromDate, toDate);
+        var tempTc = new TypedConditionExpression(tempCondition) { AttributeType = tc.AttributeType };
 
-        return TranslateConditionExpressionBetween(tc, getAttributeValueExpr, containsAttributeExpr);
+        return TranslateConditionExpressionBetween(tempTc, getAttributeValueExpr, containsAttributeExpr);
     }
 
     private static BinaryExpression TranslateConditionExpressionContains(TypedConditionExpression tc, Expression getAttributeValueExpr, Expression containsAttributeExpr)
@@ -728,11 +728,11 @@ public static class ConditionParser
             _ => beforeDateTime
         };
 
-        c.Values.Clear();
-        c.Values.Add(beforeDateTime);
-        c.Values.Add(currentDateTime);
+        // Don't mutate the input condition; create a temporary condition with the calculated dates
+        var tempCondition = new ConditionExpression(c.AttributeName, ConditionOperator.Between, beforeDateTime, currentDateTime);
+        var tempTc = new TypedConditionExpression(tempCondition) { AttributeType = tc.AttributeType };
 
-        return TranslateConditionExpressionBetween(tc, getAttributeValueExpr, containsAttributeExpr);
+        return TranslateConditionExpressionBetween(tempTc, getAttributeValueExpr, containsAttributeExpr);
     }
 
 
@@ -845,12 +845,11 @@ public static class ConditionParser
             _ => nextDateTime
         };
 
-        c.Values.Clear();
-        c.Values.Add(currentDateTime);
-        c.Values.Add(nextDateTime);
+        // Don't mutate the input condition; create a temporary condition with the calculated dates
+        var tempCondition = new ConditionExpression(c.AttributeName, ConditionOperator.Between, currentDateTime, nextDateTime);
+        var tempTc = new TypedConditionExpression(tempCondition) { AttributeType = tc.AttributeType };
 
-
-        return TranslateConditionExpressionBetween(tc, getAttributeValueExpr, containsAttributeExpr);
+        return TranslateConditionExpressionBetween(tempTc, getAttributeValueExpr, containsAttributeExpr);
     }
 
     private static BinaryExpression TranslateConditionExpressionNull(Expression getAttributeValueExpr, Expression containsAttributeExpr)
