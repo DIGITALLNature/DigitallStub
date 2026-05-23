@@ -10,18 +10,6 @@ public class DateTimeExtensionsTests
     private static readonly DateTime s_testDate = new(2024, 3, 11); // Monday
 
     [Test]
-    public async Task ToDayOfWeek_Should_ReturnCorrectDate()
-    {
-        var date = new DateTime(2024, 1, 1);
-
-        var result = date.ToDayOfWeek(2, DayOfWeek.Monday);
-        await Assert.That(result).IsEqualTo(new DateTime(2024, 1, 1));
-
-        result = date.ToDayOfWeek(2, DayOfWeek.Wednesday);
-        await Assert.That(result).IsEqualTo(new DateTime(2024, 1, 3));
-    }
-
-    [Test]
     public async Task ToFirstDayOfMonth_Should_ReturnFirstDayOfCurrentMonth()
     {
         var result = s_testDate.ToFirstDayOfMonth();

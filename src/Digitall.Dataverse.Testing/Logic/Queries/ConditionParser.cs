@@ -102,6 +102,12 @@ public static class ConditionParser
 
     public static Expression TranslateConditionExpression(QueryExpression queryExpression, FakeOrganizationService organizationService, TypedConditionExpression condition, ParameterExpression entity)
     {
+        // Early return: If outer join, filter is optional — no need to build the full expression tree
+        if (condition.IsOuter)
+        {
+            return Expression.Constant(true);
+        }
+
         Expression attributesProperty = Expression.Property(entity, "Attributes");
 
 
@@ -309,12 +315,6 @@ public static class ConditionParser
                 ErrorFactory.ThrowFault(ErrorCodes.InvalidOperatorCode, $"Operator '{condition.CondExpression.Operator}' is not yet implemented for condition expressions");
                 operatorExpression = null!; // unreachable
                 break;
-        }
-
-        if (condition.IsOuter)
-        {
-            //If outer join, filter is optional, only if there was a value
-            return Expression.Constant(true);
         }
 
         return operatorExpression;

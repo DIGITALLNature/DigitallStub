@@ -16,17 +16,17 @@ public static class EntityExtensions
             {
                 //Do not lowercase the alias prefix
                 var splitted = sAttributeName.Split('.');
-                sAttributeName = $"{splitted[0]}.{splitted[1].ToLower()}";
+                sAttributeName = $"{splitted[0]}.{splitted[1].ToLowerInvariant()}";
             }
             else
             {
-                sAttributeName = sAttributeName.ToLower();
+                sAttributeName = sAttributeName.ToLowerInvariant();
             }
 
             if (!entity.Attributes.ContainsKey(sAttributeName))
             {
                 //Check if it is the primary key
-                if (sAttributeName.Contains("id") && entity.LogicalName.ToLower().Equals(sAttributeName[..^2]))
+                if (sAttributeName.Contains("id") && entity.LogicalName.ToLowerInvariant().Equals(sAttributeName[..^2]))
                 {
                     return entity.Id;
                 }
