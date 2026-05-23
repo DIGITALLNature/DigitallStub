@@ -10,18 +10,6 @@ namespace Digitall.Dataverse.Testing.Extensions;
     {
         extension(DateTime dateTime)
         {
-            public DateTime ToDayOfWeek(int week, DayOfWeek dayOfWeek)
-            {
-                DateTime startOfYear = dateTime.AddDays(1 - dateTime.DayOfYear);
-                return startOfYear.AddDays(7 * (week - 2) + (dayOfWeek - startOfYear.DayOfWeek + 7) % 7);
-            }
-
-            // ReSharper disable once MemberCanBePrivate.Global : Public API
-            public DateTime ToDayOfDeltaWeek(int deltaWeek, DayOfWeek dayOfWeek)
-                => dateTime.ToDayOfWeek(CultureInfo.CurrentCulture.Calendar.GetWeekOfYear(dateTime
-                    , CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule
-                    , CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek) + deltaWeek, dayOfWeek);
-
             public DateTime ToLastDayOfDeltaWeek(int deltaWeek = 0)
                 => dateTime.ToFirstDayOfDeltaWeek(deltaWeek).AddDays(6);
 

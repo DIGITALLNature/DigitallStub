@@ -225,34 +225,39 @@ public class ExpressionProcessor(FakeOrganizationService fakeOrgService)
         {
             // Get the attribute metadata for the linked entity
             var attributeMetadata = fakeOrgService.State.EntityMetadata.TryGetValue(linkedEntity.LinkToEntityName, out var value) ? value.Attributes : null;
+            var entityAlias = !string.IsNullOrEmpty(linkedEntity.EntityAlias) ? linkedEntity.EntityAlias : linkedEntity.LinkToEntityName;
+            var aliasPrefix = entityAlias + ".";
 
             // Process each condition in the link criteria
             foreach (var ce in linkedEntity.LinkCriteria.Conditions)
             {
+                // Strip any existing alias prefix to make this idempotent (safe for query reuse)
+                var rawAttributeName = ce.AttributeName.StartsWith(aliasPrefix, StringComparison.Ordinal)
+                    ? ce.AttributeName[aliasPrefix.Length..]
+                    : ce.AttributeName;
+
                 // Check if the attribute is not known for the type and ends with "name"
-                if (!fakeOrgService.IsKnownAttributeForType(linkedEntity.LinkToEntityName, ce.AttributeName, out _) && ce.AttributeName.EndsWith("name", StringComparison.Ordinal))
+                if (!fakeOrgService.IsKnownAttributeForType(linkedEntity.LinkToEntityName, rawAttributeName, out _) && rawAttributeName.EndsWith("name", StringComparison.Ordinal))
                 {
                     // Special case for referencing the name of an EntityReference
-                    var slicedAttributeName = ce.AttributeName[..^4];
+                    var slicedAttributeName = rawAttributeName[..^4];
                     if (fakeOrgService.IsKnownAttributeForType(linkedEntity.LinkToEntityName, slicedAttributeName, out var attributeInfo) && attributeInfo!.PropertyType == typeof(EntityReference))
                     {
-                        // Update the attribute name to avoid conflicts with the naming pattern
-                        ce.AttributeName = slicedAttributeName;
+                        rawAttributeName = slicedAttributeName;
                     }
                 }
-                else if (attributeMetadata != null && attributeMetadata.All(a => a.LogicalName != ce.AttributeName) && ce.AttributeName.EndsWith("name", StringComparison.Ordinal))
+                else if (attributeMetadata != null && attributeMetadata.All(a => a.LogicalName != rawAttributeName) && rawAttributeName.EndsWith("name", StringComparison.Ordinal))
                 {
                     // Special case for referencing the name of an EntityReference
-                    var slicedAttributeName = ce.AttributeName[..^4];
+                    var slicedAttributeName = rawAttributeName[..^4];
                     if (attributeMetadata.Any(a => a.LogicalName == slicedAttributeName))
                     {
-                        ce.AttributeName = slicedAttributeName;
+                        rawAttributeName = slicedAttributeName;
                     }
                 }
 
-                // Update the attribute name with the entity alias
-                var entityAlias = !string.IsNullOrEmpty(linkedEntity.EntityAlias) ? linkedEntity.EntityAlias : linkedEntity.LinkToEntityName;
-                ce.AttributeName = entityAlias + "." + ce.AttributeName;
+                // Prefix with entity alias
+                ce.AttributeName = aliasPrefix + rawAttributeName;
             }
 
             // Process each filter condition in the link criteria
@@ -260,9 +265,11 @@ public class ExpressionProcessor(FakeOrganizationService fakeOrgService)
             {
                 foreach (var ce in fe.Conditions)
                 {
-                    // Update the attribute name with the entity alias
-                    var entityAlias = !string.IsNullOrEmpty(linkedEntity.EntityAlias) ? linkedEntity.EntityAlias : linkedEntity.LinkToEntityName;
-                    ce.AttributeName = entityAlias + "." + ce.AttributeName;
+                    // Strip any existing alias prefix (idempotent for reuse)
+                    var rawName = ce.AttributeName.StartsWith(aliasPrefix, StringComparison.Ordinal)
+                        ? ce.AttributeName[aliasPrefix.Length..]
+                        : ce.AttributeName;
+                    ce.AttributeName = aliasPrefix + rawName;
                 }
             }
         }
@@ -331,8 +338,13 @@ public class ExpressionProcessor(FakeOrganizationService fakeOrgService)
                         {
                             if (attributeInfo!.PropertyType == typeof(EntityReference))
                             {
-                                // Need to make Lookups work against the real attribute, not the "name" suffixed attribute that doesn't exist
-                                c.AttributeName = realAttributeName;
+                                // Create a new typed expression with the corrected attribute name to avoid mutating the input
+                                var adjustedCondition = new ConditionExpression(realAttributeName, c.Operator, c.Values.ToArray());
+                                typedExpression = new TypedConditionExpression(adjustedCondition)
+                                {
+                                    AttributeType = typedExpression.AttributeType,
+                                    IsOuter = typedExpression.IsOuter
+                                };
                             }
                         }
                     }

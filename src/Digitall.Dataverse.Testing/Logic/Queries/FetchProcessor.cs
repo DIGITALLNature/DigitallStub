@@ -12,7 +12,7 @@ namespace Digitall.Dataverse.Testing.Logic.Queries;
 
 internal class FetchProcessor(FakeOrganizationService state)
 {
-    private readonly IEnumerable<ConditionOperator> _operatorsNotToConvertArray =
+    private static readonly HashSet<ConditionOperator> s_operatorsNotToConvert =
     [
         ConditionOperator.OlderThanXWeeks,
         ConditionOperator.OlderThanXYears,
@@ -30,7 +30,6 @@ internal class FetchProcessor(FakeOrganizationService state)
         ConditionOperator.NextXWeeks,
         ConditionOperator.NextXMonths,
         ConditionOperator.NextXYears,
-        ConditionOperator.NextXWeeks,
         ConditionOperator.InFiscalYear
     ];
 
@@ -124,7 +123,7 @@ internal class FetchProcessor(FakeOrganizationService state)
         return value;
     }
 
-    private bool ValueNeedsConverting(ConditionOperator conditionOperator) => !_operatorsNotToConvertArray.Contains(conditionOperator);
+    private static bool ValueNeedsConverting(ConditionOperator conditionOperator) => !s_operatorsNotToConvert.Contains(conditionOperator);
 
     private FilterExpression ExractFilterExpression(XElement elem)
     {
