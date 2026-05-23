@@ -2,7 +2,6 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using Digitall.Dataverse.Testing.Tests.Fixtures;
-using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Dataverse.Testing.Tests.Logic;
