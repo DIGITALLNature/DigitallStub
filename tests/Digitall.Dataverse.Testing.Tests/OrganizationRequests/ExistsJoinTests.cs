@@ -642,42 +642,20 @@ public class ExistsJoinTests
 
     #endregion
 
-    #region Unsupported operators (All, NotAll) — must throw ArgumentException
+    #region JoinOperator.All and JoinOperator.NotAll
 
     /// <summary>
-    /// JoinOperator.All is parsed from FetchXml but not yet implemented in LinkedEntitiesProcessor.
-    /// It must throw a Dataverse-style FaultException rather than a NullReferenceException or silent wrong result.
+    /// JoinOperator.NotAll is equivalent to JoinOperator.Any per Dataverse documentation.
+    /// It should return accounts that have at least one matching contact.
+    /// corpA has no contacts → excluded. corpB has contacts → included.
     /// </summary>
     [Test]
-    public async Task QueryExpression_AllJoin_ThrowsArgumentException()
+    public async Task QueryExpression_NotAllJoin_BehavesLikeAny()
     {
         var sut = new FakeOrganizationService();
         sut.AddRange(TestData.Default);
 
-        await Assert.That(() => sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
-        {
-            ColumnSet = new ColumnSet(true),
-            LinkEntities =
-            {
-                new LinkEntity(
-                    Account.EntityLogicalName, Contact.EntityLogicalName,
-                    Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
-                    JoinOperator.All)
-            }
-        })).Throws<FaultException<OrganizationServiceFault>>();
-    }
-
-    /// <summary>
-    /// JoinOperator.NotAll is parsed from FetchXml but not yet implemented.
-    /// It must throw a Dataverse-style FaultException.
-    /// </summary>
-    [Test]
-    public async Task QueryExpression_NotAllJoin_ThrowsArgumentException()
-    {
-        var sut = new FakeOrganizationService();
-        sut.AddRange(TestData.Default);
-
-        await Assert.That(() => sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
         {
             ColumnSet = new ColumnSet(true),
             LinkEntities =
@@ -687,7 +665,83 @@ public class ExistsJoinTests
                     Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
                     JoinOperator.NotAll)
             }
-        })).Throws<FaultException<OrganizationServiceFault>>();
+        });
+
+        await Assert.That(result.Entities).HasCount().EqualTo(1);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
+    }
+
+    /// <summary>
+    /// JoinOperator.All returns parent rows where linked rows exist but NONE satisfy the LinkCriteria.
+    /// corpA has no contacts → excluded (must have at least one linked record).
+    /// corpB has contacts (conB "John B", conC "John C") — with criteria FirstName = "John B",
+    /// conB matches → corpB is excluded because some matching rows satisfy criteria.
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_AllJoin_ExcludesWhenAnyLinkedRecordMatchesCriteria()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            LinkEntities =
+            {
+                new LinkEntity(
+                    Account.EntityLogicalName, Contact.EntityLogicalName,
+                    Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
+                    JoinOperator.All)
+                {
+                    LinkCriteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression(Contact.LogicalNames.FirstName, ConditionOperator.Equal, "John B")
+                        }
+                    }
+                }
+            }
+        });
+
+        // corpA: no contacts → excluded. corpB: has a contact matching "John B" → excluded.
+        await Assert.That(result.Entities).IsEmpty();
+    }
+
+    /// <summary>
+    /// JoinOperator.All with criteria that no linked record matches → parent is included.
+    /// corpB has contacts but none named "Nobody" → corpB is included.
+    /// </summary>
+    [Test]
+    public async Task QueryExpression_AllJoin_IncludesWhenNoLinkedRecordMatchesCriteria()
+    {
+        var sut = new FakeOrganizationService();
+        sut.AddRange(TestData.Default);
+
+        var result = sut.RetrieveMultiple(new QueryExpression(Account.EntityLogicalName)
+        {
+            ColumnSet = new ColumnSet(true),
+            LinkEntities =
+            {
+                new LinkEntity(
+                    Account.EntityLogicalName, Contact.EntityLogicalName,
+                    Account.LogicalNames.AccountId, Contact.LogicalNames.ParentCustomerId,
+                    JoinOperator.All)
+                {
+                    LinkCriteria = new FilterExpression
+                    {
+                        Conditions =
+                        {
+                            new ConditionExpression(Contact.LogicalNames.FirstName, ConditionOperator.Equal, "Nobody")
+                        }
+                    }
+                }
+            }
+        });
+
+        // corpA: no contacts → excluded. corpB: contacts exist but none match "Nobody" → included.
+        await Assert.That(result.Entities).HasCount().EqualTo(1);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
     }
 
     #endregion

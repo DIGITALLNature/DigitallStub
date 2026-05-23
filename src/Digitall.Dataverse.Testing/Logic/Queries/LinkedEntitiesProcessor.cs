@@ -68,7 +68,7 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
             }
 
             IQueryable<Entity> inner;
-            if (le.JoinOperator is JoinOperator.LeftOuter or JoinOperator.Any or JoinOperator.Exists or JoinOperator.In or JoinOperator.NotAny)
+            if (le.JoinOperator is JoinOperator.LeftOuter or JoinOperator.Any or JoinOperator.Exists or JoinOperator.In or JoinOperator.NotAny or JoinOperator.NotAll or JoinOperator.All)
             {
                 //filters are applied in the inner query and then ignored during filter evaluation
                 var innerQueryExpression = new QueryExpression
@@ -106,10 +106,12 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
                 JoinOperator.LeftOuter => query.GroupJoin(inner,
                         outerKey => outerKey.KeySelector(linkFromAlias), innerKey => innerKey.KeySelector(le.LinkToAttributeName), (outerEl, innerElemsCol) => new { outerEl, innerElemsCol })
                     .SelectMany(x => x.innerElemsCol.DefaultIfEmpty(), (x, y) => x.outerEl.CloneEntity().JoinAttributes(y, new ColumnSet(true), leAlias)),
-                JoinOperator.Any or JoinOperator.Exists or JoinOperator.In =>
+                JoinOperator.Any or JoinOperator.Exists or JoinOperator.In or JoinOperator.NotAll =>
                     ExistsFilter(query, inner, linkFromAlias, le.LinkToAttributeName, negate: false),
                 JoinOperator.NotAny =>
                     ExistsFilter(query, inner, linkFromAlias, le.LinkToAttributeName, negate: true),
+                JoinOperator.All =>
+                    AllFilter(query, inner, state.CreateQuery<Entity>(le.LinkToEntityName), linkFromAlias, le.LinkToAttributeName),
                 _ => ThrowUnsupportedJoinOperator(le.JoinOperator)
             };
 
@@ -159,6 +161,37 @@ public partial class LinkedEntitiesProcessor(FakeOrganizationService state, Quer
                     var outerKey = outer.KeySelector(linkFromAlias);
                     var hasMatch = innerList.Any(innerEl => Equals(outerKey, innerEl.KeySelector(linkToAttributeName)));
                     return negate ? !hasMatch : hasMatch;
+                })
+                .AsQueryable();
+        }
+
+        /// <summary>
+        ///     JoinOperator.All: returns parent rows where linked rows with a matching join key exist,
+        ///     but NONE of those matching rows satisfy the LinkCriteria.
+        ///     <paramref name="filteredInner"/> is the inner query WITH LinkCriteria applied.
+        ///     <paramref name="unfilteredInner"/> is the inner query WITHOUT LinkCriteria (all records of that entity).
+        /// </summary>
+        private static IQueryable<Entity> AllFilter(
+            IQueryable<Entity> query,
+            IQueryable<Entity> filteredInner,
+            IQueryable<Entity> unfilteredInner,
+            string linkFromAlias,
+            string linkToAttributeName)
+        {
+            var filteredList = filteredInner.ToList();
+            var unfilteredList = unfilteredInner.ToList();
+
+            return query
+                .AsEnumerable()
+                .Where(outer =>
+                {
+                    var outerKey = outer.KeySelector(linkFromAlias);
+                    // Must have at least one linked record (unfiltered join matches)
+                    var hasAnyLinked = unfilteredList.Any(innerEl => Equals(outerKey, innerEl.KeySelector(linkToAttributeName)));
+                    if (!hasAnyLinked) return false;
+                    // None of the linked records satisfy the criteria (filtered query returns no match)
+                    var hasFilteredMatch = filteredList.Any(innerEl => Equals(outerKey, innerEl.KeySelector(linkToAttributeName)));
+                    return !hasFilteredMatch;
                 })
                 .AsQueryable();
         }
