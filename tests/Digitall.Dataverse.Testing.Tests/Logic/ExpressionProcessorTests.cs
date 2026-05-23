@@ -38,7 +38,7 @@ public class ExpressionProcessorTests
         qe.Criteria.AddCondition("address1_city", ConditionOperator.Equal, "Berlin");
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("A");
         await Assert.That(results[0]["address1_city"]).IsEqualTo("Berlin");
     }
@@ -56,7 +56,7 @@ public class ExpressionProcessorTests
         qe.Criteria.AddCondition("name", ConditionOperator.Equal, "C");
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     #endregion
@@ -80,7 +80,7 @@ public class ExpressionProcessorTests
         qe.Criteria.AddFilter(subFilter);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -104,7 +104,7 @@ public class ExpressionProcessorTests
         qe.Criteria.AddFilter(andFilter2);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     #endregion
@@ -123,7 +123,7 @@ public class ExpressionProcessorTests
         qe.Criteria.AddCondition("score", ConditionOperator.LessThan, 200);
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["score"]).IsEqualTo(150);
     }
 
@@ -140,7 +140,7 @@ public class ExpressionProcessorTests
         var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true) };
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -154,7 +154,7 @@ public class ExpressionProcessorTests
         qe.Criteria.AddFilter(new FilterExpression(LogicalOperator.And)); // empty sub-filter
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
     }
 
     #endregion
@@ -176,8 +176,8 @@ public class ExpressionProcessorTests
         var results1 = _sut.RetrieveMultiple(qe).Entities;
         var results2 = _sut.RetrieveMultiple(qe).Entities;
 
-        await Assert.That(results1).HasCount().EqualTo(1);
-        await Assert.That(results2).HasCount().EqualTo(1);
+        await Assert.That(results1).Count().IsEqualTo(1);
+        await Assert.That(results2).Count().IsEqualTo(1);
     }
 
     #endregion

@@ -65,7 +65,7 @@ public class DeleteFakeTests
         _sut.Execute(new DeleteRequest { Target = new EntityReference("account", id1) });
 
         var remaining = _sut.CreateQuery("account").ToList();
-        await Assert.That(remaining).HasCount().EqualTo(1);
+        await Assert.That(remaining).Count().IsEqualTo(1);
         await Assert.That(remaining[0].Id).IsEqualTo(id2);
     }
 

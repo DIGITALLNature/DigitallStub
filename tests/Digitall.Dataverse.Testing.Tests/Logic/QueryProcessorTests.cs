@@ -33,7 +33,7 @@ public class QueryProcessorTests
         var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true), TopCount = 3 };
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(3);
+        await Assert.That(results).Count().IsEqualTo(3);
     }
 
     [Test]
@@ -44,7 +44,7 @@ public class QueryProcessorTests
         var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true), TopCount = 100 };
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
     }
 
     #endregion
@@ -64,7 +64,7 @@ public class QueryProcessorTests
         };
 
         var result = _sut.RetrieveMultiple(qe);
-        await Assert.That(result.Entities).HasCount().EqualTo(2);
+        await Assert.That(result.Entities).Count().IsEqualTo(2);
         await Assert.That(result.MoreRecords).IsTrue();
     }
 
@@ -81,7 +81,7 @@ public class QueryProcessorTests
         };
 
         var result = _sut.RetrieveMultiple(qe);
-        await Assert.That(result.Entities).HasCount().EqualTo(1);
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
         await Assert.That(result.MoreRecords).IsFalse();
     }
 
@@ -103,7 +103,7 @@ public class QueryProcessorTests
         };
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     #endregion
@@ -196,7 +196,7 @@ public class QueryProcessorTests
         var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(false) };
 
         var results = _sut.RetrieveMultiple(qe).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0].Contains("name")).IsFalse();
     }
 

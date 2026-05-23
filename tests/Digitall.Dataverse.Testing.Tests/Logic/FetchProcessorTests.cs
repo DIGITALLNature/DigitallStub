@@ -44,8 +44,8 @@ public class FetchProcessorTests
         var fetchResults = _sut.RetrieveMultiple(new FetchExpression(fetchXml)).Entities;
         var qeResults = _sut.RetrieveMultiple(qe).Entities;
 
-        await Assert.That(fetchResults).HasCount().EqualTo(1);
-        await Assert.That(qeResults).HasCount().EqualTo(1);
+        await Assert.That(fetchResults).Count().IsEqualTo(1);
+        await Assert.That(qeResults).Count().IsEqualTo(1);
         await Assert.That(fetchResults[0].GetAttributeValue<string>("name")).IsEqualTo("Match");
     }
 
@@ -65,7 +65,7 @@ public class FetchProcessorTests
         </entity></fetch>";
 
         var results = _sut.RetrieveMultiple(new FetchExpression(fetchXml)).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("Kept");
     }
 
@@ -81,7 +81,7 @@ public class FetchProcessorTests
         </entity></fetch>";
 
         var results = _sut.RetrieveMultiple(new FetchExpression(fetchXml)).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0].Contains("name")).IsFalse();
     }
 
@@ -97,7 +97,7 @@ public class FetchProcessorTests
         </entity></fetch>";
 
         var results = _sut.RetrieveMultiple(new FetchExpression(fetchXml)).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("HasName");
     }
 
@@ -116,7 +116,7 @@ public class FetchProcessorTests
         </entity></fetch>";
 
         var results = _sut.RetrieveMultiple(new FetchExpression(fetchXml)).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     [Test]
@@ -131,7 +131,7 @@ public class FetchProcessorTests
         </entity></fetch>";
 
         var results = _sut.RetrieveMultiple(new FetchExpression(fetchXml)).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["name"]).IsEqualTo("Contoso Ltd");
     }
 
@@ -155,7 +155,7 @@ public class FetchProcessorTests
         </entity></fetch>";
 
         var results = _sut.RetrieveMultiple(new FetchExpression(fetchXml)).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0]["fullname"]).IsEqualTo("Child");
     }
 
@@ -174,7 +174,7 @@ public class FetchProcessorTests
         </entity></fetch>";
 
         var results = _sut.RetrieveMultiple(new FetchExpression(fetchXml)).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     #endregion
@@ -194,7 +194,7 @@ public class FetchProcessorTests
         </entity></fetch>";
 
         var results = _sut.RetrieveMultiple(new FetchExpression(fetchXml)).Entities;
-        await Assert.That(results).HasCount().EqualTo(3);
+        await Assert.That(results).Count().IsEqualTo(3);
         await Assert.That(results[0]["name"]).IsEqualTo("A");
         await Assert.That(results[1]["name"]).IsEqualTo("B");
         await Assert.That(results[2]["name"]).IsEqualTo("C");
@@ -212,7 +212,7 @@ public class FetchProcessorTests
         </entity></fetch>";
 
         var results = _sut.RetrieveMultiple(new FetchExpression(fetchXml)).Entities;
-        await Assert.That(results).HasCount().EqualTo(2);
+        await Assert.That(results).Count().IsEqualTo(2);
     }
 
     #endregion
@@ -232,7 +232,7 @@ public class FetchProcessorTests
         </entity></fetch>";
 
         var results = _sut.RetrieveMultiple(new FetchExpression(fetchXml)).Entities;
-        await Assert.That(results).HasCount().EqualTo(1);
+        await Assert.That(results).Count().IsEqualTo(1);
         await Assert.That(results[0].Id).IsEqualTo(targetId);
     }
 

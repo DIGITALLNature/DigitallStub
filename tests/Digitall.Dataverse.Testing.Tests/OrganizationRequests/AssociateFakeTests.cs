@@ -53,7 +53,7 @@ public class AssociateFakeTests
         });
 
         var intersect = _sut.CreateQuery("account_contact").ToList();
-        await Assert.That(intersect).HasCount().EqualTo(1);
+        await Assert.That(intersect).Count().IsEqualTo(1);
         await Assert.That(intersect[0].GetAttributeValue<Guid>("accountid")).IsEqualTo(accountId);
         await Assert.That(intersect[0].GetAttributeValue<Guid>("contactid")).IsEqualTo(contactId);
     }
@@ -123,7 +123,7 @@ public class AssociateFakeTests
         });
 
         var intersects = _sut.CreateQuery("account_contact").ToList();
-        await Assert.That(intersects).HasCount().EqualTo(2);
+        await Assert.That(intersects).Count().IsEqualTo(2);
     }
 
     [Test]

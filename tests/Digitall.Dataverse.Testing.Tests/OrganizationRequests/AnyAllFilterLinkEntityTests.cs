@@ -53,7 +53,7 @@ public class AnyAllFilterLinkEntityTests
             }
         });
 
-        await Assert.That(result.Entities).HasCount().EqualTo(1);
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
         await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
     }
 
@@ -97,7 +97,7 @@ public class AnyAllFilterLinkEntityTests
         });
 
         // corpA matches the name condition, corpB matches the exists condition
-        await Assert.That(result.Entities).HasCount().EqualTo(2);
+        await Assert.That(result.Entities).Count().IsEqualTo(2);
     }
 
     #endregion
@@ -140,7 +140,7 @@ public class AnyAllFilterLinkEntityTests
 
         // corpA has no contacts pointing to it at all → NOT EXISTS is true → included
         // corpB has "John B" → EXISTS is true → NOT EXISTS is false → excluded
-        await Assert.That(result.Entities).HasCount().EqualTo(1);
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
         await Assert.That(result.Entities[0].Id).IsEqualTo(CorpAId);
     }
 
@@ -178,7 +178,7 @@ public class AnyAllFilterLinkEntityTests
         });
 
         // NotAll = Any: corpB has "John B" contact → included
-        await Assert.That(result.Entities).HasCount().EqualTo(1);
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
         await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
     }
 
@@ -258,7 +258,7 @@ public class AnyAllFilterLinkEntityTests
         });
 
         // corpA: no contacts → excluded. corpB: contacts exist but none match → included.
-        await Assert.That(result.Entities).HasCount().EqualTo(1);
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
         await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
     }
 
@@ -290,7 +290,7 @@ public class AnyAllFilterLinkEntityTests
         });
 
         // corpA: no contacts → excluded. corpB: has contacts → included.
-        await Assert.That(result.Entities).HasCount().EqualTo(1);
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
         await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
     }
 
@@ -333,7 +333,7 @@ public class AnyAllFilterLinkEntityTests
         });
 
         // corpB should appear exactly once even though 2 contacts match
-        await Assert.That(result.Entities).HasCount().EqualTo(1);
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
         await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
     }
 
