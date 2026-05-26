@@ -21,8 +21,8 @@ public class ExistsJoinTests
     //   corpB (id: ...0002): conB ("John B") + conC ("John C")
     //   conA : no parentcustomerid
 
-    private static readonly Guid CorpAId = Guid.Parse("00000000-0000-0000-0001-000000000001");
-    private static readonly Guid CorpBId = Guid.Parse("00000000-0000-0000-0001-000000000002");
+    private static readonly Guid s_corpAId = Guid.Parse("00000000-0000-0000-0001-000000000001");
+    private static readonly Guid s_corpBId = Guid.Parse("00000000-0000-0000-0001-000000000002");
 
     #region JoinOperator.Any (QueryExpression)
 
@@ -49,7 +49,7 @@ public class ExistsJoinTests
         });
 
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_corpBId);
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ public class ExistsJoinTests
         });
 
         // corpB matches conB AND conC, but must only appear once
-        var corpBRows = result.Entities.Where(e => e.Id == CorpBId).ToList();
+        var corpBRows = result.Entities.Where(e => e.Id == s_corpBId).ToList();
         await Assert.That(corpBRows).Count().IsEqualTo(1);
     }
 
@@ -142,7 +142,7 @@ public class ExistsJoinTests
 
         // Only corpB has a contact named "John B"
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_corpBId);
     }
 
     /// <summary>
@@ -205,7 +205,7 @@ public class ExistsJoinTests
         });
 
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpAId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_corpAId);
     }
 
     /// <summary>
@@ -263,7 +263,7 @@ public class ExistsJoinTests
         });
 
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_corpBId);
     }
 
     /// <summary>
@@ -287,7 +287,7 @@ public class ExistsJoinTests
             }
         });
 
-        var corpBRows = result.Entities.Where(e => e.Id == CorpBId).ToList();
+        var corpBRows = result.Entities.Where(e => e.Id == s_corpBId).ToList();
         await Assert.That(corpBRows).Count().IsEqualTo(1);
     }
 
@@ -398,7 +398,7 @@ public class ExistsJoinTests
         var result = sut.RetrieveMultiple(new FetchExpression(fetchXml));
 
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_corpBId);
     }
 
     /// <summary>
@@ -424,7 +424,7 @@ public class ExistsJoinTests
         var result = sut.RetrieveMultiple(new FetchExpression(fetchXml));
 
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpAId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_corpAId);
     }
 
     #endregion
@@ -466,7 +466,7 @@ public class ExistsJoinTests
         });
 
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_corpBId);
     }
 
     /// <summary>
@@ -575,7 +575,7 @@ public class ExistsJoinTests
 
         // corpB has "John B" → excluded. corpA has no contacts → included.
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpAId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_corpAId);
     }
 
     #endregion
@@ -635,7 +635,7 @@ public class ExistsJoinTests
         var result = sut.RetrieveMultiple(new FetchExpression(fetchXml));
 
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_corpBId);
     }
 
     #endregion
@@ -666,7 +666,7 @@ public class ExistsJoinTests
         });
 
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_corpBId);
     }
 
     /// <summary>
@@ -739,7 +739,7 @@ public class ExistsJoinTests
 
         // corpA: no contacts → excluded. corpB: contacts exist but none match "Nobody" → included.
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(CorpBId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_corpBId);
     }
 
     #endregion
