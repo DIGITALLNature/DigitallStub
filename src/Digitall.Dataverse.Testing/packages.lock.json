@@ -8,12 +8,6 @@
         "resolved": "3.5.5",
         "contentHash": "q553fGj+/MiKS/LoaAinN9CCeKE6tKCUuCWck38vRB7odTurhlssiSKHWbskPBiEhSnXXWewLAGoqoTaieKMGw=="
       },
-      "FastCloner.SourceGenerator": {
-        "type": "Direct",
-        "requested": "[1.2.1, )",
-        "resolved": "1.2.1",
-        "contentHash": "SKwLe+vcIQpPqSFapztvT1mtpnsWuV1zz/TrCa0zos9I+uleLiRolTEsDOTXr//IkAN29ndMCpqB9ATlLEEl8w=="
-      },
       "Microsoft.Extensions.TimeProvider.Testing": {
         "type": "Direct",
         "requested": "[10.6.0, )",
