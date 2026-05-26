@@ -5,6 +5,7 @@ using System.ServiceModel;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
+using Microsoft.Xrm.Sdk.Query;
 
 namespace Digitall.Dataverse.Testing.Tests.OrganizationRequests;
 
@@ -215,5 +216,60 @@ public class CreateFakeDeepInsertTests
         var act = () => _sut.Execute(new CreateRequest { Target = account });
 
         await Assert.That(act).Throws<FaultException>();
+    }
+
+    [Test]
+    public async Task Create_WithReversedOneToMany_SetsForeignKeyOnParent()
+    {
+        // Scenario: calendarrule (Referencing) has a lookup to calendar (Referenced)
+        // Deep insert from calendarrule side should create the calendar and set FK on calendarrule
+        _sut.State.Relationships["calendarrule_innercalendar"] = new OneToManyRelationshipMetadata
+        {
+            SchemaName = "calendarrule_innercalendar",
+            ReferencedEntity = "calendar",
+            ReferencedAttribute = "calendarid",
+            ReferencingEntity = "calendarrule",
+            ReferencingAttribute = "innercalendarid"
+        };
+
+        // Also register the parent relationship: calendar → calendarrule
+        _sut.State.Relationships["calendar_calendar_rules"] = new OneToManyRelationshipMetadata
+        {
+            SchemaName = "calendar_calendar_rules",
+            ReferencedEntity = "calendar",
+            ReferencedAttribute = "calendarid",
+            ReferencingEntity = "calendarrule",
+            ReferencingAttribute = "calendarid"
+        };
+
+        var calendar = new Entity("calendar") { Id = Guid.NewGuid(), ["name"] = "Business Hours" };
+        var innerCalendar = new Entity("calendar") { ["name"] = "Inner Schedule" };
+        var calendarRule = new Entity("calendarrule") { ["description"] = "Rule 1" };
+
+        // Nested deep insert: calendar → calendarrule → innercalendar (reverse direction)
+        calendarRule.RelatedEntities[new Relationship("calendarrule_innercalendar")] =
+            new EntityCollection([innerCalendar]);
+
+        calendar.RelatedEntities[new Relationship("calendar_calendar_rules")] =
+            new EntityCollection([calendarRule]);
+
+        _sut.Execute(new CreateRequest { Target = calendar });
+
+        // Verify all entities were created
+        var calendars = _sut.CreateQuery("calendar").ToList();
+        var rules = _sut.CreateQuery("calendarrule").ToList();
+
+        await Assert.That(calendars).Count().IsEqualTo(2); // parent + inner
+        await Assert.That(rules).Count().IsEqualTo(1);
+
+        // Verify the FK on calendarrule points to the inner calendar
+        var createdRule = rules.Single();
+        var innerCalRef = createdRule.GetAttributeValue<EntityReference>("innercalendarid");
+        await Assert.That(innerCalRef).IsNotNull();
+        await Assert.That(innerCalRef!.LogicalName).IsEqualTo("calendar");
+
+        // The inner calendar should be the one named "Inner Schedule"
+        var innerCal = _sut.Retrieve("calendar", innerCalRef.Id, new ColumnSet(true));
+        await Assert.That(innerCal.GetAttributeValue<string>("name")).IsEqualTo("Inner Schedule");
     }
 }
