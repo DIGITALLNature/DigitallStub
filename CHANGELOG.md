@@ -1,3 +1,26 @@
+# [1.1.0-beta.7](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.6...v1.1.0-beta.7) (2026-05-26)
+
+
+### Bug Fixes
+
+* **bulk-delete:** copy RecurrencePattern and StartDateTime to asyncoperation ([97d08d0](https://github.com/DIGITALLNature/DigitallTesting/commit/97d08d0fbbc71042a9111b67e4ef7ec61675d6bd))
+* **bulk-delete:** omit recurrencepattern and recurrencestarttime when not set ([665a695](https://github.com/DIGITALLNature/DigitallTesting/commit/665a6957895b978636af3159e4fb7064af9d69b2))
+* **query:** fix 4 critical query engine bugs ([9bcbdc2](https://github.com/DIGITALLNature/DigitallTesting/commit/9bcbdc2c08eae3452a32a28bdbcf110d8510be70))
+* remove 14 redundant using directives ([66f139b](https://github.com/DIGITALLNature/DigitallTesting/commit/66f139ba136c5790ab626483a546eb1b98d8d6e6))
+* remove 5 unused local variables ([9ef79de](https://github.com/DIGITALLNature/DigitallTesting/commit/9ef79def34d0e0063e2a673cea8f079f9e2d037c))
+* remove redundant System.Reflection qualifier ([c11bd75](https://github.com/DIGITALLNature/DigitallTesting/commit/c11bd75c0819ba424c580f622ac5b796c5903cfd))
+* replace obsolete HasCount() with Count().IsEqualTo() ([24d9719](https://github.com/DIGITALLNature/DigitallTesting/commit/24d971977f4189a131015debf78f0a9a5d0c8ee9))
+* resolve ambiguous XML doc comment reference ([f3a3928](https://github.com/DIGITALLNature/DigitallTesting/commit/f3a392894253c3bee0676826696c5ebd6c2cb65b))
+* use Count property instead of Count() method ([1577b52](https://github.com/DIGITALLNature/DigitallTesting/commit/1577b52b7d5ba3bf21fc74ba0749f443bfd79b42))
+* validate relationship metadata matches parent entity in DeepInsertProcessor ([fdafece](https://github.com/DIGITALLNature/DigitallTesting/commit/fdafeceb6746ccdb6f26b39bbbdbfd2d2d90d3a3))
+
+
+### Features
+
+* **query:** implement CompareColumns and MatchFirstRowUsingCrossApply ([7376e02](https://github.com/DIGITALLNature/DigitallTesting/commit/7376e02199f43a8ba21f9c399218bd6e8e387fdf))
+* **query:** support FilterExpression.AnyAllFilterLinkEntity and JoinOperator.All/NotAll ([628fd01](https://github.com/DIGITALLNature/DigitallTesting/commit/628fd0162ed13b20bde105d4965272e1c1510c32))
+* support deep insert (RelatedEntities) in CreateFake and UpsertFake ([07ef938](https://github.com/DIGITALLNature/DigitallTesting/commit/07ef938cfd67a5678bc0db1bb02d722ff47cb708))
+
 # [1.1.0-beta.6](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.5...v1.1.0-beta.6) (2026-05-22)
 
 
