@@ -74,7 +74,7 @@ public class AssociateFake : OrganizationRequestFake<AssociateRequest, Associate
                         break;
                     }
                 default:
-                    ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Relationship metadata type '{relationshipMetadata!.GetType().Name}' is not supported for Associate");
+                    ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Relationship metadata type '{relationshipMetadata.GetType().Name}' is not supported for Associate");
                     break;
             }
         }

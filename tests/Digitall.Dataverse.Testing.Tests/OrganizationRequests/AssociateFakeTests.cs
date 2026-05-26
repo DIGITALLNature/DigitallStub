@@ -46,10 +46,7 @@ public class AssociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contact_mm"),
-            RelatedEntities = new EntityReferenceCollection
-            {
-                new("contact", contactId)
-            }
+            RelatedEntities = [new("contact", contactId)]
         });
 
         var intersect = _sut.CreateQuery("account_contact").ToList();
@@ -78,10 +75,7 @@ public class AssociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contacts"),
-            RelatedEntities = new EntityReferenceCollection
-            {
-                new("contact", contactId)
-            }
+            RelatedEntities = [new("contact", contactId)]
         });
 
         var contact = _sut.Retrieve("contact", contactId, new ColumnSet(true));
@@ -115,11 +109,7 @@ public class AssociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contact_mm"),
-            RelatedEntities = new EntityReferenceCollection
-            {
-                new("contact", contactId1),
-                new("contact", contactId2)
-            }
+            RelatedEntities = [new("contact", contactId1), new("contact", contactId2)]
         });
 
         var intersects = _sut.CreateQuery("account_contact").ToList();
@@ -136,10 +126,7 @@ public class AssociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("nonexistent_relationship"),
-            RelatedEntities = new EntityReferenceCollection
-            {
-                new("contact", Guid.NewGuid())
-            }
+            RelatedEntities = [new("contact", Guid.NewGuid())]
         });
 
         var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(Action);
@@ -165,10 +152,7 @@ public class AssociateFakeTests
         {
             Target = new EntityReference("account", Guid.NewGuid()),
             Relationship = new Relationship("account_contact_mm"),
-            RelatedEntities = new EntityReferenceCollection
-            {
-                new("contact", Guid.NewGuid())
-            }
+            RelatedEntities = [new("contact", Guid.NewGuid())]
         });
 
         var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(Action);
@@ -195,10 +179,7 @@ public class AssociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contact_mm"),
-            RelatedEntities = new EntityReferenceCollection
-            {
-                new("contact", Guid.NewGuid())
-            }
+            RelatedEntities = [new("contact", Guid.NewGuid())]
         });
 
         var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(Action);

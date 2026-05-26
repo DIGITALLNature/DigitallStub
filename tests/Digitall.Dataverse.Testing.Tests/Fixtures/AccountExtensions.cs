@@ -10,10 +10,6 @@ public partial class Account
     [AttributeLogicalName("new_accountcategorycodemultiple")]
     public OptionSetValueCollection AccountCategoryCodeMultiple
     {
-        get
-        {
-            return GetAttributeValue<OptionSetValueCollection>("new_accountcategorycodemultiple");
-        }
         set
         {
             OnPropertyChanging();
