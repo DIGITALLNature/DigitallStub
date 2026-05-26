@@ -1,3 +1,11 @@
+# [1.1.0-beta.8](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.7...v1.1.0-beta.8) (2026-05-26)
+
+
+### Bug Fixes
+
+* enforce single-child and entity type validation for N:1 deep insert ([4242368](https://github.com/DIGITALLNature/DigitallTesting/commit/4242368aaa5959118019772d050baf908ebb0769))
+* support reverse-direction (ManyToOne) nested deep insert ([d05ff50](https://github.com/DIGITALLNature/DigitallTesting/commit/d05ff502e119fc0b5eced904b533257a689b8c4b))
+
 # [1.1.0-beta.7](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.6...v1.1.0-beta.7) (2026-05-26)
 
 
