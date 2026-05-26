@@ -81,18 +81,34 @@ internal static class DeepInsertProcessor
         }
         else if (metadata.ReferencingEntity == parentLogicalName)
         {
-            // Parent is the "many" side → create child first, then set FK on parent pointing to child
-            foreach (var child in children.Entities)
+            // Parent is the "many" side (N:1) → lookup can only point to a single record
+            if (children.Entities.Count > 1)
             {
-                var childId = state.Create(child);
-                var childRef = new EntityReference(metadata.ReferencedEntity, childId);
-
-                var parentUpdate = new Entity(parentLogicalName, parentId)
-                {
-                    [metadata.ReferencingAttribute] = childRef
-                };
-                state.Update(parentUpdate);
+                ErrorFactory.ThrowFault(
+                    ErrorCodes.InvalidArgument,
+                    $"Relationship '{metadata.SchemaName}' is used from the referencing (N:1) side. " +
+                    "A lookup attribute can only reference a single entity, but multiple related entities were provided.");
             }
+
+            var child = children.Entities[0];
+
+            if (child.LogicalName != metadata.ReferencedEntity)
+            {
+                ErrorFactory.ThrowFault(
+                    ErrorCodes.InvalidArgument,
+                    $"Relationship '{metadata.SchemaName}' expects referenced entity '{metadata.ReferencedEntity}' " +
+                    $"but the related entity is '{child.LogicalName}'.");
+            }
+
+            // Create child first, then set FK on parent pointing to child
+            var childId = state.Create(child);
+            var childRef = new EntityReference(metadata.ReferencedEntity, childId);
+
+            var parentUpdate = new Entity(parentLogicalName, parentId)
+            {
+                [metadata.ReferencingAttribute] = childRef
+            };
+            state.Update(parentUpdate);
         }
         else
         {
