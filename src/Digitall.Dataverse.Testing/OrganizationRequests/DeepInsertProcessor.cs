@@ -68,6 +68,14 @@ internal static class DeepInsertProcessor
         EntityCollection children,
         FakeOrganizationService state)
     {
+        if (metadata.ReferencedEntity != parentLogicalName)
+        {
+            ErrorFactory.ThrowFault(
+                ErrorCodes.InvalidArgument,
+                $"Relationship '{metadata.SchemaName}' references entity '{metadata.ReferencedEntity}' " +
+                $"but the parent entity is '{parentLogicalName}'. The relationship metadata does not match the parent.");
+        }
+
         var parentRef = new EntityReference(parentLogicalName, parentId);
 
         foreach (var child in children.Entities)
@@ -85,6 +93,15 @@ internal static class DeepInsertProcessor
         EntityCollection children,
         FakeOrganizationService state)
     {
+        if (parentLogicalName != metadata.Entity1LogicalName && parentLogicalName != metadata.Entity2LogicalName)
+        {
+            ErrorFactory.ThrowFault(
+                ErrorCodes.InvalidArgument,
+                $"Relationship '{metadata.SchemaName}' is between '{metadata.Entity1LogicalName}' and " +
+                $"'{metadata.Entity2LogicalName}' but the parent entity is '{parentLogicalName}'. " +
+                "The relationship metadata does not match the parent.");
+        }
+
         var isFrom1To2 = parentLogicalName == metadata.Entity1LogicalName;
         var fromAttribute = isFrom1To2 ? metadata.Entity1IntersectAttribute : metadata.Entity2IntersectAttribute;
         var toAttribute = isFrom1To2 ? metadata.Entity2IntersectAttribute : metadata.Entity1IntersectAttribute;

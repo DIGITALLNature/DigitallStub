@@ -177,4 +177,43 @@ public class CreateFakeDeepInsertTests
 
         await Assert.That(response.id).IsNotEqualTo(Guid.Empty);
     }
+
+    [Test]
+    public async Task Create_WithMismatchedOneToManyRelationship_ThrowsFault()
+    {
+        // Register relationship where ReferencedEntity is "contact", not "account"
+        _sut.State.Relationships["mismatched_onetomany"] = new OneToManyRelationshipMetadata
+        {
+            SchemaName = "mismatched_onetomany",
+            ReferencedEntity = "contact",
+            ReferencedAttribute = "contactid",
+            ReferencingEntity = "task",
+            ReferencingAttribute = "regardingobjectid"
+        };
+
+        var account = new Entity("account") { Id = Guid.NewGuid(), ["name"] = "Contoso" };
+        var task = new Entity("task") { ["subject"] = "Follow up" };
+
+        account.RelatedEntities[new Relationship("mismatched_onetomany")] =
+            new EntityCollection([task]);
+
+        var act = () => _sut.Execute(new CreateRequest { Target = account });
+
+        await Assert.That(act).Throws<FaultException>();
+    }
+
+    [Test]
+    public async Task Create_WithMismatchedManyToManyRelationship_ThrowsFault()
+    {
+        // Register relationship between "systemuser" and "role" but use it on "account"
+        var account = new Entity("account") { Id = Guid.NewGuid(), ["name"] = "Contoso" };
+        var role = new Entity("role") { ["name"] = "Admin" };
+
+        account.RelatedEntities[new Relationship("systemuserroles_association")] =
+            new EntityCollection([role]);
+
+        var act = () => _sut.Execute(new CreateRequest { Target = account });
+
+        await Assert.That(act).Throws<FaultException>();
+    }
 }
