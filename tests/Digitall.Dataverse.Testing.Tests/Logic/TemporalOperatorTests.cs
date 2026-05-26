@@ -14,11 +14,11 @@ namespace Digitall.Dataverse.Testing.Tests.Logic;
 /// </summary>
 public class TemporalOperatorTests
 {
-    private static readonly DateTime Now = new(2024, 6, 12, 12, 0, 0, DateTimeKind.Utc); // Wednesday
+    private static readonly DateTime s_now = new(2024, 6, 12, 12, 0, 0, DateTimeKind.Utc); // Wednesday
 
     private static FakeOrganizationService CreateService(params Entity[] entities)
     {
-        var sut = new FakeOrganizationService(new FakeTimeProvider(Now));
+        var sut = new FakeOrganizationService(new FakeTimeProvider(s_now));
         sut.AddRange(entities);
         return sut;
     }
@@ -30,8 +30,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task LastXHours_MatchesRecordWithinLastXHours()
     {
-        var inside = AccountAt(Now.AddHours(-2));
-        var outside = AccountAt(Now.AddHours(-10));
+        var inside = AccountAt(s_now.AddHours(-2));
+        var outside = AccountAt(s_now.AddHours(-10));
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -45,8 +45,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task LastXDays_MatchesRecordWithinLastXDays()
     {
-        var inside = AccountAt(Now.AddDays(-3));
-        var outside = AccountAt(Now.AddDays(-10));
+        var inside = AccountAt(s_now.AddDays(-3));
+        var outside = AccountAt(s_now.AddDays(-10));
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -60,8 +60,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task Last7Days_MatchesRecordWithinLast7Days()
     {
-        var inside = AccountAt(Now.AddDays(-5));
-        var outside = AccountAt(Now.AddDays(-10));
+        var inside = AccountAt(s_now.AddDays(-5));
+        var outside = AccountAt(s_now.AddDays(-10));
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -75,8 +75,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task LastXWeeks_MatchesRecordWithinLastXWeeks()
     {
-        var inside = AccountAt(Now.AddDays(-10)); // ~1.4 weeks ago
-        var outside = AccountAt(Now.AddDays(-30)); // ~4.3 weeks ago
+        var inside = AccountAt(s_now.AddDays(-10)); // ~1.4 weeks ago
+        var outside = AccountAt(s_now.AddDays(-30)); // ~4.3 weeks ago
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -90,8 +90,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task LastXMonths_MatchesRecordWithinLastXMonths()
     {
-        var inside = AccountAt(Now.AddMonths(-2));
-        var outside = AccountAt(Now.AddMonths(-6));
+        var inside = AccountAt(s_now.AddMonths(-2));
+        var outside = AccountAt(s_now.AddMonths(-6));
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -105,8 +105,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task LastXYears_MatchesRecordWithinLastXYears()
     {
-        var inside = AccountAt(Now.AddYears(-1));
-        var outside = AccountAt(Now.AddYears(-5));
+        var inside = AccountAt(s_now.AddYears(-1));
+        var outside = AccountAt(s_now.AddYears(-5));
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -124,8 +124,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task NextXHours_MatchesRecordWithinNextXHours()
     {
-        var inside = AccountAt(Now.AddHours(3));
-        var outside = AccountAt(Now.AddHours(10));
+        var inside = AccountAt(s_now.AddHours(3));
+        var outside = AccountAt(s_now.AddHours(10));
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -139,8 +139,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task NextXDays_MatchesRecordWithinNextXDays()
     {
-        var inside = AccountAt(Now.AddDays(3));
-        var outside = AccountAt(Now.AddDays(10));
+        var inside = AccountAt(s_now.AddDays(3));
+        var outside = AccountAt(s_now.AddDays(10));
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -154,8 +154,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task Next7Days_MatchesRecordWithinNext7Days()
     {
-        var inside = AccountAt(Now.AddDays(5));
-        var outside = AccountAt(Now.AddDays(10));
+        var inside = AccountAt(s_now.AddDays(5));
+        var outside = AccountAt(s_now.AddDays(10));
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -169,8 +169,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task NextXWeeks_MatchesRecordWithinNextXWeeks()
     {
-        var inside = AccountAt(Now.AddDays(10));
-        var outside = AccountAt(Now.AddDays(30));
+        var inside = AccountAt(s_now.AddDays(10));
+        var outside = AccountAt(s_now.AddDays(30));
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -184,8 +184,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task NextXMonths_MatchesRecordWithinNextXMonths()
     {
-        var inside = AccountAt(Now.AddMonths(2));
-        var outside = AccountAt(Now.AddMonths(6));
+        var inside = AccountAt(s_now.AddMonths(2));
+        var outside = AccountAt(s_now.AddMonths(6));
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -199,8 +199,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task NextXYears_MatchesRecordWithinNextXYears()
     {
-        var inside = AccountAt(Now.AddYears(1));
-        var outside = AccountAt(Now.AddYears(5));
+        var inside = AccountAt(s_now.AddYears(1));
+        var outside = AccountAt(s_now.AddYears(5));
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -218,8 +218,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task OlderThanXMinutes_MatchesRecordOlderThanXMinutes()
     {
-        var old = AccountAt(Now.AddMinutes(-30));
-        var recent = AccountAt(Now.AddMinutes(-5));
+        var old = AccountAt(s_now.AddMinutes(-30));
+        var recent = AccountAt(s_now.AddMinutes(-5));
         var sut = CreateService(old, recent);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -233,8 +233,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task OlderThanXHours_MatchesRecordOlderThanXHours()
     {
-        var old = AccountAt(Now.AddHours(-10));
-        var recent = AccountAt(Now.AddHours(-1));
+        var old = AccountAt(s_now.AddHours(-10));
+        var recent = AccountAt(s_now.AddHours(-1));
         var sut = CreateService(old, recent);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -248,8 +248,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task OlderThanXDays_MatchesRecordOlderThanXDays()
     {
-        var old = AccountAt(Now.AddDays(-20));
-        var recent = AccountAt(Now.AddDays(-2));
+        var old = AccountAt(s_now.AddDays(-20));
+        var recent = AccountAt(s_now.AddDays(-2));
         var sut = CreateService(old, recent);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -263,8 +263,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task OlderThanXWeeks_MatchesRecordOlderThanXWeeks()
     {
-        var old = AccountAt(Now.AddDays(-30));
-        var recent = AccountAt(Now.AddDays(-5));
+        var old = AccountAt(s_now.AddDays(-30));
+        var recent = AccountAt(s_now.AddDays(-5));
         var sut = CreateService(old, recent);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -278,8 +278,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task OlderThanXMonths_MatchesRecordOlderThanXMonths()
     {
-        var old = AccountAt(Now.AddMonths(-6));
-        var recent = AccountAt(Now.AddMonths(-1));
+        var old = AccountAt(s_now.AddMonths(-6));
+        var recent = AccountAt(s_now.AddMonths(-1));
         var sut = CreateService(old, recent);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -293,8 +293,8 @@ public class TemporalOperatorTests
     [Test]
     public async Task OlderThanXYears_MatchesRecordOlderThanXYears()
     {
-        var old = AccountAt(Now.AddYears(-5));
-        var recent = AccountAt(Now.AddYears(-1));
+        var old = AccountAt(s_now.AddYears(-5));
+        var recent = AccountAt(s_now.AddYears(-1));
         var sut = CreateService(old, recent);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -419,8 +419,8 @@ public class TemporalOperatorTests
     public async Task LastWeek_MatchesRecordInPreviousWeek()
     {
         // Now = 2024-06-12 (Wednesday). 7 days before (Jun 5) should be "last week".
-        var inside = AccountAt(Now.AddDays(-7).Date);
-        var outside = AccountAt(Now.Date); // this week
+        var inside = AccountAt(s_now.AddDays(-7).Date);
+        var outside = AccountAt(s_now.Date); // this week
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);
@@ -435,8 +435,8 @@ public class TemporalOperatorTests
     public async Task NextWeek_MatchesRecordInNextWeek()
     {
         // Now = 2024-06-12 (Wednesday). 7 days after (Jun 19) should be "next week".
-        var inside = AccountAt(Now.AddDays(7).Date);
-        var outside = AccountAt(Now.Date); // this week
+        var inside = AccountAt(s_now.AddDays(7).Date);
+        var outside = AccountAt(s_now.Date); // this week
         var sut = CreateService(inside, outside);
 
         var query = new QueryExpression(Account.EntityLogicalName);

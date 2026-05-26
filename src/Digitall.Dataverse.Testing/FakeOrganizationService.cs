@@ -136,7 +136,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         }
     }
 
-    private static readonly Lazy<Dictionary<Type, IOrganizationRequestFake>> DefaultFakes = new(() =>
+    private static readonly Lazy<Dictionary<Type, IOrganizationRequestFake>> s_defaultFakes = new(() =>
     {
         var assembly = typeof(IOrganizationRequestFake).Assembly;
         var fakeTypes = assembly.GetTypes().Where(type =>
@@ -161,7 +161,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
     /// </summary>
     public void AddDefaultRequests()
     {
-        foreach (var (type, fake) in DefaultFakes.Value)
+        foreach (var (type, fake) in s_defaultFakes.Value)
         {
             if (!OrganizationRequestFakes.ContainsKey(type))
             {
@@ -477,7 +477,7 @@ public class FakeOrganizationService(TimeProvider timeProvider, FakeOrganization
         if (OrganizationRequestFakes.TryGetValue(request.GetType(), out var fake))
             return fake.Execute(request, this);
 
-        if (DefaultFakes.Value.TryGetValue(request.GetType(), out var defaultFake))
+        if (s_defaultFakes.Value.TryGetValue(request.GetType(), out var defaultFake))
             return defaultFake.Execute(request, this);
 
         ErrorFactory.ThrowFault(ErrorCodes.MessageDoesNotExist, $"No implementation found for request of type {request.GetType().Name}");

@@ -46,7 +46,7 @@ public class DisassociateFake : OrganizationRequestFake<DisassociateRequest, Dis
             }
             else
             {
-                ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Disassociate only supports ManyToMany relationships; '{relationship.SchemaName}' is of type '{relationshipMetadata!.GetType().Name}'");
+                ErrorFactory.ThrowFault(ErrorCodes.InvalidArgument, $"Disassociate only supports ManyToMany relationships; '{relationship.SchemaName}' is of type '{relationshipMetadata.GetType().Name}'");
             }
         }
 
