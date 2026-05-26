@@ -146,4 +146,30 @@ public class BulkDeleteFakeTests
         var remaining = _sut.CreateQuery("account").Where(e => e.Id == accountId).ToList();
         await Assert.That(remaining).IsEmpty();
     }
+
+    [Test]
+    public async Task Execute_WithDefaultStartDateTime_DoesNotSetRecurrenceStartTime()
+    {
+        var request = BuildRequest();
+
+        var response = (BulkDeleteResponse)_sut.Execute(request);
+        var jobId = (Guid)response["JobId"];
+
+        var asyncOp = _sut.Retrieve("asyncoperation", jobId, new ColumnSet(true));
+
+        await Assert.That(asyncOp.Attributes.ContainsKey("recurrencestarttime")).IsFalse();
+    }
+
+    [Test]
+    public async Task Execute_WithNullRecurrencePattern_DoesNotSetRecurrencePattern()
+    {
+        var request = BuildRequest();
+
+        var response = (BulkDeleteResponse)_sut.Execute(request);
+        var jobId = (Guid)response["JobId"];
+
+        var asyncOp = _sut.Retrieve("asyncoperation", jobId, new ColumnSet(true));
+
+        await Assert.That(asyncOp.Attributes.ContainsKey("recurrencepattern")).IsFalse();
+    }
 }
