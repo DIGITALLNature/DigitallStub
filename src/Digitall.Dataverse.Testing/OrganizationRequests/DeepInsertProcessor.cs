@@ -68,21 +68,39 @@ internal static class DeepInsertProcessor
         EntityCollection children,
         FakeOrganizationService state)
     {
-        if (metadata.ReferencedEntity != parentLogicalName)
+        if (metadata.ReferencedEntity == parentLogicalName)
+        {
+            // Parent is the "one" side → set FK on each child pointing to parent
+            var parentRef = new EntityReference(parentLogicalName, parentId);
+
+            foreach (var child in children.Entities)
+            {
+                child[metadata.ReferencingAttribute] = parentRef;
+                state.Create(child);
+            }
+        }
+        else if (metadata.ReferencingEntity == parentLogicalName)
+        {
+            // Parent is the "many" side → create child first, then set FK on parent pointing to child
+            foreach (var child in children.Entities)
+            {
+                var childId = state.Create(child);
+                var childRef = new EntityReference(metadata.ReferencedEntity, childId);
+
+                var parentUpdate = new Entity(parentLogicalName, parentId)
+                {
+                    [metadata.ReferencingAttribute] = childRef
+                };
+                state.Update(parentUpdate);
+            }
+        }
+        else
         {
             ErrorFactory.ThrowFault(
                 ErrorCodes.InvalidArgument,
-                $"Relationship '{metadata.SchemaName}' references entity '{metadata.ReferencedEntity}' " +
-                $"but the parent entity is '{parentLogicalName}'. The relationship metadata does not match the parent.");
-        }
-
-        var parentRef = new EntityReference(parentLogicalName, parentId);
-
-        foreach (var child in children.Entities)
-        {
-            // Set the foreign key (lookup) on the child pointing to the parent
-            child[metadata.ReferencingAttribute] = parentRef;
-            state.Create(child);
+                $"Relationship '{metadata.SchemaName}' is between '{metadata.ReferencedEntity}' and " +
+                $"'{metadata.ReferencingEntity}' but the parent entity is '{parentLogicalName}'. " +
+                "The relationship metadata does not match the parent.");
         }
     }
 
