@@ -272,4 +272,52 @@ public class CreateFakeDeepInsertTests
         var innerCal = _sut.Retrieve("calendar", innerCalRef.Id, new ColumnSet(true));
         await Assert.That(innerCal.GetAttributeValue<string>("name")).IsEqualTo("Inner Schedule");
     }
+
+    [Test]
+    public async Task Create_WithReversedOneToMany_MultipleChildren_ThrowsFault()
+    {
+        // N:1 direction: a lookup can only point to one record
+        _sut.State.Relationships["calendarrule_innercalendar"] = new OneToManyRelationshipMetadata
+        {
+            SchemaName = "calendarrule_innercalendar",
+            ReferencedEntity = "calendar",
+            ReferencedAttribute = "calendarid",
+            ReferencingEntity = "calendarrule",
+            ReferencingAttribute = "innercalendarid"
+        };
+
+        var rule = new Entity("calendarrule") { Id = Guid.NewGuid(), ["description"] = "Rule" };
+        var cal1 = new Entity("calendar") { ["name"] = "Cal 1" };
+        var cal2 = new Entity("calendar") { ["name"] = "Cal 2" };
+
+        rule.RelatedEntities[new Relationship("calendarrule_innercalendar")] =
+            new EntityCollection([cal1, cal2]); // Two children on N:1 → invalid
+
+        var act = () => _sut.Execute(new CreateRequest { Target = rule });
+
+        await Assert.That(act).Throws<FaultException>();
+    }
+
+    [Test]
+    public async Task Create_WithReversedOneToMany_WrongChildLogicalName_ThrowsFault()
+    {
+        _sut.State.Relationships["calendarrule_innercalendar"] = new OneToManyRelationshipMetadata
+        {
+            SchemaName = "calendarrule_innercalendar",
+            ReferencedEntity = "calendar",
+            ReferencedAttribute = "calendarid",
+            ReferencingEntity = "calendarrule",
+            ReferencingAttribute = "innercalendarid"
+        };
+
+        var rule = new Entity("calendarrule") { Id = Guid.NewGuid(), ["description"] = "Rule" };
+        var wrongEntity = new Entity("account") { ["name"] = "Not a calendar" };
+
+        rule.RelatedEntities[new Relationship("calendarrule_innercalendar")] =
+            new EntityCollection([wrongEntity]);
+
+        var act = () => _sut.Execute(new CreateRequest { Target = rule });
+
+        await Assert.That(act).Throws<FaultException>();
+    }
 }
