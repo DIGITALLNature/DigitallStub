@@ -86,7 +86,7 @@ public class QueryBugsTests
         // It should still contain the original value [30], not [beforeDate, currentDate]
         await Assert.That(daysCondition.Values).Count().IsEqualTo(1); // Still 1, not 2!
         await Assert.That(daysCondition.Values[0]).IsEqualTo(30); // Still 30, not a DateTime!
-        
+
         // Query is reusable: second execution returns same results
         var result2 = sut.RetrieveMultiple(query);
         await Assert.That(result2.Entities).Count().IsEqualTo(result1.Entities.Count);
@@ -94,22 +94,18 @@ public class QueryBugsTests
 
     /// <summary>
     /// BUG #3: CompareColumnsHelper MethodInfo reflection not cached
-    /// The MethodInfo lookup happens on every call instead of being cached in a static field
+    /// The MethodInfo lookup happens on every call instead of being cached in a static field.
+    /// This test verifies CompareColumns works correctly across repeated queries.
     /// </summary>
     [Test]
-    public async Task CompareColumns_MethodInfoNotCached_PerformsReflectionEveryCall()
+    public async Task CompareColumns_RepeatedQueries_ReturnsCorrectResults()
     {
-        // This test verifies the bug indirectly by checking performance
-        // In production code, the MethodInfo should be cached like other static readonly fields in ConditionParser
-
         var sut = new FakeOrganizationService();
-        var acct1 = new Account(Guid.NewGuid()) { Name = "Test", [Account.LogicalNames.Description] = "Test" };
-        var acct2 = new Account(Guid.NewGuid()) { Name = "Other", [Account.LogicalNames.Description] = "Other" };
-        sut.AddRange([acct1, acct2]);
+        var matching = new Account(Guid.NewGuid()) { Name = "Test", [Account.LogicalNames.Description] = "Test" };
+        var nonMatching = new Account(Guid.NewGuid()) { Name = "Other", [Account.LogicalNames.Description] = "Different" };
+        sut.AddRange([matching, nonMatching]);
 
-        // Create 100 separate queries with CompareColumns to show reflection overhead
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
-
+        // Execute multiple CompareColumns queries to exercise the reflection path repeatedly
         for (var i = 0; i < 100; i++)
         {
             var query = new QueryExpression(Account.EntityLogicalName)
@@ -123,19 +119,9 @@ public class QueryBugsTests
             query.Criteria.AddCondition(condition);
 
             var result = sut.RetrieveMultiple(query);
-            await Assert.That(result.Entities).Count().IsGreaterThanOrEqualTo(0);
+            await Assert.That(result.Entities).Count().IsEqualTo(1);
+            await Assert.That(result.Entities[0].Id).IsEqualTo(matching.Id);
         }
-
-        stopwatch.Stop();
-
-        // If MethodInfo is not cached, this will be significantly slower than cached approach
-        // This test proves the method is being looked up repeatedly
-        // The bug is that ConditionParser should have:
-        // private static readonly MethodInfo s_compareColumnsHelper = ...
-        // But it does: var helperMethod = typeof(...).GetMethod(...) on every call
-
-        await Assert.That(stopwatch.ElapsedMilliseconds).IsGreaterThan(0);
-        // Just verify it completes; real perf testing would compare against cached version
     }
 
     /// <summary>
