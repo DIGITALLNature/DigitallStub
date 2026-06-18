@@ -1,3 +1,10 @@
+# [1.1.0-beta.9](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.8...v1.1.0-beta.9) (2026-06-18)
+
+
+### Features
+
+* add RetrieveAttributeFake implementation ([f2474ff](https://github.com/DIGITALLNature/DigitallTesting/commit/f2474ffa19572a3763fce1e679ce13da9830ef89))
+
 # [1.1.0-beta.8](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.7...v1.1.0-beta.8) (2026-05-26)
 
 
