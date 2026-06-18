@@ -6,9 +6,20 @@ using Microsoft.Xrm.Sdk.Messages;
 
 namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
-public class RetrieveAttributeFake : OrganizationRequestFake<RetrieveAttributeRequest, RetrieveAttributeResponse>
+public class RetrieveAttributeFake : IOrganizationRequestFake
 {
-    public override RetrieveAttributeResponse Execute(RetrieveAttributeRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
+    public Type ForType => typeof(RetrieveAttributeRequest);
+
+    public OrganizationResponse Execute(OrganizationRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
+    {
+        ArgumentNullException.ThrowIfNull(organizationRequest);
+
+        return organizationRequest is RetrieveAttributeRequest retrieveAttributeRequest
+            ? Execute(retrieveAttributeRequest, fakeOrganizationService)
+            : throw new InvalidCastException($"Cannot cast {organizationRequest.GetType()} to {typeof(RetrieveAttributeRequest)}");
+    }
+
+    public RetrieveAttributeResponse Execute(RetrieveAttributeRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
         ArgumentNullException.ThrowIfNull(organizationRequest);
 

@@ -2,6 +2,7 @@
 // DIGITALL Nature licenses this file to you under the Microsoft Public License.
 
 using Digitall.Dataverse.Testing.OrganizationRequests;
+using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Messages;
 using Microsoft.Xrm.Sdk.Metadata;
 
@@ -9,7 +10,7 @@ namespace Digitall.Dataverse.Testing.Tests.OrganizationRequests;
 
 public class RetrieveAttributeFakeTests
 {
-    private FakeOrganizationService _sut = null!;
+    private FakeOrganizationService _sut = new();
 
     [Before(Test)]
     public async Task Setup()
@@ -24,8 +25,9 @@ public class RetrieveAttributeFakeTests
         var metadata = new EntityMetadata { LogicalName = entityLogicalName };
 
         // Use reflection to set Attributes since it has no public setter
-        var attributesProperty = typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.Attributes));
-        attributesProperty!.SetValue(metadata, new[] { attribute });
+        var attributesProperty = typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.Attributes))
+                                 ?? throw new InvalidOperationException($"Property {nameof(EntityMetadata.Attributes)} was not found.");
+        attributesProperty.SetValue(metadata, new AttributeMetadata[] { attribute });
 
         return metadata;
     }
@@ -81,9 +83,19 @@ public class RetrieveAttributeFakeTests
     [Test]
     public async Task Execute_NullRequest_ThrowsArgumentNull()
     {
-        void Action() => _sut.Execute(null!);
+        OrganizationRequest? request = null;
+        void Action() => _sut.Execute(request!);
 
         Assert.Throws<ArgumentNullException>(Action);
+        await Task.CompletedTask;
+    }
+
+    [Test]
+    public async Task Execute_WrongRequestType_ThrowsInvalidCast()
+    {
+        void Action() => new RetrieveAttributeFake().Execute(new RetrieveEntityRequest(), _sut);
+
+        Assert.Throws<InvalidCastException>(Action);
         await Task.CompletedTask;
     }
 
