@@ -1,3 +1,10 @@
+# [1.1.0-beta.10](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.9...v1.1.0-beta.10) (2026-06-18)
+
+
+### Bug Fixes
+
+* **query:** honor LinkEntity.Orders in RetrieveMultiple ordering ([#42](https://github.com/DIGITALLNature/DigitallTesting/issues/42)) ([809f8e6](https://github.com/DIGITALLNature/DigitallTesting/commit/809f8e6638e07e0dd22378b77b18b15b3aac9ab7))
+
 # [1.1.0-beta.9](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.8...v1.1.0-beta.9) (2026-06-18)
 
 
