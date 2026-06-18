@@ -10,14 +10,14 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class AssociateFake : OrganizationRequestFake<AssociateRequest, AssociateResponse>
 {
-    public override AssociateResponse Execute(AssociateRequest organizationRequest, FakeOrganizationService state)
+    public override AssociateResponse Execute(AssociateRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
         var entityName = organizationRequest.Target.LogicalName;
         var entityId = organizationRequest.Target.Id;
         var relationship = organizationRequest.Relationship;
         var relatedEntities = organizationRequest.RelatedEntities;
 
-        var relationshipMetadata = state.GetRelationship(relationship.SchemaName);
+        var relationshipMetadata = fakeOrganizationService.GetRelationship(relationship.SchemaName);
 
         if (relationshipMetadata == null)
         {
@@ -37,14 +37,14 @@ public class AssociateFake : OrganizationRequestFake<AssociateRequest, Associate
                         var toEntityName = isFrom1To2 ? manyToManyRelationshipMetadata.Entity2LogicalName : manyToManyRelationshipMetadata.Entity1LogicalName;
 
                         //Check records exist
-                        var targetExists = state.CreateQuery(fromEntityName).FirstOrDefault(e => e.Id == entityId) != null;
+                        var targetExists = fakeOrganizationService.CreateQuery(fromEntityName).FirstOrDefault(e => e.Id == entityId) != null;
 
                         if (!targetExists)
                         {
                             ErrorFactory.ThrowFault(ErrorCodes.ObjectDoesNotExist, $"{fromEntityName} with Id {entityId} does not exist");
                         }
 
-                        var relatedExists = state.CreateQuery(toEntityName).FirstOrDefault(e => e.Id == relatedEntityReference.Id) != null;
+                        var relatedExists = fakeOrganizationService.CreateQuery(toEntityName).FirstOrDefault(e => e.Id == relatedEntityReference.Id) != null;
 
                         if (!relatedExists)
                         {
@@ -59,7 +59,7 @@ public class AssociateFake : OrganizationRequestFake<AssociateRequest, Associate
                             }
                         };
 
-                        state.Create(association);
+                        fakeOrganizationService.Create(association);
                         break;
                     }
                 case OneToManyRelationshipMetadata oneToManyRelationshipMetadata:
@@ -70,7 +70,7 @@ public class AssociateFake : OrganizationRequestFake<AssociateRequest, Associate
                             Id = relatedEntityReference.Id, [oneToManyRelationshipMetadata.ReferencingAttribute] = new EntityReference(entityName, entityId)
                         };
 
-                        state.Update(entityToUpdate);
+                        fakeOrganizationService.Update(entityToUpdate);
                         break;
                     }
                 default:

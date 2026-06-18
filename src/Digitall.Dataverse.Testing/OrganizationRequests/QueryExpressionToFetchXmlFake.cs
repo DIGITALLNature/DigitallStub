@@ -11,7 +11,7 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class QueryExpressionToFetchXmlFake : OrganizationRequestFake<QueryExpressionToFetchXmlRequest, QueryExpressionToFetchXmlResponse>
 {
-    public override QueryExpressionToFetchXmlResponse Execute(QueryExpressionToFetchXmlRequest organizationRequest, FakeOrganizationService state)
+    public override QueryExpressionToFetchXmlResponse Execute(QueryExpressionToFetchXmlRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
         ArgumentNullException.ThrowIfNull(organizationRequest);
 

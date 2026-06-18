@@ -10,7 +10,7 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class BulkDeleteFake : OrganizationRequestFake<BulkDeleteRequest, BulkDeleteResponse>
 {
-    public override BulkDeleteResponse Execute(BulkDeleteRequest organizationRequest, FakeOrganizationService state)
+    public override BulkDeleteResponse Execute(BulkDeleteRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
         if (string.IsNullOrEmpty(organizationRequest.JobName))
         {
@@ -39,7 +39,7 @@ public class BulkDeleteFake : OrganizationRequestFake<BulkDeleteRequest, BulkDel
             Attributes =
             {
                 ["name"] = organizationRequest.JobName,
-                ["ownerid"] = new EntityReference("systemuser", state.Options.UserId),
+                ["ownerid"] = new EntityReference("systemuser", fakeOrganizationService.Options.UserId),
                 ["operationtype"] = new OptionSetValue(13), // 13 = BulkDelete
             }
         };
@@ -54,21 +54,21 @@ public class BulkDeleteFake : OrganizationRequestFake<BulkDeleteRequest, BulkDel
             asyncOpertation["recurrencestarttime"] = organizationRequest.StartDateTime;
         }
 
-        state.Create(asyncOpertation);
+        fakeOrganizationService.Create(asyncOpertation);
 
         // delete all records from all queries
         foreach (QueryExpression queryExpression in organizationRequest.QuerySet ?? [])
         {
-            EntityCollection recordsToDelete = state.RetrieveMultiple(queryExpression);
+            EntityCollection recordsToDelete = fakeOrganizationService.RetrieveMultiple(queryExpression);
             foreach (Entity record in recordsToDelete.Entities)
             {
-                state.Delete(record.LogicalName, record.Id);
+                fakeOrganizationService.Delete(record.LogicalName, record.Id);
             }
         }
 
         // set ayncoperation to completed
         asyncOpertation["statecode"] = new OptionSetValue(3);
-        state.Update(asyncOpertation);
+        fakeOrganizationService.Update(asyncOpertation);
 
         // return result
         return new BulkDeleteResponse { ResponseName = "BulkDeleteResponse", ["JobId"] = jobId};
