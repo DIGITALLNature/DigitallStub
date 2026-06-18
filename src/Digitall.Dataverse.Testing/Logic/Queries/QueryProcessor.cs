@@ -262,26 +262,92 @@ public class QueryProcessor
 
     private static IQueryable<Entity> OrderQuery(QueryExpression qe, IQueryable<Entity> query)
     {
-        //Sort results
-        if (qe.Orders is not { Count: > 0 }) return query;
+        // Collect all orders, from the root query and from every (nested) link entity,
+        // so they can be applied as a single combined OrderBy -> ThenBy chain.
+        var orders = CollectOrders(qe);
 
-        var order = qe.Orders[0];
-        var orderedQuery = order.OrderType == OrderType.Ascending
-            ? query.OrderBy(e => e.Attributes.ContainsKey(order.AttributeName) ? e[order.AttributeName] : null, new XrmOrderByAttributeComparer())
-            : query.OrderByDescending(e => e.Attributes.ContainsKey(order.AttributeName) ? e[order.AttributeName] : null, new XrmOrderByAttributeComparer());
+        //Sort results
+        if (orders.Count <= 0) return query;
+
+        var comparer = new XrmOrderByAttributeComparer();
+
+        var first = orders[0];
+        var orderedQuery = first.Order.OrderType == OrderType.Ascending
+            ? query.OrderBy(e => OrderKeySelector(e, first.Order.AttributeName, first.Alias), comparer)
+            : query.OrderByDescending(e => OrderKeySelector(e, first.Order.AttributeName, first.Alias), comparer);
 
         //Subsequent orders should use ThenBy and ThenByDescending
-        for (var i = 1; i < qe.Orders.Count; i++)
+        for (var i = 1; i < orders.Count; i++)
         {
-            var thenOrder = qe.Orders[i];
-            orderedQuery = thenOrder.OrderType == OrderType.Ascending
-                ? orderedQuery.ThenBy(e => e.Attributes.ContainsKey(thenOrder.AttributeName) ? e[thenOrder.AttributeName] : null, new XrmOrderByAttributeComparer())
-                : orderedQuery.ThenByDescending(e => e.Attributes.ContainsKey(thenOrder.AttributeName) ? e[thenOrder.AttributeName] : null, new XrmOrderByAttributeComparer());
+            var (order, alias) = orders[i];
+            orderedQuery = order.OrderType == OrderType.Ascending
+                ? orderedQuery.ThenBy(e => OrderKeySelector(e, order.AttributeName, alias), comparer)
+                : orderedQuery.ThenByDescending(e => OrderKeySelector(e, order.AttributeName, alias), comparer);
         }
 
         query = orderedQuery;
 
         return query;
+    }
+
+    /// <summary>
+    ///     Builds a flat, ordered list of orders honoring Dataverse/FetchXml precedence: the root
+    ///     entity's orders first, then each link entity's orders following a depth-first traversal of
+    ///     <see cref="QueryExpression.LinkEntities" /> (including nested links). Link-entity orders are
+    ///     paired with their <see cref="LinkEntity.EntityAlias" /> so the key resolver can locate the
+    ///     aliased attribute on the joined result entity.
+    /// </summary>
+    private static List<(OrderExpression Order, string? Alias)> CollectOrders(QueryExpression qe)
+    {
+        var result = new List<(OrderExpression, string?)>();
+
+        if (qe.Orders is { Count: > 0 })
+        {
+            foreach (var order in qe.Orders)
+            {
+                result.Add((order, null));
+            }
+        }
+
+        foreach (var le in qe.LinkEntities)
+        {
+            CollectLinkOrders(le, result);
+        }
+
+        return result;
+    }
+
+    private static void CollectLinkOrders(LinkEntity le, List<(OrderExpression Order, string? Alias)> result)
+    {
+        // EntityAlias is populated by LinkedEntitiesProcessor.FilterQuery before OrderQuery runs.
+        var alias = string.IsNullOrWhiteSpace(le.EntityAlias) ? le.LinkToEntityName : le.EntityAlias;
+
+        if (le.Orders is { Count: > 0 })
+        {
+            foreach (var order in le.Orders)
+            {
+                result.Add((order, alias));
+            }
+        }
+
+        foreach (var nested in le.LinkEntities)
+        {
+            CollectLinkOrders(nested, result);
+        }
+    }
+
+    /// <summary>
+    ///     Resolves the sort key for an order. Root orders use the bare attribute name; link-entity
+    ///     orders use the "{alias}.{attributeName}" key produced by the join and unwrap the
+    ///     <see cref="AliasedValue" /> so the underlying value is compared.
+    /// </summary>
+    private static object? OrderKeySelector(Entity e, string attributeName, string? alias)
+    {
+        var key = alias is null ? attributeName : $"{alias}.{attributeName}";
+
+        if (!e.Attributes.TryGetValue(key, out var value)) return null;
+
+        return value is AliasedValue aliased ? aliased.Value : value;
     }
 
     private static XElement? RetrieveFetchXmlNode(XContainer xContainer, string nodeName)

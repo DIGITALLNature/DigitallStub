@@ -407,7 +407,7 @@ public class RetrieveMultipleTests
 
         // Each row must carry the aliased first name of its specific contact
         var firstNames = corpBRows
-            .Select(e => (e.GetAttributeValue<AliasedValue>("c." + Contact.LogicalNames.FirstName)?.Value as string))
+            .Select(e => (e.GetAttributeValue<AliasedValue>("c." + Contact.LogicalNames.FirstName)?.Value as string)!)
             .OrderBy(n => n)
             .ToList();
         await Assert.That(firstNames).IsEquivalentTo(["John B", "John C"]);
@@ -484,7 +484,7 @@ public class RetrieveMultipleTests
         await Assert.That(corpBRows).Count().IsEqualTo(2);
 
         var firstNames = corpBRows
-            .Select(e => (e.GetAttributeValue<AliasedValue>("c." + Contact.LogicalNames.FirstName)?.Value as string))
+            .Select(e => (e.GetAttributeValue<AliasedValue>("c." + Contact.LogicalNames.FirstName)?.Value as string)!)
             .OrderBy(n => n)
             .ToList();
 

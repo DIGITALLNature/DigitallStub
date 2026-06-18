@@ -402,7 +402,7 @@ public class TemporalOperatorTests
     [Test]
     public async Task ThisWeek_MatchesRecordInCurrentWeek()
     {
-        // Now = 2024-06-12 (Wednesday). Same day should always be in "this week".
+        // s_now = 2024-06-12 (Wednesday). Same day should always be in "this week".
         var inside = AccountAt(new DateTime(2024, 6, 12));
         var outside = AccountAt(new DateTime(2024, 5, 1)); // clearly different week
         var sut = CreateService(inside, outside);
@@ -418,7 +418,7 @@ public class TemporalOperatorTests
     [Test]
     public async Task LastWeek_MatchesRecordInPreviousWeek()
     {
-        // Now = 2024-06-12 (Wednesday). 7 days before (Jun 5) should be "last week".
+        // s_now = 2024-06-12 (Wednesday). 7 days before (Jun 5) should be "last week".
         var inside = AccountAt(s_now.AddDays(-7).Date);
         var outside = AccountAt(s_now.Date); // this week
         var sut = CreateService(inside, outside);
@@ -434,7 +434,7 @@ public class TemporalOperatorTests
     [Test]
     public async Task NextWeek_MatchesRecordInNextWeek()
     {
-        // Now = 2024-06-12 (Wednesday). 7 days after (Jun 19) should be "next week".
+        // s_now = 2024-06-12 (Wednesday). 7 days after (Jun 19) should be "next week".
         var inside = AccountAt(s_now.AddDays(7).Date);
         var outside = AccountAt(s_now.Date); // this week
         var sut = CreateService(inside, outside);
