@@ -143,7 +143,12 @@ public static class XDocumentExtensions
                 .Elements() //entity
                 .Elements() //child nodes of entity
                 .Where(el => el.Name.LocalName.Equals("order")).Select(el =>
-                    new OrderExpression { AttributeName = el.GetAttribute("attribute")?.Value, OrderType = el.IsAttributeTrue("descending") ? OrderType.Descending : OrderType.Ascending }).ToList();
+                    new OrderExpression
+                    {
+                        AttributeName = el.GetAttribute("attribute")?.Value,
+                        OrderType = el.IsAttributeTrue("descending") ? OrderType.Descending : OrderType.Ascending,
+                        EntityName = el.GetAttribute("entityname")?.Value
+                    }).ToList();
 
             return orderByElements;
         }
