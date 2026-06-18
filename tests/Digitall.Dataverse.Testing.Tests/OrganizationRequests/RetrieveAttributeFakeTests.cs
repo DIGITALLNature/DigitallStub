@@ -27,7 +27,7 @@ public class RetrieveAttributeFakeTests
         // Use reflection to set Attributes since it has no public setter
         var attributesProperty = typeof(EntityMetadata).GetProperty(nameof(EntityMetadata.Attributes))
                                  ?? throw new InvalidOperationException($"Property {nameof(EntityMetadata.Attributes)} was not found.");
-        attributesProperty.SetValue(metadata, new AttributeMetadata[] { attribute });
+        attributesProperty.SetValue(metadata, new[] { attribute });
 
         return metadata;
     }
@@ -54,13 +54,11 @@ public class RetrieveAttributeFakeTests
         var nameAttribute = new StringAttributeMetadata("name") { LogicalName = "name" };
         _sut.AddMetadata(CreateMetadataWithAttribute("account", nameAttribute));
 
-        void Action() => _sut.Execute(new RetrieveAttributeRequest
+        Assert.Throws<KeyNotFoundException>(() => _sut.Execute(new RetrieveAttributeRequest
         {
             EntityLogicalName = "contact",
             LogicalName = "name"
-        });
-
-        Assert.Throws<KeyNotFoundException>(Action);
+        }));
         await Task.CompletedTask;
     }
 
@@ -70,13 +68,11 @@ public class RetrieveAttributeFakeTests
         var nameAttribute = new StringAttributeMetadata("name") { LogicalName = "name" };
         _sut.AddMetadata(CreateMetadataWithAttribute("account", nameAttribute));
 
-        void Action() => _sut.Execute(new RetrieveAttributeRequest
+        Assert.Throws<InvalidOperationException>(() => _sut.Execute(new RetrieveAttributeRequest
         {
             EntityLogicalName = "account",
             LogicalName = "missing"
-        });
-
-        Assert.Throws<InvalidOperationException>(Action);
+        }));
         await Task.CompletedTask;
     }
 
@@ -84,18 +80,15 @@ public class RetrieveAttributeFakeTests
     public async Task Execute_NullRequest_ThrowsArgumentNull()
     {
         OrganizationRequest? request = null;
-        void Action() => _sut.Execute(request!);
 
-        Assert.Throws<ArgumentNullException>(Action);
+        Assert.Throws<ArgumentNullException>(() => _sut.Execute(request!));
         await Task.CompletedTask;
     }
 
     [Test]
     public async Task Execute_WrongRequestType_ThrowsInvalidCast()
     {
-        void Action() => new RetrieveAttributeFake().Execute(new RetrieveEntityRequest(), _sut);
-
-        Assert.Throws<InvalidCastException>(Action);
+        Assert.Throws<InvalidCastException>(() => new RetrieveAttributeFake().Execute(new RetrieveEntityRequest(), _sut));
         await Task.CompletedTask;
     }
 

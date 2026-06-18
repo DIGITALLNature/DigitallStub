@@ -19,7 +19,7 @@ public class RetrieveAttributeFake : IOrganizationRequestFake
             : throw new InvalidCastException($"Cannot cast {organizationRequest.GetType()} to {typeof(RetrieveAttributeRequest)}");
     }
 
-    public RetrieveAttributeResponse Execute(RetrieveAttributeRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
+    private static RetrieveAttributeResponse Execute(RetrieveAttributeRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
         ArgumentNullException.ThrowIfNull(organizationRequest);
 
