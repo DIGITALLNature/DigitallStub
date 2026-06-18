@@ -115,7 +115,7 @@ public class CreateFakeDeepInsertTests
         account.RelatedEntities[new Relationship("unknown_relationship")] =
             new EntityCollection([task]);
 
-        var act = () => _sut.Execute(new CreateRequest { Target = account });
+        void act() => _sut.Execute(new CreateRequest { Target = account });
 
         await Assert.That(act).Throws<FaultException>();
     }
@@ -198,7 +198,7 @@ public class CreateFakeDeepInsertTests
         account.RelatedEntities[new Relationship("mismatched_onetomany")] =
             new EntityCollection([task]);
 
-        var act = () => _sut.Execute(new CreateRequest { Target = account });
+        void act() => _sut.Execute(new CreateRequest { Target = account });
 
         await Assert.That(act).Throws<FaultException>();
     }
@@ -213,7 +213,7 @@ public class CreateFakeDeepInsertTests
         account.RelatedEntities[new Relationship("systemuserroles_association")] =
             new EntityCollection([role]);
 
-        var act = () => _sut.Execute(new CreateRequest { Target = account });
+        void act() => _sut.Execute(new CreateRequest { Target = account });
 
         await Assert.That(act).Throws<FaultException>();
     }
@@ -244,11 +244,16 @@ public class CreateFakeDeepInsertTests
 
         var calendar = new Entity("calendar") { Id = Guid.NewGuid(), ["name"] = "Business Hours" };
         var innerCalendar = new Entity("calendar") { ["name"] = "Inner Schedule" };
-        var calendarRule = new Entity("calendarrule") { ["description"] = "Rule 1" };
+        var calendarRule = new Entity("calendarrule")
+        {
+            ["description"] = "Rule 1",
+            RelatedEntities =
+            {
+                [new Relationship("calendarrule_innercalendar")] = new EntityCollection([innerCalendar])
+            }
+        };
 
         // Nested deep insert: calendar → calendarrule → innercalendar (reverse direction)
-        calendarRule.RelatedEntities[new Relationship("calendarrule_innercalendar")] =
-            new EntityCollection([innerCalendar]);
 
         calendar.RelatedEntities[new Relationship("calendar_calendar_rules")] =
             new EntityCollection([calendarRule]);
@@ -293,7 +298,7 @@ public class CreateFakeDeepInsertTests
         rule.RelatedEntities[new Relationship("calendarrule_innercalendar")] =
             new EntityCollection([cal1, cal2]); // Two children on N:1 → invalid
 
-        var act = () => _sut.Execute(new CreateRequest { Target = rule });
+        void act() => _sut.Execute(new CreateRequest { Target = rule });
 
         await Assert.That(act).Throws<FaultException>();
     }
@@ -316,7 +321,7 @@ public class CreateFakeDeepInsertTests
         rule.RelatedEntities[new Relationship("calendarrule_innercalendar")] =
             new EntityCollection([wrongEntity]);
 
-        var act = () => _sut.Execute(new CreateRequest { Target = rule });
+        void act() => _sut.Execute(new CreateRequest { Target = rule });
 
         await Assert.That(act).Throws<FaultException>();
     }

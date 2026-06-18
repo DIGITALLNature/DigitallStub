@@ -29,12 +29,12 @@ public class ExecuteTransactionFakeTests
     {
         var request = new ExecuteTransactionRequest
         {
-            Requests = new OrganizationRequestCollection
-            {
+            Requests =
+            [
                 new CreateRequest { Target = new Entity("account") { Id = Guid.NewGuid(), ["name"] = "A" } },
                 new CreateRequest { Target = new Entity("account") { Id = Guid.NewGuid(), ["name"] = "B" } },
                 new CreateRequest { Target = new Entity("contact") { Id = Guid.NewGuid(), ["name"] = "C" } }
-            }
+            ]
         };
 
         _sut.Execute(request);
@@ -50,11 +50,11 @@ public class ExecuteTransactionFakeTests
     {
         var request = new ExecuteTransactionRequest
         {
-            Requests = new OrganizationRequestCollection
-            {
+            Requests =
+            [
                 new CreateRequest { Target = new Entity("account") { Id = Guid.NewGuid() } },
                 new CreateRequest { Target = new Entity("contact") { Id = Guid.NewGuid() } }
-            },
+            ],
             ReturnResponses = true
         };
 
@@ -70,10 +70,10 @@ public class ExecuteTransactionFakeTests
     {
         var request = new ExecuteTransactionRequest
         {
-            Requests = new OrganizationRequestCollection
-            {
+            Requests =
+            [
                 new CreateRequest { Target = new Entity("account") { Id = Guid.NewGuid() } }
-            },
+            ],
             ReturnResponses = false
         };
 
@@ -92,11 +92,11 @@ public class ExecuteTransactionFakeTests
 
         var request = new ExecuteTransactionRequest
         {
-            Requests = new OrganizationRequestCollection
-            {
+            Requests =
+            [
                 new UpdateRequest { Target = new Entity("account") { Id = accountId, ["name"] = "Updated" } },
                 new CreateRequest { Target = new Entity("contact") { Id = contactId, ["fullname"] = "New Contact" } }
-            }
+            ]
         };
 
         _sut.Execute(request);
@@ -113,11 +113,11 @@ public class ExecuteTransactionFakeTests
     {
         var request = new ExecuteTransactionRequest
         {
-            Requests = new OrganizationRequestCollection
-            {
+            Requests =
+            [
                 new CreateRequest { Target = new Entity("account") { Id = Guid.NewGuid() } },
                 new DeleteRequest { Target = new EntityReference("account", Guid.NewGuid()) } // Non-existing
-            }
+            ]
         };
 
         void Action() => _sut.Execute(request);

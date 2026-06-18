@@ -89,8 +89,7 @@ public class ExpressionProcessorTests
         _sut.Add(new Entity("account") { Id = Guid.NewGuid(), ["name"] = "A", ["x"] = 1, ["y"] = 10 });
         _sut.Add(new Entity("account") { Id = Guid.NewGuid(), ["name"] = "B", ["x"] = 2, ["y"] = 20 });
         _sut.Add(new Entity("account") { Id = Guid.NewGuid(), ["name"] = "C", ["x"] = 1, ["y"] = 20 });
-
-        var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true) };
+        var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true), Criteria = { FilterOperator = LogicalOperator.Or } };
         qe.Criteria.FilterOperator = LogicalOperator.Or;
 
         var andFilter1 = new FilterExpression(LogicalOperator.And);

@@ -55,7 +55,7 @@ internal static class DeepInsertProcessor
                 default:
                     ErrorFactory.ThrowFault(
                         ErrorCodes.InvalidArgument,
-                        $"Relationship metadata type '{relationshipMetadata!.GetType().Name}' is not supported for deep insert");
+                        $"Relationship metadata type '{relationshipMetadata.GetType().Name}' is not supported for deep insert");
                     break;
             }
         }

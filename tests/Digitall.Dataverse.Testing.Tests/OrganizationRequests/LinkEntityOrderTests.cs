@@ -14,11 +14,11 @@ namespace Digitall.Dataverse.Testing.Tests.OrganizationRequests;
 /// </summary>
 public class LinkEntityOrderTests
 {
-    private static readonly Guid AccountXId = Guid.Parse("00000000-0000-0000-00a0-000000000001");
-    private static readonly Guid AccountYId = Guid.Parse("00000000-0000-0000-00a0-000000000002");
+    private static readonly Guid s_accountXId = Guid.Parse("00000000-0000-0000-00a0-000000000001");
+    private static readonly Guid s_accountYId = Guid.Parse("00000000-0000-0000-00a0-000000000002");
 
-    private static readonly Guid ContactXId = Guid.Parse("00000000-0000-0000-00c0-000000000001");
-    private static readonly Guid ContactYId = Guid.Parse("00000000-0000-0000-00c0-000000000002");
+    private static readonly Guid s_contactXId = Guid.Parse("00000000-0000-0000-00c0-000000000001");
+    private static readonly Guid s_contactYId = Guid.Parse("00000000-0000-0000-00c0-000000000002");
 
     /// <summary>
     /// Two accounts, each with exactly one contact carrying a numeric column.
@@ -26,15 +26,15 @@ public class LinkEntityOrderTests
     /// </summary>
     private static IEnumerable<Entity> SingleLinkData()
     {
-        var accountX = new Account(AccountXId) { Name = "Account X" };
-        var accountY = new Account(AccountYId) { Name = "Account Y" };
+        var accountX = new Account(s_accountXId) { Name = "Account X" };
+        var accountY = new Account(s_accountYId) { Name = "Account Y" };
 
-        var contactX = new Contact(ContactXId)
+        var contactX = new Contact(s_contactXId)
         {
             ParentCustomerId = accountX.ToEntityReference(),
             NumberOfChildren = 5
         };
-        var contactY = new Contact(ContactYId)
+        var contactY = new Contact(s_contactYId)
         {
             ParentCustomerId = accountY.ToEntityReference(),
             NumberOfChildren = 10
@@ -82,7 +82,7 @@ public class LinkEntityOrderTests
         });
 
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(AccountYId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_accountYId);
     }
 
     [Test]
@@ -102,7 +102,7 @@ public class LinkEntityOrderTests
         });
 
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(AccountXId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_accountXId);
     }
 
     #endregion
@@ -126,8 +126,8 @@ public class LinkEntityOrderTests
         });
 
         await Assert.That(result.Entities).Count().IsEqualTo(2);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(AccountYId);
-        await Assert.That(result.Entities[1].Id).IsEqualTo(AccountXId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_accountYId);
+        await Assert.That(result.Entities[1].Id).IsEqualTo(s_accountXId);
     }
 
     #endregion
@@ -256,7 +256,7 @@ public class LinkEntityOrderTests
         var result = sut.RetrieveMultiple(new FetchExpression(fetchXml));
 
         await Assert.That(result.Entities).Count().IsEqualTo(1);
-        await Assert.That(result.Entities[0].Id).IsEqualTo(AccountYId);
+        await Assert.That(result.Entities[0].Id).IsEqualTo(s_accountYId);
     }
 
     #endregion

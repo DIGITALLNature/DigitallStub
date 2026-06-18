@@ -53,7 +53,7 @@ public class DisassociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contact_mm"),
-            RelatedEntities = new EntityReferenceCollection { new("contact", contactId) }
+            RelatedEntities = [new("contact", contactId)]
         });
 
         // Verify associated
@@ -65,7 +65,7 @@ public class DisassociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contact_mm"),
-            RelatedEntities = new EntityReferenceCollection { new("contact", contactId) }
+            RelatedEntities = [new("contact", contactId)]
         });
 
         var after = _sut.CreateQuery("account_contact").ToList();
@@ -88,11 +88,11 @@ public class DisassociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contact_mm"),
-            RelatedEntities = new EntityReferenceCollection
-            {
+            RelatedEntities =
+            [
                 new("contact", contactId1),
                 new("contact", contactId2)
-            }
+            ]
         });
 
         // Disassociate only one
@@ -100,7 +100,7 @@ public class DisassociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contact_mm"),
-            RelatedEntities = new EntityReferenceCollection { new("contact", contactId1) }
+            RelatedEntities = [new("contact", contactId1)]
         });
 
         var remaining = _sut.CreateQuery("account_contact").ToList();
@@ -118,7 +118,7 @@ public class DisassociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("nonexistent"),
-            RelatedEntities = new EntityReferenceCollection { new("contact", Guid.NewGuid()) }
+            RelatedEntities = [new("contact", Guid.NewGuid())]
         });
 
         var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(Action);
@@ -143,7 +143,7 @@ public class DisassociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contacts_1n"),
-            RelatedEntities = new EntityReferenceCollection { new("contact", Guid.NewGuid()) }
+            RelatedEntities = [new("contact", Guid.NewGuid())]
         });
 
         var ex = Assert.Throws<FaultException<OrganizationServiceFault>>(Action);
@@ -163,14 +163,14 @@ public class DisassociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contact_mm"),
-            RelatedEntities = new EntityReferenceCollection { new("contact", contactId) }
+            RelatedEntities = [new("contact", contactId)]
         });
 
         var response = _sut.Execute(new DisassociateRequest
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contact_mm"),
-            RelatedEntities = new EntityReferenceCollection { new("contact", contactId) }
+            RelatedEntities = [new("contact", contactId)]
         });
 
         await Assert.That(response).IsTypeOf<DisassociateResponse>();

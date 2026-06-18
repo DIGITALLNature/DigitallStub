@@ -484,7 +484,7 @@ public class RetrieveMultipleTests
         await Assert.That(corpBRows).Count().IsEqualTo(2);
 
         var firstNames = corpBRows
-            .Select(e => (e.GetAttributeValue<AliasedValue>("c." + Contact.LogicalNames.FirstName)?.Value as string))
+            .Select(e => (e.GetAttributeValue<AliasedValue>("c." + Contact.LogicalNames.FirstName)?.Value as string)!)
             .OrderBy(n => n)
             .ToList();
 
