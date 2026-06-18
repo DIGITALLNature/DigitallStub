@@ -7,9 +7,9 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class RetrieveAllEntitiesFake : OrganizationRequestFake<RetrieveAllEntitiesRequest, RetrieveAllEntitiesResponse>
 {
-    public override RetrieveAllEntitiesResponse Execute(RetrieveAllEntitiesRequest organizationRequest, FakeOrganizationService state)
+    public override RetrieveAllEntitiesResponse Execute(RetrieveAllEntitiesRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
-        var knownMetadata = state.State.EntityMetadata.Values.ToArray();
+        var knownMetadata = fakeOrganizationService.State.EntityMetadata.Values.ToArray();
         return new RetrieveAllEntitiesResponse
         {
             Results =

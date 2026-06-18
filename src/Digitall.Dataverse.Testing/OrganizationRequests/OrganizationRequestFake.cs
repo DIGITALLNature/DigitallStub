@@ -9,10 +9,10 @@ public abstract class OrganizationRequestFake<TRequest, TResponse> : IOrganizati
 {
     public Type ForType => typeof(TRequest);
 
-    public OrganizationResponse Execute(OrganizationRequest organizationRequest, FakeOrganizationService state)
+    public OrganizationResponse Execute(OrganizationRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
-        return organizationRequest is TRequest request ? Execute(request, state) : throw new InvalidCastException($"Cannot cast {organizationRequest.GetType()} to {typeof(TRequest)}");
+        return organizationRequest is TRequest request ? Execute(request, fakeOrganizationService) : throw new InvalidCastException($"Cannot cast {organizationRequest.GetType()} to {typeof(TRequest)}");
     }
 
-    public abstract TResponse Execute(TRequest organizationRequest, FakeOrganizationService state);
+    public abstract TResponse Execute(TRequest organizationRequest, FakeOrganizationService fakeOrganizationService);
 }

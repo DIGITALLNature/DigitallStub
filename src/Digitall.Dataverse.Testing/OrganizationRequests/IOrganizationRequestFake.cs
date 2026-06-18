@@ -8,5 +8,5 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 public interface IOrganizationRequestFake
 {
     Type ForType { get; }
-    OrganizationResponse Execute(OrganizationRequest organizationRequest, FakeOrganizationService state);
+    OrganizationResponse Execute(OrganizationRequest organizationRequest, FakeOrganizationService fakeOrganizationService);
 }

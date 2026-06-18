@@ -10,14 +10,14 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class DisassociateFake : OrganizationRequestFake<DisassociateRequest, DisassociateResponse>
 {
-    public override DisassociateResponse Execute(DisassociateRequest organizationRequest, FakeOrganizationService state)
+    public override DisassociateResponse Execute(DisassociateRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
         var entityName = organizationRequest.Target.LogicalName;
         var entityId = organizationRequest.Target.Id;
         var relationship = organizationRequest.Relationship;
         var relatedEntities = organizationRequest.RelatedEntities;
 
-        var relationshipMetadata = state.GetRelationship(relationship.SchemaName);
+        var relationshipMetadata = fakeOrganizationService.GetRelationship(relationship.SchemaName);
 
         if (relationshipMetadata == null)
         {
@@ -37,11 +37,11 @@ public class DisassociateFake : OrganizationRequestFake<DisassociateRequest, Dis
                 query.Criteria.AddCondition(new ConditionExpression(fromAttribute, ConditionOperator.Equal, entityId));
                 query.Criteria.AddCondition(new ConditionExpression(toAttribute, ConditionOperator.Equal, relatedEntity.Id));
 
-                var results = state.RetrieveMultiple(query);
+                var results = fakeOrganizationService.RetrieveMultiple(query);
 
                 if (results.Entities.Count == 1)
                 {
-                    state.Delete(manyToManyRelationshipMetadata.IntersectEntityName, results.Entities.First().Id);
+                    fakeOrganizationService.Delete(manyToManyRelationshipMetadata.IntersectEntityName, results.Entities.First().Id);
                 }
             }
             else

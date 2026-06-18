@@ -11,24 +11,24 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class RetrieveFake : OrganizationRequestFake<RetrieveRequest, RetrieveResponse>
 {
-    public override RetrieveResponse Execute(RetrieveRequest organizationRequest, FakeOrganizationService state)
+    public override RetrieveResponse Execute(RetrieveRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
-        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(fakeOrganizationService);
         ArgumentNullException.ThrowIfNull(organizationRequest);
 
         Entity record;
         if (organizationRequest.Target.Id == Guid.Empty && organizationRequest.Target.KeyAttributes.Count > 0)
         {
-            record = state.RetrieveWithAlternateKey(organizationRequest.Target.LogicalName, organizationRequest.Target.KeyAttributes, organizationRequest.ColumnSet);
+            record = fakeOrganizationService.RetrieveWithAlternateKey(organizationRequest.Target.LogicalName, organizationRequest.Target.KeyAttributes, organizationRequest.ColumnSet);
         }
         else
         {
-            record = state.RetrieveCore(organizationRequest.Target.LogicalName, organizationRequest.Target.Id, organizationRequest.ColumnSet);
+            record = fakeOrganizationService.RetrieveCore(organizationRequest.Target.LogicalName, organizationRequest.Target.Id, organizationRequest.ColumnSet);
         }
 
         if (organizationRequest.RelatedEntitiesQuery?.Count > 0)
         {
-            PopulateRelatedEntities(organizationRequest, record, state);
+            PopulateRelatedEntities(organizationRequest, record, fakeOrganizationService);
         }
 
         return new RetrieveResponse
