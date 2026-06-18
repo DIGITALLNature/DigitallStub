@@ -478,6 +478,20 @@ internal class FetchProcessor(FakeOrganizationService state)
         //Process column sets
         linkEntity.Columns = el.ToColumnSet();
 
+        //Process orders defined directly on the link entity (<order> inside <link-entity>)
+        var linkOrders = el.Elements()
+            .Where(e => e.Name.LocalName.Equals("order", StringComparison.Ordinal))
+            .Select(e => new OrderExpression
+            {
+                AttributeName = e.GetAttribute("attribute")?.Value,
+                OrderType = e.IsAttributeTrue("descending") ? OrderType.Descending : OrderType.Ascending
+            });
+
+        foreach (var order in linkOrders)
+        {
+            linkEntity.Orders.Add(order);
+        }
+
         //Process filter
         linkEntity.LinkCriteria = el.Elements().Where(e => e.Name.LocalName.Equals("filter")).Select(ExractFilterExpression).FirstOrDefault();
 

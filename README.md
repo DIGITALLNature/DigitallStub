@@ -284,7 +284,7 @@ Full support for `QueryExpression` including:
 - **LinkEntity** joins (Inner, LeftOuter, Natural, MatchFirstRowUsingCrossApply, Any, NotAny, All, NotAll, Exists, In) with nested link entities
 - **FilterExpression.AnyAllFilterLinkEntity** for EXISTS/NOT EXISTS subqueries at the filter level
 - **ConditionExpression.CompareColumns** for column-to-column comparison within the same row
-- **OrderExpression** (ascending/descending on multiple attributes)
+- **OrderExpression** (ascending/descending on multiple attributes), including orders defined on linked entities (`LinkEntity.Orders`, applied after the root entity's orders and recursively across nested links)
 - **Paging** via `PageInfo` with proper `MoreRecords` and `PagingCookie` support
 - **TopCount** limiting
 - **Distinct** result filtering

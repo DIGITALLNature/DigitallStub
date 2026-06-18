@@ -32,8 +32,7 @@ public class ExpressionProcessorTests
         _sut.Add(new Entity("account") { Id = Guid.NewGuid(), ["name"] = "A", ["address1_city"] = "Munich" });
         _sut.Add(new Entity("account") { Id = Guid.NewGuid(), ["name"] = "B", ["address1_city"] = "Berlin" });
 
-        var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true) };
-        qe.Criteria.FilterOperator = LogicalOperator.And;
+        var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true), Criteria = { FilterOperator = LogicalOperator.And } };
         qe.Criteria.AddCondition("name", ConditionOperator.Equal, "A");
         qe.Criteria.AddCondition("address1_city", ConditionOperator.Equal, "Berlin");
 
@@ -50,8 +49,7 @@ public class ExpressionProcessorTests
         _sut.Add(new Entity("account") { Id = Guid.NewGuid(), ["name"] = "B" });
         _sut.Add(new Entity("account") { Id = Guid.NewGuid(), ["name"] = "C" });
 
-        var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true) };
-        qe.Criteria.FilterOperator = LogicalOperator.Or;
+        var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true), Criteria = { FilterOperator = LogicalOperator.Or } };
         qe.Criteria.AddCondition("name", ConditionOperator.Equal, "A");
         qe.Criteria.AddCondition("name", ConditionOperator.Equal, "C");
 
@@ -70,8 +68,7 @@ public class ExpressionProcessorTests
         _sut.Add(new Entity("account") { Id = Guid.NewGuid(), ["name"] = "B", ["address1_city"] = "Munich", ["active"] = true });
         _sut.Add(new Entity("account") { Id = Guid.NewGuid(), ["name"] = "C", ["address1_city"] = "Berlin", ["active"] = false });
 
-        var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true) };
-        qe.Criteria.FilterOperator = LogicalOperator.And;
+        var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true), Criteria = { FilterOperator = LogicalOperator.And } };
         qe.Criteria.AddCondition("active", ConditionOperator.Equal, true);
 
         var subFilter = new FilterExpression(LogicalOperator.Or);
@@ -90,8 +87,7 @@ public class ExpressionProcessorTests
         _sut.Add(new Entity("account") { Id = Guid.NewGuid(), ["name"] = "B", ["x"] = 2, ["y"] = 20 });
         _sut.Add(new Entity("account") { Id = Guid.NewGuid(), ["name"] = "C", ["x"] = 1, ["y"] = 20 });
 
-        var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true) };
-        qe.Criteria.FilterOperator = LogicalOperator.Or;
+        var qe = new QueryExpression("account") { ColumnSet = new ColumnSet(true), Criteria = { FilterOperator = LogicalOperator.Or } };
 
         var andFilter1 = new FilterExpression(LogicalOperator.And);
         andFilter1.AddCondition("x", ConditionOperator.Equal, 1);

@@ -88,7 +88,11 @@ public class DisassociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contact_mm"),
-            RelatedEntities = [new("contact", contactId1), new("contact", contactId2)]
+            RelatedEntities =
+            [
+                new("contact", contactId1),
+                new("contact", contactId2)
+            ]
         });
 
         // Disassociate only one
@@ -96,7 +100,7 @@ public class DisassociateFakeTests
         {
             Target = new EntityReference("account", accountId),
             Relationship = new Relationship("account_contact_mm"),
-            RelatedEntities = new EntityReferenceCollection { new("contact", contactId1) }
+            RelatedEntities = [new("contact", contactId1)]
         });
 
         var remaining = _sut.CreateQuery("account_contact").ToList();
