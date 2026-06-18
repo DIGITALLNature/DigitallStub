@@ -8,15 +8,15 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class CreateFake : OrganizationRequestFake<CreateRequest, CreateResponse>
 {
-    public override CreateResponse Execute(CreateRequest organizationRequest, FakeOrganizationService state)
+    public override CreateResponse Execute(CreateRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
         var target = organizationRequest.Target;
-        var guid = state.CreateCore(target);
+        var guid = fakeOrganizationService.CreateCore(target);
 
         // Deep insert: create sub-entities from RelatedEntities
         if (target.RelatedEntities.Count > 0)
         {
-            DeepInsertProcessor.Process(target.LogicalName, guid, target.RelatedEntities, state);
+            DeepInsertProcessor.Process(target.LogicalName, guid, target.RelatedEntities, fakeOrganizationService);
         }
 
         return new CreateResponse

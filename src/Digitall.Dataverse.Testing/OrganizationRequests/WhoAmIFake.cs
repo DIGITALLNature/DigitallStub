@@ -8,20 +8,20 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class WhoAmIFake : OrganizationRequestFake<WhoAmIRequest, WhoAmIResponse>
 {
-    public override WhoAmIResponse Execute(WhoAmIRequest organizationRequest, FakeOrganizationService state)
+    public override WhoAmIResponse Execute(WhoAmIRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
-        var userId = state.Options.UserId;
+        var userId = fakeOrganizationService.Options.UserId;
 
         var results = new ParameterCollection { { "UserId", userId } };
 
-        var user = state.CreateQuery("systemuser").SingleOrDefault(u => u.Id == userId);
+        var user = fakeOrganizationService.CreateQuery("systemuser").SingleOrDefault(u => u.Id == userId);
 
         if (user != null)
         {
-            var buId = GetBusinessUnitId(user) ?? state.Options.BusinessUnitId;
+            var buId = GetBusinessUnitId(user) ?? fakeOrganizationService.Options.BusinessUnitId;
             results.Add("BusinessUnitId", buId);
 
-            var orgId = GetOrganizationId(state, user, buId);
+            var orgId = GetOrganizationId(fakeOrganizationService, user, buId);
             results.Add("OrganizationId", orgId);
         }
 

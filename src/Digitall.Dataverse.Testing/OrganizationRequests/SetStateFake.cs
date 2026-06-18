@@ -9,16 +9,16 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class SetStateFake : OrganizationRequestFake<SetStateRequest, SetStateResponse>
 {
-    public override SetStateResponse Execute(SetStateRequest organizationRequest, FakeOrganizationService state)
+    public override SetStateResponse Execute(SetStateRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
-        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(fakeOrganizationService);
         ArgumentNullException.ThrowIfNull(organizationRequest);
 
         var entityName = organizationRequest.EntityMoniker.LogicalName;
         var entityId = organizationRequest.EntityMoniker.Id;
 
         var statusCode = organizationRequest.Status.Value == -1
-            ? state.State.GetDefaultStatusCode(entityName, organizationRequest.State.Value)
+            ? fakeOrganizationService.State.GetDefaultStatusCode(entityName, organizationRequest.State.Value)
             : organizationRequest.Status;
 
         var entityToUpdate = new Entity(entityName)
@@ -28,7 +28,7 @@ public class SetStateFake : OrganizationRequestFake<SetStateRequest, SetStateRes
             ["statuscode"] = statusCode
         };
 
-        state.Update(entityToUpdate);
+        fakeOrganizationService.Update(entityToUpdate);
 
         return new SetStateResponse();
     }

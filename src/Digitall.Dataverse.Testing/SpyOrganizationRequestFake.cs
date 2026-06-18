@@ -17,9 +17,9 @@ public sealed class SpyOrganizationRequestFake<TReq, TRes>(Func<TReq, FakeOrgani
     /// <summary>All requests captured by Execute calls.</summary>
     public List<TReq> ReceivedRequests { get; } = [];
 
-    public override TRes Execute(TReq request, FakeOrganizationService organizationService)
+    public override TRes Execute(TReq request, FakeOrganizationService fakeOrganizationService)
     {
         ReceivedRequests.Add(request);
-        return handler?.Invoke(request, organizationService) ?? new TRes();
+        return handler?.Invoke(request, fakeOrganizationService) ?? new TRes();
     }
 }

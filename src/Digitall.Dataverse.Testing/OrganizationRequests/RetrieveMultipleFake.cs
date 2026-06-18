@@ -14,12 +14,12 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequest, RetrieveMultipleResponse>
 {
-    public override RetrieveMultipleResponse Execute(RetrieveMultipleRequest organizationRequest, FakeOrganizationService state)
+    public override RetrieveMultipleResponse Execute(RetrieveMultipleRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
         ArgumentNullException.ThrowIfNull(organizationRequest);
 
         // Create a new QueryProcessor with the given state
-        var queryProcessor = new QueryProcessor(state);
+        var queryProcessor = new QueryProcessor(fakeOrganizationService);
 
         // Initialize variables
         QueryExpression queryExpression;
@@ -111,7 +111,7 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
         }
 
         // Handle paging
-        var maxRetrieveCount = state.Options.MaxRetrieveCount;
+        var maxRetrieveCount = fakeOrganizationService.Options.MaxRetrieveCount;
         var pageSize = maxRetrieveCount;
         var pageInfo = queryExpression.PageInfo;
         var pageNumber = 1;
@@ -143,10 +143,10 @@ public class RetrieveMultipleFake : OrganizationRequestFake<RetrieveMultipleRequ
 
         var recordsToReturn = startPosition + numberToGet > internalResult.Count ? [] : internalResult.GetRange(startPosition, numberToGet);
 
-        recordsToReturn.ForEach(e => PatchDateFormat(e, state));
+        recordsToReturn.ForEach(e => PatchDateFormat(e, fakeOrganizationService));
         recordsToReturn.ForEach(FillFormattedValues);
 
-        recordsToReturn = recordsToReturn.Select(state.ConvertToProxyType).ToList();
+        recordsToReturn = recordsToReturn.Select(fakeOrganizationService.ConvertToProxyType).ToList();
 
         var response = new RetrieveMultipleResponse
         {
