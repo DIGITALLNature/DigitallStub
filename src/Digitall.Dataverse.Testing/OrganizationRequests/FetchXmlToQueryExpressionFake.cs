@@ -9,7 +9,7 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class FetchXmlToQueryExpressionFake : OrganizationRequestFake<FetchXmlToQueryExpressionRequest, FetchXmlToQueryExpressionResponse>
 {
-    public override FetchXmlToQueryExpressionResponse Execute(FetchXmlToQueryExpressionRequest organizationRequest, FakeOrganizationService state)
+    public override FetchXmlToQueryExpressionResponse Execute(FetchXmlToQueryExpressionRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
         ArgumentNullException.ThrowIfNull(organizationRequest);
 
@@ -28,7 +28,7 @@ public class FetchXmlToQueryExpressionFake : OrganizationRequestFake<FetchXmlToQ
             throw new ArgumentException("FetchXml is not valid XML.", nameof(organizationRequest), ex);
         }
 
-        var processor = new QueryProcessor(state);
+        var processor = new QueryProcessor(fakeOrganizationService);
         var query = processor.ConvertXmlDocumentToQueryExpression(xmlDocument);
 
         return new FetchXmlToQueryExpressionResponse

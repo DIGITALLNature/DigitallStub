@@ -9,9 +9,9 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class AssignRequestFake : OrganizationRequestFake<AssignRequest, AssignResponse>
 {
-    public override AssignResponse Execute(AssignRequest organizationRequest, FakeOrganizationService state)
+    public override AssignResponse Execute(AssignRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
-        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(fakeOrganizationService);
         ArgumentNullException.ThrowIfNull(organizationRequest);
 
 
@@ -46,7 +46,7 @@ public class AssignRequestFake : OrganizationRequestFake<AssignRequest, AssignRe
             }
         };
 
-        state.Update(assignment);
+        fakeOrganizationService.Update(assignment);
 
         return new AssignResponse();
     }

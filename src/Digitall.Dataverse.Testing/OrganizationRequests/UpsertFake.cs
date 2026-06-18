@@ -8,9 +8,9 @@ namespace Digitall.Dataverse.Testing.OrganizationRequests;
 
 public class UpsertFake : OrganizationRequestFake<UpsertRequest, UpsertResponse>
 {
-    public override UpsertResponse Execute(UpsertRequest organizationRequest, FakeOrganizationService state)
+    public override UpsertResponse Execute(UpsertRequest organizationRequest, FakeOrganizationService fakeOrganizationService)
     {
-        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(fakeOrganizationService);
         ArgumentNullException.ThrowIfNull(organizationRequest);
 
         var target = organizationRequest.Target;
@@ -18,22 +18,22 @@ public class UpsertFake : OrganizationRequestFake<UpsertRequest, UpsertResponse>
         var entityId = target.Id;
 
         bool recordCreated;
-        if (state.EntityExists(entityLogicalName, entityId))
+        if (fakeOrganizationService.EntityExists(entityLogicalName, entityId))
         {
             recordCreated = false;
-            state.Update(target);
+            fakeOrganizationService.Update(target);
 
             // Deep insert: sub-entities are always created even when the parent is updated
             if (target.RelatedEntities.Count > 0)
             {
-                DeepInsertProcessor.Process(entityLogicalName, entityId, target.RelatedEntities, state);
+                DeepInsertProcessor.Process(entityLogicalName, entityId, target.RelatedEntities, fakeOrganizationService);
             }
         }
         else
         {
             recordCreated = true;
             // state.Create routes through CreateFake which handles deep insert
-            entityId = state.Create(target);
+            entityId = fakeOrganizationService.Create(target);
         }
 
         var result = new UpsertResponse();

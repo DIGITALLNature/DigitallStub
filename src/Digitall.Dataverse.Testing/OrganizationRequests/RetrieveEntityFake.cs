@@ -14,15 +14,9 @@ public class RetrieveEntityFake : OrganizationRequestFake<RetrieveEntityRequest,
 
         var entityMetadata = fakeOrganizationService.State.EntityMetadata[organizationRequest.LogicalName];
 
-        var results = new ParameterCollection {
-            { nameof (RetrieveEntityResponse.EntityMetadata), entityMetadata }
-        };
+        var results = new ParameterCollection { { nameof(RetrieveEntityResponse.EntityMetadata), entityMetadata } };
 
-        var response = new RetrieveEntityResponse
-        {
-           Results = results
-        };
+        var response = new RetrieveEntityResponse { Results = results };
         return response;
     }
 }
-
