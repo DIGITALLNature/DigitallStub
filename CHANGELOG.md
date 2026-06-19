@@ -1,3 +1,10 @@
+# [1.1.0-beta.11](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.10...v1.1.0-beta.11) (2026-06-19)
+
+
+### Bug Fixes
+
+* **query:** honor root-level OrderExpression.EntityName for linked-entity sorting ([#43](https://github.com/DIGITALLNature/DigitallTesting/issues/43)) ([102de5d](https://github.com/DIGITALLNature/DigitallTesting/commit/102de5dc96d13cf11c467878e0b8bd9294d1ce61))
+
 # [1.1.0-beta.10](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.9...v1.1.0-beta.10) (2026-06-18)
 
 
