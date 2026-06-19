@@ -194,4 +194,194 @@ public class QueryBugsTests
         await Assert.That(firstName1).IsEqualTo("Alice"); // Verified: the lower ID entity is returned
     }
 
+    /// <summary>
+    /// BUG #5 (partial fix in beta.11): Root-level cross-entity OrderExpression reads EntityName
+    /// instead of Alias. The 3-arg constructor sets only Alias; EntityName is null, so the sort
+    /// key was never resolved and ordering had no effect.
+    /// FIXED: CollectOrders now prefers Alias over EntityName (mirrors CollectLinkOrders).
+    /// </summary>
+    [Test]
+    public async Task RootLevelCrossEntityOrder_ThreeArgConstructorDescending_ReturnsHighestLinkedValue()
+    {
+        // Arrange – three accounts each linked to a contact with a distinct NumberOfChildren value
+        var accountLow = new Account(Guid.NewGuid()) { Name = "Low" };
+        var accountMid = new Account(Guid.NewGuid()) { Name = "Mid" };
+        var accountHigh = new Account(Guid.NewGuid()) { Name = "High" };
+
+        var contactLow = new Contact(Guid.NewGuid())
+        {
+            NumberOfChildren = 1,
+            ParentCustomerId = new EntityReference(Account.EntityLogicalName, accountLow.Id)
+        };
+        var contactMid = new Contact(Guid.NewGuid())
+        {
+            NumberOfChildren = 5,
+            ParentCustomerId = new EntityReference(Account.EntityLogicalName, accountMid.Id)
+        };
+        var contactHigh = new Contact(Guid.NewGuid())
+        {
+            NumberOfChildren = 10,
+            ParentCustomerId = new EntityReference(Account.EntityLogicalName, accountHigh.Id)
+        };
+
+        var sut = new FakeOrganizationService();
+        sut.AddRange([accountLow, accountMid, accountHigh, contactLow, contactMid, contactHigh]);
+
+        var query = new QueryExpression(Account.EntityLogicalName) { TopCount = 1 };
+        query.ColumnSet = new ColumnSet(Account.LogicalNames.Name);
+        var link = query.AddLink(Contact.EntityLogicalName, Account.LogicalNames.AccountId,
+            Contact.LogicalNames.ParentCustomerId, JoinOperator.Inner);
+        link.EntityAlias = "c";
+        link.Columns = new ColumnSet(Contact.LogicalNames.NumberOfChildren);
+
+        // 3-arg constructor: sets Alias="c", EntityName=null
+        query.Orders.Add(new OrderExpression(Contact.LogicalNames.NumberOfChildren, OrderType.Descending, "c"));
+
+        // Act
+        var result = sut.RetrieveMultiple(query);
+
+        // Assert – should return the account linked to the contact with the highest value (10)
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
+        await Assert.That(result.Entities[0].GetAttributeValue<string>(Account.LogicalNames.Name))
+            .IsEqualTo("High");
+    }
+
+    [Test]
+    public async Task RootLevelCrossEntityOrder_ThreeArgConstructorAscending_ReturnsLowestLinkedValue()
+    {
+        // Arrange
+        var accountLow = new Account(Guid.NewGuid()) { Name = "Low" };
+        var accountMid = new Account(Guid.NewGuid()) { Name = "Mid" };
+        var accountHigh = new Account(Guid.NewGuid()) { Name = "High" };
+
+        var contactLow = new Contact(Guid.NewGuid())
+        {
+            NumberOfChildren = 1,
+            ParentCustomerId = new EntityReference(Account.EntityLogicalName, accountLow.Id)
+        };
+        var contactMid = new Contact(Guid.NewGuid())
+        {
+            NumberOfChildren = 5,
+            ParentCustomerId = new EntityReference(Account.EntityLogicalName, accountMid.Id)
+        };
+        var contactHigh = new Contact(Guid.NewGuid())
+        {
+            NumberOfChildren = 10,
+            ParentCustomerId = new EntityReference(Account.EntityLogicalName, accountHigh.Id)
+        };
+
+        var sut = new FakeOrganizationService();
+        sut.AddRange([accountLow, accountMid, accountHigh, contactLow, contactMid, contactHigh]);
+
+        var query = new QueryExpression(Account.EntityLogicalName) { TopCount = 1 };
+        query.ColumnSet = new ColumnSet(Account.LogicalNames.Name);
+        var link = query.AddLink(Contact.EntityLogicalName, Account.LogicalNames.AccountId,
+            Contact.LogicalNames.ParentCustomerId, JoinOperator.Inner);
+        link.EntityAlias = "c";
+        link.Columns = new ColumnSet(Contact.LogicalNames.NumberOfChildren);
+
+        // 3-arg ascending
+        query.Orders.Add(new OrderExpression(Contact.LogicalNames.NumberOfChildren, OrderType.Ascending, "c"));
+
+        // Act
+        var result = sut.RetrieveMultiple(query);
+
+        // Assert – should return the account linked to the contact with the lowest value (1)
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
+        await Assert.That(result.Entities[0].GetAttributeValue<string>(Account.LogicalNames.Name))
+            .IsEqualTo("Low");
+    }
+
+    [Test]
+    public async Task RootLevelCrossEntityOrder_FourArgConstructor_UsesAliasNotEntityName()
+    {
+        // Arrange – verifies that when both Alias and EntityName are set (4-arg constructor),
+        // Alias is used as the key prefix, not EntityName.
+        var accountLow = new Account(Guid.NewGuid()) { Name = "Low" };
+        var accountHigh = new Account(Guid.NewGuid()) { Name = "High" };
+
+        var contactLow = new Contact(Guid.NewGuid())
+        {
+            NumberOfChildren = 1,
+            ParentCustomerId = new EntityReference(Account.EntityLogicalName, accountLow.Id)
+        };
+        var contactHigh = new Contact(Guid.NewGuid())
+        {
+            NumberOfChildren = 10,
+            ParentCustomerId = new EntityReference(Account.EntityLogicalName, accountHigh.Id)
+        };
+
+        var sut = new FakeOrganizationService();
+        sut.AddRange([accountLow, accountHigh, contactLow, contactHigh]);
+
+        var query = new QueryExpression(Account.EntityLogicalName) { TopCount = 1 };
+        query.ColumnSet = new ColumnSet(Account.LogicalNames.Name);
+        var link = query.AddLink(Contact.EntityLogicalName, Account.LogicalNames.AccountId,
+            Contact.LogicalNames.ParentCustomerId, JoinOperator.Inner);
+        link.EntityAlias = "c";
+        link.Columns = new ColumnSet(Contact.LogicalNames.NumberOfChildren);
+
+        // 4-arg constructor: sets Alias="c", EntityName="contact"
+        // Attributes are stored as "c.numberofchildren" (alias prefix), NOT "contact.numberofchildren"
+        query.Orders.Add(new OrderExpression(Contact.LogicalNames.NumberOfChildren, OrderType.Descending,
+            "c", Contact.EntityLogicalName));
+
+        // Act
+        var result = sut.RetrieveMultiple(query);
+
+        // Assert – Alias "c" was used → correctly found "c.numberofchildren" → returns highest
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
+        await Assert.That(result.Entities[0].GetAttributeValue<string>(Account.LogicalNames.Name))
+            .IsEqualTo("High");
+    }
+
+    [Test]
+    public async Task RootLevelCrossEntityOrder_EntityNameOnlyNoAlias_UsesEntityNameAsFallbackPrefix()
+    {
+        // Arrange – link entity has an EntityAlias that equals the entity logical name ("contact").
+        // The root-level OrderExpression carries only EntityName="contact" (no Alias set).
+        // CollectOrders must fall back to EntityName when Alias is empty/null so the key
+        // "contact.numberofchildren" is resolved correctly.
+        var accountLow = new Account(Guid.NewGuid()) { Name = "Low" };
+        var accountHigh = new Account(Guid.NewGuid()) { Name = "High" };
+
+        var contactLow = new Contact(Guid.NewGuid())
+        {
+            NumberOfChildren = 1,
+            ParentCustomerId = new EntityReference(Account.EntityLogicalName, accountLow.Id)
+        };
+        var contactHigh = new Contact(Guid.NewGuid())
+        {
+            NumberOfChildren = 10,
+            ParentCustomerId = new EntityReference(Account.EntityLogicalName, accountHigh.Id)
+        };
+
+        var sut = new FakeOrganizationService();
+        sut.AddRange([accountLow, accountHigh, contactLow, contactHigh]);
+
+        var query = new QueryExpression(Account.EntityLogicalName) { TopCount = 1 };
+        query.ColumnSet = new ColumnSet(Account.LogicalNames.Name);
+        var link = query.AddLink(Contact.EntityLogicalName, Account.LogicalNames.AccountId,
+            Contact.LogicalNames.ParentCustomerId, JoinOperator.Inner);
+        // EntityAlias explicitly set to the entity logical name so the key prefix is "contact"
+        link.EntityAlias = Contact.EntityLogicalName;
+        link.Columns = new ColumnSet(Contact.LogicalNames.NumberOfChildren);
+
+        // OrderExpression with EntityName only (Alias not set) → fallback to EntityName="contact"
+        query.Orders.Add(new OrderExpression
+        {
+            AttributeName = Contact.LogicalNames.NumberOfChildren,
+            OrderType = OrderType.Descending,
+            EntityName = Contact.EntityLogicalName
+        });
+
+        // Act
+        var result = sut.RetrieveMultiple(query);
+
+        // Assert – EntityName "contact" used as key prefix → correctly resolved → returns highest
+        await Assert.That(result.Entities).Count().IsEqualTo(1);
+        await Assert.That(result.Entities[0].GetAttributeValue<string>(Account.LogicalNames.Name))
+            .IsEqualTo("High");
+    }
+
 }

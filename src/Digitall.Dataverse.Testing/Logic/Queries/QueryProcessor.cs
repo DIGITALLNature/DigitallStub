@@ -308,11 +308,15 @@ public class QueryProcessor
         {
             foreach (var order in qe.Orders)
             {
-                // A root-level OrderExpression may carry an EntityName that references a linked
-                // entity alias (FetchXML: <order entityname="alias" attribute="field" />).
-                // In that case the attribute is stored on the result entity as an AliasedValue
-                // under the key "{EntityName}.{AttributeName}", so we pass EntityName as the alias.
-                var alias = string.IsNullOrWhiteSpace(order.EntityName) ? null : order.EntityName;
+                // A root-level OrderExpression may reference a linked entity via Alias (set by the
+                // 3-arg or 4-arg constructor) or EntityName (set by the 4-arg constructor as the
+                // entity logical name). Alias always takes precedence, matching the same rule used
+                // in CollectLinkOrders for link-entity orders. EntityName is only used as a fallback
+                // for the case where the link has no alias and is identified by its entity logical name.
+                // (FetchXML equivalent: <order entityname="alias_or_logicalname" attribute="field" />)
+                var alias = !string.IsNullOrWhiteSpace(order.Alias) ? order.Alias
+                    : !string.IsNullOrWhiteSpace(order.EntityName) ? order.EntityName
+                    : null;
                 result.Add((order, alias));
             }
         }
