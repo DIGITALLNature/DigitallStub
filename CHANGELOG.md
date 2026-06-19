@@ -1,3 +1,10 @@
+# [1.1.0-beta.12](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.11...v1.1.0-beta.12) (2026-06-19)
+
+
+### Bug Fixes
+
+* **query:** prefer OrderExpression.Alias over EntityName in CollectOrders ([#44](https://github.com/DIGITALLNature/DigitallTesting/issues/44)) ([890d912](https://github.com/DIGITALLNature/DigitallTesting/commit/890d91220a070631e72d752654ac1655fd7681ee))
+
 # [1.1.0-beta.11](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.10...v1.1.0-beta.11) (2026-06-19)
 
 
