@@ -55,7 +55,10 @@ public class QueryProcessor
             var orders = xmlDocument.ToOrderExpressionList();
             foreach (var order in orders)
             {
-                query.AddOrder(order.AttributeName, order.OrderType);
+                // Preserve EntityName (set when FetchXML uses <order entityname="alias" attribute="..." />
+                // at the root entity level to order by a linked entity attribute).
+                // QueryExpression.AddOrder does not accept EntityName, so add the OrderExpression directly.
+                query.Orders.Add(order);
             }
         }
 
@@ -305,7 +308,12 @@ public class QueryProcessor
         {
             foreach (var order in qe.Orders)
             {
-                result.Add((order, null));
+                // A root-level OrderExpression may carry an EntityName that references a linked
+                // entity alias (FetchXML: <order entityname="alias" attribute="field" />).
+                // In that case the attribute is stored on the result entity as an AliasedValue
+                // under the key "{EntityName}.{AttributeName}", so we pass EntityName as the alias.
+                var alias = string.IsNullOrWhiteSpace(order.EntityName) ? null : order.EntityName;
+                result.Add((order, alias));
             }
         }
 

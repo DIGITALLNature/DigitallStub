@@ -160,6 +160,146 @@ public class QueryProcessorTests
     }
 
     #endregion
+    #region Root-level OrderExpression.EntityName
+
+    /// <summary>
+    /// A root-level OrderExpression with EntityName set (e.g. produced by FetchXML
+    /// &lt;order entityname="alias" attribute="field" /&gt;) should sort by the aliased
+    /// linked-entity attribute rather than a bare root attribute.
+    /// </summary>
+    [Test]
+    public async Task RootOrder_WithEntityName_Ascending_SortsByLinkedAttribute()
+    {
+        // Arrange: contacts linked to accounts; order contacts by linked account name ascending
+        var accountId1 = Guid.NewGuid();
+        var accountId2 = Guid.NewGuid();
+        var accountId3 = Guid.NewGuid();
+
+        _sut.Add(new Entity("account") { Id = accountId1, ["name"] = "C-Account" });
+        _sut.Add(new Entity("account") { Id = accountId2, ["name"] = "A-Account" });
+        _sut.Add(new Entity("account") { Id = accountId3, ["name"] = "B-Account" });
+
+        _sut.Add(new Entity("contact") { Id = Guid.NewGuid(), ["parentcustomerid"] = accountId1, ["fullname"] = "Contact-C" });
+        _sut.Add(new Entity("contact") { Id = Guid.NewGuid(), ["parentcustomerid"] = accountId2, ["fullname"] = "Contact-A" });
+        _sut.Add(new Entity("contact") { Id = Guid.NewGuid(), ["parentcustomerid"] = accountId3, ["fullname"] = "Contact-B" });
+
+        var qe = new QueryExpression("contact") { ColumnSet = new ColumnSet(true) };
+        var link = qe.AddLink("account", "parentcustomerid", "accountid", JoinOperator.Inner);
+        link.EntityAlias = "acc";
+        link.Columns = new ColumnSet("name");
+
+        // Root-level order that references the linked entity alias
+        qe.Orders.Add(new OrderExpression { AttributeName = "name", EntityName = "acc", OrderType = OrderType.Ascending });
+
+        var results = _sut.RetrieveMultiple(qe).Entities;
+
+        // Ascending by linked account name: Contact-A, Contact-B, Contact-C
+        await Assert.That(results).Count().IsEqualTo(3);
+        await Assert.That(results[0]["fullname"]).IsEqualTo("Contact-A");
+        await Assert.That(results[1]["fullname"]).IsEqualTo("Contact-B");
+        await Assert.That(results[2]["fullname"]).IsEqualTo("Contact-C");
+    }
+
+    [Test]
+    public async Task RootOrder_WithEntityName_Descending_SortsByLinkedAttributeDescending()
+    {
+        var accountId1 = Guid.NewGuid();
+        var accountId2 = Guid.NewGuid();
+        var accountId3 = Guid.NewGuid();
+
+        _sut.Add(new Entity("account") { Id = accountId1, ["name"] = "C-Account" });
+        _sut.Add(new Entity("account") { Id = accountId2, ["name"] = "A-Account" });
+        _sut.Add(new Entity("account") { Id = accountId3, ["name"] = "B-Account" });
+
+        _sut.Add(new Entity("contact") { Id = Guid.NewGuid(), ["parentcustomerid"] = accountId1, ["fullname"] = "Contact-C" });
+        _sut.Add(new Entity("contact") { Id = Guid.NewGuid(), ["parentcustomerid"] = accountId2, ["fullname"] = "Contact-A" });
+        _sut.Add(new Entity("contact") { Id = Guid.NewGuid(), ["parentcustomerid"] = accountId3, ["fullname"] = "Contact-B" });
+
+        var qe = new QueryExpression("contact") { ColumnSet = new ColumnSet(true) };
+        var link = qe.AddLink("account", "parentcustomerid", "accountid", JoinOperator.Inner);
+        link.EntityAlias = "acc";
+        link.Columns = new ColumnSet("name");
+
+        qe.Orders.Add(new OrderExpression { AttributeName = "name", EntityName = "acc", OrderType = OrderType.Descending });
+
+        var results = _sut.RetrieveMultiple(qe).Entities;
+
+        // Descending: Contact-C, Contact-B, Contact-A
+        await Assert.That(results).Count().IsEqualTo(3);
+        await Assert.That(results[0]["fullname"]).IsEqualTo("Contact-C");
+        await Assert.That(results[1]["fullname"]).IsEqualTo("Contact-B");
+        await Assert.That(results[2]["fullname"]).IsEqualTo("Contact-A");
+    }
+
+    [Test]
+    public async Task RootOrder_WithEntityName_TopCount_ReturnsCorrectRow()
+    {
+        // TopCount = 1 + descending order on linked attribute → contact linked to alphabetically-last account
+        var accountId1 = Guid.NewGuid();
+        var accountId2 = Guid.NewGuid();
+        var accountId3 = Guid.NewGuid();
+
+        _sut.Add(new Entity("account") { Id = accountId1, ["name"] = "B-Account" });
+        _sut.Add(new Entity("account") { Id = accountId2, ["name"] = "A-Account" });
+        _sut.Add(new Entity("account") { Id = accountId3, ["name"] = "C-Account" });
+
+        _sut.Add(new Entity("contact") { Id = Guid.NewGuid(), ["parentcustomerid"] = accountId1, ["fullname"] = "Contact-B" });
+        _sut.Add(new Entity("contact") { Id = Guid.NewGuid(), ["parentcustomerid"] = accountId2, ["fullname"] = "Contact-A" });
+        _sut.Add(new Entity("contact") { Id = Guid.NewGuid(), ["parentcustomerid"] = accountId3, ["fullname"] = "Contact-C" });
+
+        var qe = new QueryExpression("contact") { ColumnSet = new ColumnSet(true), TopCount = 1 };
+        var link = qe.AddLink("account", "parentcustomerid", "accountid", JoinOperator.Inner);
+        link.EntityAlias = "acc";
+        link.Columns = new ColumnSet("name");
+
+        qe.Orders.Add(new OrderExpression { AttributeName = "name", EntityName = "acc", OrderType = OrderType.Descending });
+
+        var results = _sut.RetrieveMultiple(qe).Entities;
+
+        // Only the contact linked to "C-Account" (alphabetically last) should be returned
+        await Assert.That(results).Count().IsEqualTo(1);
+        await Assert.That(results[0]["fullname"]).IsEqualTo("Contact-C");
+    }
+
+    [Test]
+    public async Task FetchXml_RootOrder_WithEntityName_SortsByLinkedAttribute()
+    {
+        // FetchXML path: <order entityname="acc" attribute="name" /> at root entity level
+        var accountId1 = Guid.NewGuid();
+        var accountId2 = Guid.NewGuid();
+        var accountId3 = Guid.NewGuid();
+
+        _sut.Add(new Entity("account") { Id = accountId1, ["name"] = "C-Account" });
+        _sut.Add(new Entity("account") { Id = accountId2, ["name"] = "A-Account" });
+        _sut.Add(new Entity("account") { Id = accountId3, ["name"] = "B-Account" });
+
+        _sut.Add(new Entity("contact") { Id = Guid.NewGuid(), ["parentcustomerid"] = accountId1, ["fullname"] = "Contact-C" });
+        _sut.Add(new Entity("contact") { Id = Guid.NewGuid(), ["parentcustomerid"] = accountId2, ["fullname"] = "Contact-A" });
+        _sut.Add(new Entity("contact") { Id = Guid.NewGuid(), ["parentcustomerid"] = accountId3, ["fullname"] = "Contact-B" });
+
+        var fetchXml = """
+            <fetch>
+              <entity name="contact">
+                <attribute name="fullname" />
+                <link-entity name="account" from="accountid" to="parentcustomerid" link-type="inner" alias="acc">
+                  <attribute name="name" />
+                </link-entity>
+                <order entityname="acc" attribute="name" descending="false" />
+              </entity>
+            </fetch>
+            """;
+
+        var results = _sut.RetrieveMultiple(new FetchExpression(fetchXml)).Entities;
+
+        // Ascending by linked account name: Contact-A, Contact-B, Contact-C
+        await Assert.That(results).Count().IsEqualTo(3);
+        await Assert.That(results[0]["fullname"]).IsEqualTo("Contact-A");
+        await Assert.That(results[1]["fullname"]).IsEqualTo("Contact-B");
+        await Assert.That(results[2]["fullname"]).IsEqualTo("Contact-C");
+    }
+
+    #endregion
+
 
     #region Column Projection
 
