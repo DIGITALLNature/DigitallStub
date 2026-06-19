@@ -227,8 +227,7 @@ public class QueryBugsTests
         var sut = new FakeOrganizationService();
         sut.AddRange([accountLow, accountMid, accountHigh, contactLow, contactMid, contactHigh]);
 
-        var query = new QueryExpression(Account.EntityLogicalName) { TopCount = 1 };
-        query.ColumnSet = new ColumnSet(Account.LogicalNames.Name);
+        var query = new QueryExpression(Account.EntityLogicalName) { TopCount = 1, ColumnSet = new ColumnSet(Account.LogicalNames.Name) };
         var link = query.AddLink(Contact.EntityLogicalName, Account.LogicalNames.AccountId,
             Contact.LogicalNames.ParentCustomerId, JoinOperator.Inner);
         link.EntityAlias = "c";
@@ -273,8 +272,7 @@ public class QueryBugsTests
         var sut = new FakeOrganizationService();
         sut.AddRange([accountLow, accountMid, accountHigh, contactLow, contactMid, contactHigh]);
 
-        var query = new QueryExpression(Account.EntityLogicalName) { TopCount = 1 };
-        query.ColumnSet = new ColumnSet(Account.LogicalNames.Name);
+        var query = new QueryExpression(Account.EntityLogicalName) { TopCount = 1, ColumnSet = new ColumnSet(Account.LogicalNames.Name) };
         var link = query.AddLink(Contact.EntityLogicalName, Account.LogicalNames.AccountId,
             Contact.LogicalNames.ParentCustomerId, JoinOperator.Inner);
         link.EntityAlias = "c";
@@ -314,8 +312,7 @@ public class QueryBugsTests
         var sut = new FakeOrganizationService();
         sut.AddRange([accountLow, accountHigh, contactLow, contactHigh]);
 
-        var query = new QueryExpression(Account.EntityLogicalName) { TopCount = 1 };
-        query.ColumnSet = new ColumnSet(Account.LogicalNames.Name);
+        var query = new QueryExpression(Account.EntityLogicalName) { TopCount = 1, ColumnSet = new ColumnSet(Account.LogicalNames.Name) };
         var link = query.AddLink(Contact.EntityLogicalName, Account.LogicalNames.AccountId,
             Contact.LogicalNames.ParentCustomerId, JoinOperator.Inner);
         link.EntityAlias = "c";
