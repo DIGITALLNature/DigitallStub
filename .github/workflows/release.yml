@@ -3,17 +3,22 @@ name: Release Digitall.Testing
 on:
   push:
     branches: [ "main", "beta" ]
+  workflow_dispatch:
 
 jobs:
   release:
     name: Semantic Release
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta')) ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.CI_GITHUB_TOKEN }}
+          fetch-depth: 0
+          fetch-tags: true
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:

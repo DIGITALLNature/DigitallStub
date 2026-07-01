@@ -1,3 +1,17 @@
+# [1.1.0-beta.12](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.11...v1.1.0-beta.12) (2026-06-19)
+
+
+### Bug Fixes
+
+* **query:** prefer OrderExpression.Alias over EntityName in CollectOrders ([#44](https://github.com/DIGITALLNature/DigitallTesting/issues/44)) ([890d912](https://github.com/DIGITALLNature/DigitallTesting/commit/890d91220a070631e72d752654ac1655fd7681ee))
+
+# [1.1.0-beta.11](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.10...v1.1.0-beta.11) (2026-06-19)
+
+
+### Bug Fixes
+
+* **query:** honor root-level OrderExpression.EntityName for linked-entity sorting ([#43](https://github.com/DIGITALLNature/DigitallTesting/issues/43)) ([102de5d](https://github.com/DIGITALLNature/DigitallTesting/commit/102de5dc96d13cf11c467878e0b8bd9294d1ce61))
+
 # [1.1.0-beta.10](https://github.com/DIGITALLNature/DigitallTesting/compare/v1.1.0-beta.9...v1.1.0-beta.10) (2026-06-18)
 
 

@@ -55,7 +55,10 @@ public class QueryProcessor
             var orders = xmlDocument.ToOrderExpressionList();
             foreach (var order in orders)
             {
-                query.AddOrder(order.AttributeName, order.OrderType);
+                // Preserve EntityName (set when FetchXML uses <order entityname="alias" attribute="..." />
+                // at the root entity level to order by a linked entity attribute).
+                // QueryExpression.AddOrder does not accept EntityName, so add the OrderExpression directly.
+                query.Orders.Add(order);
             }
         }
 
@@ -305,7 +308,16 @@ public class QueryProcessor
         {
             foreach (var order in qe.Orders)
             {
-                result.Add((order, null));
+                // A root-level OrderExpression may reference a linked entity via Alias (set by the
+                // 3-arg or 4-arg constructor) or EntityName (set by the 4-arg constructor as the
+                // entity logical name). Alias always takes precedence, matching the same rule used
+                // in CollectLinkOrders for link-entity orders. EntityName is only used as a fallback
+                // for the case where the link has no alias and is identified by its entity logical name.
+                // (FetchXML equivalent: <order entityname="alias_or_logicalname" attribute="field" />)
+                var alias = !string.IsNullOrWhiteSpace(order.Alias) ? order.Alias
+                    : !string.IsNullOrWhiteSpace(order.EntityName) ? order.EntityName
+                    : null;
+                result.Add((order, alias));
             }
         }
 
