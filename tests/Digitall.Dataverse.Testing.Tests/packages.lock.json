@@ -42,11 +42,11 @@
       },
       "System.Security.Cryptography.Xml": {
         "type": "Direct",
-        "requested": "[10.0.8, )",
-        "resolved": "10.0.8",
-        "contentHash": "Fb+L55vEJaf8RCOzrzN564sfyCL8SZEfce9z6XkuhHg+294SBfyS4fIoLU3EljofDCkp+EKDeleI8ug5WO2NtA==",
+        "requested": "[10.0.10, )",
+        "resolved": "10.0.10",
+        "contentHash": "Mz6Y+s+uMQKj1H2BUF0OhlmaOQkLgSG34/IrUaBDirYBQ6bgwcFvO/XtXWcoDlBLFoFB0uKqDNhybHOd+fQK1A==",
         "dependencies": {
-          "System.Security.Cryptography.Pkcs": "10.0.8"
+          "System.Security.Cryptography.Pkcs": "10.0.10"
         }
       },
       "TUnit": {
@@ -77,11 +77,6 @@
         "type": "Transitive",
         "resolved": "3.5.5",
         "contentHash": "q553fGj+/MiKS/LoaAinN9CCeKE6tKCUuCWck38vRB7odTurhlssiSKHWbskPBiEhSnXXWewLAGoqoTaieKMGw=="
-      },
-      "FastCloner.SourceGenerator": {
-        "type": "Transitive",
-        "resolved": "1.2.1",
-        "contentHash": "SKwLe+vcIQpPqSFapztvT1mtpnsWuV1zz/TrCa0zos9I+uleLiRolTEsDOTXr//IkAN29ndMCpqB9ATlLEEl8w=="
       },
       "Microsoft.ApplicationInsights": {
         "type": "Transitive",
@@ -330,8 +325,8 @@
       },
       "System.Security.Cryptography.Pkcs": {
         "type": "Transitive",
-        "resolved": "10.0.8",
-        "contentHash": "2wOycCqMyg9Tu+SDP03FFwDEWBni/3xOKgt0bRXplOvyeIcUJmWO7m3gTCF2mIdtQLROLtOP5VwWRT8YBwP/bA=="
+        "resolved": "10.0.10",
+        "contentHash": "KG8t5RHczdgB3IWvRndpI0nE1DSo7ikDYSDbITxfgRFyIvnYiKzuPjaZOsPnwFQ1aOGUl9sEulJul9wlHLEUoA=="
       },
       "System.Security.Cryptography.ProtectedData": {
         "type": "Transitive",
@@ -397,10 +392,9 @@
         "type": "Project",
         "dependencies": {
           "FastCloner": "[3.5.5, )",
-          "FastCloner.SourceGenerator": "[1.2.1, )",
           "Microsoft.Extensions.TimeProvider.Testing": "[10.6.0, )",
           "Microsoft.PowerPlatform.Dataverse.Client": "[1.2.10, )",
-          "System.Security.Cryptography.Xml": "[10.0.8, )",
+          "System.Security.Cryptography.Xml": "[10.0.10, )",
           "TUnit.Mocks": "[1.45.22, )"
         }
       }
